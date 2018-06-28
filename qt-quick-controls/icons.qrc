@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>baseline_folder_open_black_18dp.png</file>
+        <file>baseline_save_black_18dp.png</file>
+        <file>baseline_fiber_new_black_18dp.png</file>
+    </qresource>
+</RCC>
