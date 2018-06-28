@@ -4,6 +4,11 @@
 
 我的环境是Qt5.11，跟视频中的差别还是有一些的。
 
+## 主要功能
+
+- 在界面上显示Hello World
+- 点击push me按钮，Hello World变为Hello Qt
+
 ## 源码
 
 建好工程后，修改源代码
