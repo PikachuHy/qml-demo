@@ -1,0 +1,44 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>Header.qml</file>
+        <file>HeaderForm.ui.qml</file>
+        <file>IconButton.qml</file>
+        <file>IconButtonForm.ui.qml</file>
+        <file>CloseButton.qml</file>
+        <file>MinimizeButton.qml</file>
+        <file>MenuButton.qml</file>
+        <file>TabItem.qml</file>
+        <file>TabItemForm.ui.qml</file>
+        <file>VirusKilling.qml</file>
+        <file>VirusKillingForm.ui.qml</file>
+        <file>MyButtonForm.ui.qml</file>
+        <file>MyButton.qml</file>
+        <file>ArrowButton.qml</file>
+        <file>KillingListView.qml</file>
+        <file>KillingListItem.qml</file>
+        <file>MyMenuItem.qml</file>
+        <file>MaterialIcon.qml</file>
+        <file>components/Palette.qml</file>
+        <file>DefenderCenter/ItemForm.ui.qml</file>
+        <file>DefenderCenter/Block.qml</file>
+        <file>DefenderCenter/BlockItem.qml</file>
+        <file>DefenderCenter/DefenderCenter.qml</file>
+        <file>Debug.qml</file>
+        <file>FontAwesome5FreeIcon.qml</file>
+        <file>util.js</file>
+        <file>AbstractFontIcon.qml</file>
+        <file>ParentalControl/SeparationLine.qml</file>
+        <file>ParentalControl/ParentalControl.qml</file>
+        <file>ParentalControl/ParentalControlForm.ui.qml</file>
+        <file>ParentalControl/MyItem.qml</file>
+        <file>ParentalControl/MyItemForm.ui.qml</file>
+        <file>MySwitch.qml</file>
+        <file>ExtensionTool/ExtensionTool.qml</file>
+        <file>ExtensionTool/ExtensionToolForm.ui.qml</file>
+        <file>ExtensionTool/ToolItem.qml</file>
+        <file>ExtensionTool/ToolItemForm.ui.qml</file>
+        <file>ExtensionTool/DownloadIcon.qml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>db/codepoints.txt</file>
+        <file>db/FontAwesome5FreeIcon_codepoints.txt</file>
+    </qresource>
+</RCC>

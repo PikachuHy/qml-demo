@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>font/fa_brands_400.ttf</file>
+        <file>font/MaterialIcons_Regular.ttf</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,15 @@
+times f00d
+lock f023
+chevron-right f054
+chevron-up f077
+chevron-down f078
+briefcase f0b1
+bars f0c9
+file f15b
+adn f170
+windows f17a
+wifi f1eb
+toggle-off f204
+toggle-on f205
+window-minimize f2d1
+arrow-alt-circle-down f358

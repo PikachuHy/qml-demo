@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/logo.png</file>
+        <file>image/animation.gif</file>
+        <file>image/background.png</file>
+        <file>image/tool/1.png</file>
+        <file>image/tool/2.png</file>
+        <file>image/tool/3.png</file>
+        <file>image/tool/4.png</file>
+        <file>image/tool/5.png</file>
+        <file>image/tool/6.png</file>
+        <file>image/tool/7.png</file>
+        <file>image/tool/8.png</file>
+    </qresource>
+</RCC>

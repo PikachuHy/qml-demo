@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>huorong.ico</file>
+        <file>ico.rc</file>
+    </qresource>
+</RCC>
