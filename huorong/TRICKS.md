@@ -70,3 +70,38 @@ qml中的继承，就是继承跟对象的属性
 QtCreator开始蹦
 
 最顶层的窗口怎么做阴影
+
+如何发布Qt Quick Application
+
+```
+[windeployqt.exe路径] --release --qml --qmldir [qml源码路径] [exe文件路径]
+```
+
+例如: 
+
+```
+D:\src\qml\build-huorong-Desktop_Qt_5_11_0_MinGW_32bit-Release\release>D:\Qt\Qt5.11.0\5.11.0\mingw53_32\bin\windeployqt.exe --release --qml --qmldir D:\src\qml\huorong\ huorong.exe
+```
+
+参考： https://www.jianshu.com/p/ec6a505b1ab7
+
+如何制作安装包
+
+- 去官网下载[Qt Installer Framework](http://download.qt.io/official_releases/qt-installer-framework/)的安装包，安装好
+- 复制examples\startmenu到一个目录下，修改相关的文件
+- 使用binarycreator.exe创建安装包
+
+```
+[binarycreator.exe] -c [config.xml路径] -p [packages路径] [生成的安装程序exe文件名] -v
+```
+
+例如：
+
+```
+./binarycreator.exe -c huorong/config/config.xml -p huorong/packages my_install.exe -v
+```
+
+```
+./binarycreator.exe --offline-only -c huorong/config/config.xml -p huorong/packages -t installerbase my_install
+```
+
