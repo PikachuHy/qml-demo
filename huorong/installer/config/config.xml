@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>火绒安全软件</Name>
+    <Version>0.1.0</Version>
+    <Title>火绒安全软件</Title>
+    <Publisher>大黄老鼠</Publisher>
+    <!-- Directory name is used in component.xml -->
+    <StartMenuDir>pikachu</StartMenuDir>
+    <TargetDir>@HomeDir@/pikachu/huorong</TargetDir>
+</Installer>
