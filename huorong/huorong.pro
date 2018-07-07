@@ -1,6 +1,6 @@
-QT += quick widgets
+QT += quick core gui widgets
 CONFIG += c++11
-#CONFIG += qtquickcompiler
+CONFIG += qtquickcompiler
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -18,12 +18,13 @@ SOURCES += \
     SystemTrayIcon.cpp \
     FontIconDatabase.cpp
 
-RESOURCES += qml.qrc \
+RESOURCES +=  \
     images.qrc \
     icons.qrc \
     fonts.qrc \
     db.qrc \
-    ico.qrc
+    ico.qrc \
+qml.qrc
 # TRANSLATIONS += linguist/huorong_en.ts \
 #                linguist/huorong_zh.ts
 
