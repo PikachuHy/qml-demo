@@ -24,7 +24,7 @@ RESOURCES +=  \
     fonts.qrc \
     db.qrc \
     ico.qrc \
-qml.qrc
+#qml.qrc
 # TRANSLATIONS += linguist/huorong_en.ts \
 #                linguist/huorong_zh.ts
 
@@ -41,9 +41,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += \
-    KillingListView.ui.qml \
-    qmldir
+DISTFILES += qmldir
 
 HEADERS += \
     SystemTrayIcon.h \

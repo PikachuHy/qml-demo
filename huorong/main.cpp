@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     FontIconDatabase::init();
     QQmlApplicationEngine engine;
     qmlRegisterType<FontIconDatabase>("DB",1,0,"DB");
-    engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+    engine.load(QUrl(QStringLiteral("../huorong/qml/main.qml")));
     if (engine.rootObjects().isEmpty()){
 
         qDebug()<<"QQmlApplicationEngine is Empty";
