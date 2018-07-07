@@ -1,6 +1,5 @@
 import QtQuick 2.11
-
-import "../"
 import "../components"
+import controller 1.0
 ExtensionToolForm {
 }

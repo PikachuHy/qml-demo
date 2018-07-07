@@ -2,9 +2,11 @@ import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.3
 import "../components"
+
 Item {
     width: 750
     height: 500
+    property alias quickKillingButton: quickKillingButton
     property alias arrowButton: arrowButton
     property alias listView: listView
 
@@ -82,9 +84,11 @@ Item {
                         id: quickKillingButton
                         width: 175
                         height: 70
-                        font.pointSize: 16
-                        displayColor: "#ffffff"
-                        displayText: qsTr("快速查杀")
+                        textSize: 24
+                        normalTextColor: "white"
+                        normalBackgroundColor: "#ffa924"
+                        hoverBackgroundColor: "#ff9600"
+                        text: qsTr("快速查杀")
                     }
 
                     ArrowButton {
@@ -108,15 +112,14 @@ Item {
             y: 418
             width: 100
             height: 50
+            textSize: 16
             anchors.right: parent.right
             anchors.rightMargin: 50
             anchors.verticalCenter: tag.verticalCenter
-            normalColor: "#ffffff"
-            hoverColor: "#ffffff"
-            backgroundColor: "#ffffff"
-            displayColor: "#ff9600"
-            displayText: qsTr("信任区")
-            flat: true
+            normalTextColor: "#ff960`0"
+            hoverTextColor: "#ffffff"
+            normalBackgroundColor: "#ffffff"
+            text: qsTr("信任区")
         }
 
         MyButton {
@@ -125,16 +128,14 @@ Item {
             y: 418
             width: 100
             height: 50
-            font.pointSize: 9
+            textSize: 16
             anchors.right: securityButton.left
             anchors.rightMargin: 50
             anchors.verticalCenter: tag.verticalCenter
-            hoverColor: "#ffffff"
-            normalColor: "#ffffff"
-            backgroundColor: "#ffffff"
-            displayColor: "#ff9600"
-            displayText: qsTr("隔离区")
-            flat: true
+            normalTextColor: "#ff9600"
+            hoverTextColor: "#ffffff"
+            normalBackgroundColor: "#ffffff"
+            text: qsTr("隔离区")
         }
 
         Label {

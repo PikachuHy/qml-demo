@@ -11,5 +11,12 @@
         <file>image/tool/6.png</file>
         <file>image/tool/7.png</file>
         <file>image/tool/8.png</file>
+        <file>image/scanning/1.png</file>
+        <file>image/scanning/2.png</file>
+        <file>image/scanning/3.png</file>
+        <file>image/scanning/4.png</file>
+        <file>image/scanning/5.png</file>
+        <file>image/scanning/6.png</file>
+        <file>image/background2.png</file>
     </qresource>
 </RCC>

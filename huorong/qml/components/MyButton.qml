@@ -1,16 +1,74 @@
-import QtQuick 2.4
-
+import QtQuick 2.11
 MyButtonForm {
-    property string normalColor: "#FFA924"
-    property string hoverColor: "#FF9600"
-    property string pressedColor: "#FCA53B"
+    id: control
+    property string normalTextColor
+    property string hoverTextColor
+    property string pressedTextColor
+    property string normalBackgroundColor
+    property string hoverBackgroundColor
+    property string pressedBackgroundColor
+
     onHoveredChanged: {
-       backgroundColor = hovered? hoverColor: normalColor
+        textColor = hovered? hoverTextColor: normalTextColor
+        backgroundColor = hovered? hoverBackgroundColor: normalBackgroundColor
     }
     onPressedChanged: {
-        backgroundColor = pressed? pressedColor: normalColor
+        textColor = pressed? pressedTextColor: normalTextColor
+        backgroundColor = pressed? pressedBackgroundColor: normalBackgroundColor
+    }
+    mouseArea.onClicked: {
+        control.clicked()
     }
 
-    backgroundColor: normalColor
+    onTextColorChanged: {
+        normalTextColor = textColor
+        hoverTextColor = textColor
+        pressedBackgroundColor = textColor
+    }
+    onBackgroundColorChanged: {
+        normalBackgroundColor = backgroundColor
+        hoverBackgroundColor = backgroundColor
+        pressedBackgroundColor = backgroundColor
+    }
+
+    function checkIfNullOrEmpty(value){
+        return value===null || value===""
+    }
+    function checkNormalTextColor(){
+        if(checkIfNullOrEmpty(normalTextColor)){
+            normalTextColor="black"
+            hoverTextColor="black"
+            pressedTextColor="black"
+        }
+        if(checkIfNullOrEmpty(hoverTextColor)){
+            hoverTextColor=normalTextColor
+        }
+        if(checkIfNullOrEmpty(pressedBackgroundColor)){
+            pressedTextColor=normalTextColor
+        }
+
+    }
+    function checkNormalBackgroundColor(){
+        if(checkIfNullOrEmpty(normalBackgroundColor)){
+            normalBackgroundColor="white"
+            hoverBackgroundColor="white"
+            pressedBackgroundColor="white"
+        }
+        if(checkIfNullOrEmpty(hoverBackgroundColor)){
+            hoverBackgroundColor=normalBackgroundColor
+        }
+        if(checkIfNullOrEmpty(pressedBackgroundColor)){
+            pressedBackgroundColor=normalBackgroundColor
+        }
+    }
+
+    Component.onCompleted: {
+        checkNormalTextColor()
+        checkNormalBackgroundColor()
+        control.textColor = normalTextColor
+        control.backgroundColor = normalBackgroundColor
+
+//        console.log("backgroundcolor: normal-"+normalBackgroundColor+", hover-"+hoverBackgroundColor+", pressed-"+pressedBackgroundColor)
+    }
 
 }

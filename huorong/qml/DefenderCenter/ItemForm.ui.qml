@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 
 import "../"
 import "../components"
-
+import controller 1.0
 Item {
     width: 225
     height: 45

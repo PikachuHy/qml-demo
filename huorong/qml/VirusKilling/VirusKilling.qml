@@ -1,5 +1,5 @@
 import QtQuick 2.11
-
+import controller 1.0
 VirusKillingForm {
     property real listViewY
     arrowButton.onClicked: {
@@ -21,5 +21,9 @@ VirusKillingForm {
     }
     Component.onCompleted: {
         listView.visible = false
+    }
+    quickKillingButton.onClicked: {
+        QmlController.stackView.push('Scanning.qml')
+        QmlController.header.title = "正在快速扫描"
     }
 }

@@ -5,7 +5,7 @@
 function convertStringToUnicode(text){
     var str = "\\u" + text
     var jsonstr = '{"ustr":"'+str+'"}'
-//    console.log("jsonstr: "+jsonstr)
+    // console.log("jsonstr: "+jsonstr)
     var obj = JSON.parse(jsonstr)
     return obj.ustr
 }

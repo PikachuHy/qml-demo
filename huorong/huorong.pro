@@ -24,7 +24,7 @@ RESOURCES +=  \
     fonts.qrc \
     db.qrc \
     ico.qrc \
-#qml.qrc
+    qml.qrc
 # TRANSLATIONS += linguist/huorong_en.ts \
 #                linguist/huorong_zh.ts
 
@@ -41,7 +41,17 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += qmldir
+DISTFILES += qml/qmldir \
+    qml/*.qml \
+    qml/components/*.qml \
+    qml/DefenderCenter/*.qml \
+    qml/ExtensionTool/*.qml \
+    qml/ParentalControl/*.qml \
+    qml/VirusKilling/*.qml \
+    qml/SystemTray/*.qml \
+    qml/SystemTray/items/*.qml \
+    qml/VirusKilling/private/*.qml \
+    qml/controller/*.qml
 
 HEADERS += \
     SystemTrayIcon.h \

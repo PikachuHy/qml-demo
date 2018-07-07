@@ -1,45 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
-        <file>qml/Debug.qml</file>
-        <file>qml/Header.qml</file>
-        <file>qml/HeaderForm.ui.qml</file>
-        <file>qml/main.qml</file>
-        <file>qml/MenuButton.qml</file>
-        <file>qml/MyMenuItem.qml</file>
-        <file>qml/MySystemTrayIcon.qml</file>
-        <file>qml/TabItem.qml</file>
-        <file>qml/TabItemForm.ui.qml</file>
-        <file>qml/components/AbstractFontIcon.qml</file>
-        <file>qml/components/CloseButton.qml</file>
-        <file>qml/components/FontAwesome5FreeIcon.qml</file>
-        <file>qml/components/IconButton.qml</file>
-        <file>qml/components/IconButtonForm.ui.qml</file>
-        <file>qml/components/MaterialIcon.qml</file>
-        <file>qml/components/MinimizeButton.qml</file>
-        <file>qml/components/MyButton.qml</file>
-        <file>qml/components/MyButtonForm.ui.qml</file>
-        <file>qml/components/MySwitch.qml</file>
-        <file>qml/components/Palette.qml</file>
-        <file>qml/components/util.js</file>
-        <file>qml/DefenderCenter/Block.qml</file>
-        <file>qml/DefenderCenter/BlockItem.qml</file>
-        <file>qml/DefenderCenter/DefenderCenter.qml</file>
-        <file>qml/DefenderCenter/ItemForm.ui.qml</file>
-        <file>qml/ExtensionTool/DownloadIcon.qml</file>
-        <file>qml/ExtensionTool/ExtensionTool.qml</file>
-        <file>qml/ExtensionTool/ExtensionToolForm.ui.qml</file>
-        <file>qml/ExtensionTool/ToolItem.qml</file>
-        <file>qml/ExtensionTool/ToolItemForm.ui.qml</file>
-        <file>qml/ParentalControl/MyItem.qml</file>
-        <file>qml/ParentalControl/MyItemForm.ui.qml</file>
-        <file>qml/ParentalControl/ParentalControl.qml</file>
-        <file>qml/ParentalControl/ParentalControlForm.ui.qml</file>
-        <file>qml/ParentalControl/SeparationLine.qml</file>
-        <file>qml/VirusKilling/ArrowButton.qml</file>
-        <file>qml/VirusKilling/KillingListItem.qml</file>
-        <file>qml/VirusKilling/KillingListView.qml</file>
-        <file>qml/VirusKilling/VirusKilling.qml</file>
-        <file>qml/VirusKilling/VirusKillingForm.ui.qml</file>
+        <file>qml/qmldir</file>
+        <file>qml/controller/QmlController.qml</file>
     </qresource>
 </RCC>

@@ -1,28 +1,31 @@
-import QtQuick 2.4
+import QtQuick 2.11
 import QtQuick.Controls 2.4
 
 Button {
-    id: control
+    id: button
     width: 400
     height: 200
-    text: "Button"
+    property alias textSize: button.font.pixelSize
+    property alias textColor: display.color
     property alias backgroundColor: background.color
-    property alias displayText: display.text
-    property alias displayColor: display.color
+    text: "Button"
+    property alias mouseArea: mouseArea
     background: Rectangle {
         id: background
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-        }
     }
     contentItem: Label {
         id: display
-        //        text: control.text
-        font: control.font
-        color: "#262b28"
+        font: button.font
+        text: button.text
+        color: "#ffffff"
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
+    }
+
+    MouseArea {
+        id: mouseArea
+        hoverEnabled: true
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
     }
 }

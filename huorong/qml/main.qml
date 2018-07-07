@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import QtQuick.Window 2.3
 import "./components"
+import "./SystemTray"
+import controller 1.0
 ApplicationWindow {
     id: window
     objectName: "window"
@@ -11,7 +13,13 @@ ApplicationWindow {
     width: 1000
     height: 650
     title: qsTr("huorong safe")
-    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+    onVisibleChanged: {
+        if(visible){
+            flags = flags | Qt.WindowStaysOnTopHint
+            flags = flags & ~Qt.WindowStaysOnTopHint
+        }
+    }
 
 
     DropShadow {
@@ -25,6 +33,7 @@ ApplicationWindow {
         visible: true
     }
     header: Header{
+        id:myHeader
         width: window.width
         title: " "
         minimizeButton.onClicked: window.visible = false
@@ -142,7 +151,12 @@ ApplicationWindow {
 //            initialItem: "DefenderCenter/DefenderCenter.qml"
 //            initialItem: "qrc:/ParentalControl/ParentalControl.qml"
 //            initialItem: "qrc:/ExtensionTool/ExtensionTool.qml"
+//            initialItem: "VirusKilling/Scanning.qml"
             anchors.left: leftside.right
+            popEnter: null
+            popExit: null
+            pushEnter: null
+            pushExit: null
         }
     }
     Rectangle{
@@ -151,7 +165,13 @@ ApplicationWindow {
         anchors.fill: parent
         visible: false
     }
-    MySystemTrayIcon{}
+//    MySystemTrayIcon{
+//        onActivated: {
+//                  window.show()
+//                  window.raise()
+//                  window.requestActivate()
+//              }
+//    }
     NetworkTrafficFloatingWindow{
         id: networkTrafficFloatingWindow
         x: Screen.width - width
@@ -168,5 +188,8 @@ ApplicationWindow {
         leftside.items.push(item1)
         leftside.items.push(item2)
         leftside.items.push(item3)
+        QmlController.stackView = stackView
+        QmlController.header = myHeader
+//        console.log("stackView",QmlController.header,myHeader)
     }
 }

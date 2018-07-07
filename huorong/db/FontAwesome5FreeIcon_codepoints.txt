@@ -1,6 +1,9 @@
+check f00c
 times f00d
+clock f017
 lock f023
 chevron-right f054
+exclamation-circle f06a
 chevron-up f077
 chevron-down f078
 briefcase f0b1

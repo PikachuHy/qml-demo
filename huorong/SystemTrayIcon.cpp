@@ -14,5 +14,6 @@ void SystemTrayIcon::onActivated(QSystemTrayIcon::ActivationReason reason)
     Q_UNUSED(reason)
     qDebug()<<"void SystemTrayIcon::onActivated(QSystemTrayIcon::ActivationReason reason)";
     auto window = m_engine->rootObjects().first();
+
     window->setProperty("visible",true);
 }
