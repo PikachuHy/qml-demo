@@ -1,0 +1,19 @@
+{
+    "dependencies": {
+        "commitizen": "^3.0.5",
+        "cz-conventional-changelog": "^2.1.0"
+    },
+    "scripts": {
+        "commit": "git-cz"
+    },
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-conventional-changelog"
+        }
+    },
+    "keywords": [
+        "deepin"
+    ],
+    "author": "PikachuHy",
+    "license": "GPL-3.0"
+}
