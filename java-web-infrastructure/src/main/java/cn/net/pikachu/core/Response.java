@@ -29,6 +29,7 @@ public class Response<T> extends BaseObject{
 
     private static final Integer OK = 200;
     private static final Integer BAD_REQUEST = 400;
+    private static final Integer  INTERNAL_SERVER_ERROR = 500;
 
     public static Response success(){
         return new Response(OK, null, null);
@@ -43,6 +44,10 @@ public class Response<T> extends BaseObject{
 
     public static Response fail(String msg) {
         return new Response(BAD_REQUEST, null, msg);
+    }
+
+    public static Response failForInternalServerError(String msg) {
+        return new Response(INTERNAL_SERVER_ERROR, null, msg);
     }
 
     public static Response fail(Object data, String msg){

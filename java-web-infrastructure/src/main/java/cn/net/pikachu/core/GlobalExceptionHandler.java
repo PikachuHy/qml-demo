@@ -16,6 +16,8 @@ import java.util.List;
 @Slf4j
 @RestController
 public class GlobalExceptionHandler extends BaseController{
+    private static final String INTERNAL_SERVER_ERROR_MSG
+            = "非常抱歉，服务器正在维护，请及时联系技术支持人员，我们会尽快恢复，谢谢。";
     @ExceptionHandler(Exception.class)
     public Response exceptionHandler(Exception ex){
         String msg = ex.getMessage();
@@ -24,21 +26,6 @@ public class GlobalExceptionHandler extends BaseController{
         return fail(msg);
     }
 
-    /**
-     * 微信错误
-     * @param ex
-     * @return
-     */
-    /*
-    @ExceptionHandler(WxErrorException.class)
-    public Response wxErrorExceptionHandler(Exception ex){
-        String msg = ex.getMessage();
-        ex.printStackTrace();
-        WxErrorDTO wxErrorDTO = JSON.parseObject(msg, WxErrorDTO.class);
-        logger.error("ex: {}", msg);
-        return fail(wxErrorDTO.getErrmsg());
-    }
-*/
     /**
      * JSON反序列化失败
      * @param ex
@@ -52,6 +39,18 @@ public class GlobalExceptionHandler extends BaseController{
         return fail("对不起，请求参数有误，请调整后重新请求");
     }
     /**
+     * JSON反序列化失败
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(NullPointerException.class)
+    public Response nullPointerExceptionHandler(Exception ex){
+        String msg = ex.getMessage();
+        ex.printStackTrace();
+        logger.error("ex: {}", msg);
+        return failForServer(INTERNAL_SERVER_ERROR_MSG);
+    }
+    /**
      * 严重警告，生产环境不许出现这样的错误，如果出现这样的错误，必定是有严重的错误
      * 捕获不到这个异常？
      * @param ex
@@ -62,7 +61,7 @@ public class GlobalExceptionHandler extends BaseController{
         String msg = ex.getMessage();
         ex.printStackTrace();
         logger.error("ex: {}", msg);
-        return fail("非常抱歉，服务器正在维护，请及时联系技术支持人员，我们会尽快恢复，谢谢。");
+        return failForServer(INTERNAL_SERVER_ERROR_MSG);
     }
     /**
      * 处理实体字段校验不通过异常

@@ -7,6 +7,9 @@ public abstract class BaseController {
     protected Response success(){
         return Response.success();
     }
+    protected Response success(String msg){
+        return Response.success(null, msg);
+    }
     protected Response success(Object data) {
         return Response.success(data);
     }
@@ -15,5 +18,8 @@ public abstract class BaseController {
     }
     protected Response fail(String msg) {
         return Response.fail(msg);
+    }
+    protected Response failForServer(String msg) {
+        return Response.failForInternalServerError(msg);
     }
 }
