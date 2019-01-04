@@ -8,13 +8,13 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 /**
- * Service调试用切面，可以快速了解输入输出是
+ * Mapper调试用切面，可以快速了解输入输出是
  */
 @Aspect
 @Component
 @Slf4j
-public class ServiceDebugAspect extends BaseAspect{
-    @Pointcut("execution(* com.sumixer.ys.manager.service.*.*.*(..))")
+public class MapperDebugAspect extends BaseAspect {
+    @Pointcut("execution(* com.sumixer.ys.manager.mapper.*.*(..))")
     public void Pointcut() {
     }
     @Around("Pointcut()")

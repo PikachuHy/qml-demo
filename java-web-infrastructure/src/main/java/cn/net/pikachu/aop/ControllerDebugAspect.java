@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ControllerDebugAspect extends BaseAspect{
-    @Pointcut("execution(* com.sumixer.ys.api.controller.*.*(..))")
+    @Pointcut("execution(* com.sumixer.ys.manager.controller.*.*(..)) || execution(* com.sumixer.ys.manager.controller.*.*.*(..))")
     public void Pointcut() {
     }
     @Around("Pointcut()")
