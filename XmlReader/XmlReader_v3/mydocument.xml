@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="GBK" ?>
+<data>
+    <startweek>2010-03-01 00:00:00.000</startweek>
+    <eventnumber>2</eventnumber>
+    <period>
+        <id>223401</id>
+        <starttime>2010-03-01 00:00:00.000</starttime>
+        <endtime>2010-06-20 23:59:59.999</endtime>
+        <exception>
+            <subexception>
+                <id>01</id>
+                <starttime>2010-04-03 00:00:00.000</starttime>
+                <endtime>2010-04-05 23:59:59.000</endtime>
+                <description>清明节放假三天</description>
+            </subexception>
+            <subexception>
+                <id>02</id>
+                <starttime>2010-05-01 00:00:00.000</starttime>
+                <endtime>2010-05-03 23:59:59.000</endtime>
+                <description>五一劳动节放假三天</description>
+            </subexception>
+        </exception>
+        <duration>0000-00-07 00:00:00.000</duration>
+        <event>
+            <id>01</id>
+            <offsettime>0000-00-00 14:00:00.000</offsettime>
+            <eventdesc>
+                <eventname>编译原理</eventname>
+                <prompt>ring</prompt>
+            </eventdesc>
+            <lasthandle>null</lasthandle>
+        </event>
+        <event>
+            <id>02</id>
+            <offsettime>0000-00-03 09:50:00.000</offsettime>
+            <eventdesc>
+                <eventname>编译原理</eventname>
+                <prompt>vibration</prompt>
+            </eventdesc>
+            <lasthandle>null</lasthandle>
+        </event>
+    </period>
+</data>
