@@ -1,0 +1,13 @@
+pose.npz
+pose.npz.debug
+result/
+train.error
+train.log
+pose.npz.BboomBboom
+pose.npz.jilejingtu
+data.npz
+data_with_label.npz
+data_with_label_split_none.npz
+snapshot_iter_27375
+static
+
