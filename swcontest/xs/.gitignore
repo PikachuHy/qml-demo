@@ -1,9 +1,9 @@
-bin/
-frames/
-pkg/
-json/
-src/
-xs/
+/bin/
+/frames/
+/pkg/
+/json/
+/src/
+/xs/
 pose.npz
 xs.tar.gz
 extract_all.error
