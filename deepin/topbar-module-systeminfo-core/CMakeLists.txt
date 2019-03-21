@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.13)
+project(topbar_module)
+
+set(CMAKE_CXX_STANDARD 17)
+set(QT Core)
+find_package(Qt5 REQUIRED ${QT})
+add_executable(topbar_module-cpu main_cpu.cpp)
+add_executable(topbar_module-mem main_mem.cpp)
+add_executable(topbar_module-net main_net.cpp)
+qt5_use_modules(topbar_module-net ${QT})
+target_link_libraries(topbar_module-mem procps)
