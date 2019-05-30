@@ -1,0 +1,13 @@
+[Desktop Entry]
+Categories=System;
+Comment=Deepin Graphics Driver Manager is a compact and easy  to use graphics driver managing tool.
+Exec=bulbasaur
+GenericName=Bulbasaur
+GenericName[zh_CN]=妙蛙种子
+Icon=/usr/share/icons/bulbasaur.png
+Name=Bulbasaur
+Name[zh_CN]=妙蛙种子
+StartupNotify=true
+Terminal=false
+Type=Application
+X-Deepin-Vendor=user-custom

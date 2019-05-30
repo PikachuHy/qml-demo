@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 16.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   enable-background="new 0 0 512 512"
+   xml:space="preserve"
+   sodipodi:docname="ios-folder-outline.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"><metadata
+   id="metadata9"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+   id="defs7" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1920"
+   inkscape:window-height="990"
+   id="namedview5"
+   showgrid="false"
+   inkscape:zoom="10.429825"
+   inkscape:cx="53.566019"
+   inkscape:cy="3.2195862"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1" />
+
+<path
+   d="M 21.779977,4.577689 H 9.8960469 c -0.13706,0 -0.20974,-0.0286 -0.29926,-0.11823 l -1.10496,-1.10496 -0.008,-0.008 c -0.23925,-0.2257 -0.43588,-0.34027 -0.84646,-0.34027 h -5.50005 c -0.67694,4e-5 -1.22768001,0.50668 -1.22768001,1.1295 v 16.499999 c 0,0.65396 0.57372001,1.22768 1.22768001,1.22768 H 21.780177 c 0.62282,0 1.12946,-0.55073 1.12946,-1.22768 V 5.707149 c 0,-0.65445 -0.47501,-1.12946 -1.12946,-1.12946 z M 2.1371169,3.791979 h 5.5 c 0.17173,0 0.18351,0.009 0.30324,0.12217 l 1.10083,1.10088 c 0.23768,0.23768 0.50934,0.34838 0.85486,0.34838 H 21.779977 c 0.21843,0 0.34375,0.12531 0.34375,0.34374 v 2.08097 c -0.12297,-0.0436 -0.25511,-0.0676 -0.39286,-0.0676 H 2.0880069 c -0.13774,0 -0.26989,0.0238 -0.39285,0.0676 v -3.65239 c 0,-0.2123 0.22942,-0.34375 0.44196,-0.34375 z M 22.123727,20.635728 c 0,0.21255 -0.13146,0.44196 -0.34375,0.44196 H 2.1371169 c -0.21892,0 -0.44196,-0.22304 -0.44196,-0.44196 V 8.899119 c 0,-0.21661 0.17624,-0.39284 0.39285,-0.39284 H 21.730867 c 0.21661,0 0.39286,0.17623 0.39286,0.39284 z"
+   id="path3716"
+   inkscape:connector-curvature="0"
+   style="stroke-width:0.04910715" /></svg>

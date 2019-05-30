@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/icon.png</file>
+        <file>icon/icon22.png</file>
+        <file>icon/ios-folder-outline.svg</file>
+        <file>icon/ios-folder-open-outline.svg</file>
+        <file>icon/ios-folder-open.svg</file>
+    </qresource>
+</RCC>

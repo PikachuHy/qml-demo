@@ -1,0 +1,35 @@
+{
+    "name": "bulbasaur",
+    "version": "1.0.0",
+    "description": "TreeSize for Deepin, Quickly Scan Directory Sizes and Find Space Hogs.",
+    "main": "index.js",
+    "dependencies": {
+        "commitizen": "^3.0.5",
+        "cz-conventional-changelog": "^2.1.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "package": "rm -rf build;mkdir build; cd build;cmake ..;make package",
+        "commit": "git-cz",
+        "test": "echo 'Error: no test specified' && exit 1"
+    },
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-conventional-changelog"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/PikachuHy/bulbasaur.git"
+    },
+    "keywords": [
+        "deepin",
+        "TreeSize"
+    ],
+    "author": "PikachuHy",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/PikachuHy/bulbasaur/issues"
+    },
+    "homepage": "https://github.com/PikachuHy/bulbasaur#readme"
+}
