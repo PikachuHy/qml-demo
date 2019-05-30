@@ -1,0 +1,6 @@
+# CLion
+/cmake-build-debug
+.idea
+
+# QtCreator
+*.user
