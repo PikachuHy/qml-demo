@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/qiniu_32x32.png</file>
+        <file>qml/Demo.qml</file>
+        <file>qml/DemoForm.ui.qml</file>
+        <file>qml/SideItem.qml</file>
+        <file>qml/SideItemForm.ui.qml</file>
+        <file>icon/up-load_8a8a8a_64x64.png</file>
+        <file>icon/up-load_1296db_64x64.png</file>
+        <file>qml/Side.qml</file>
+        <file>icon/photo_1296db_64x64.png</file>
+        <file>icon/setting_1296db_64x64.png</file>
+        <file>qml/PictureUpload.qml</file>
+        <file>qml/PictureUploadForm.ui.qml</file>
+        <file>qml/UploadArea.qml</file>
+        <file>qml/UploadAreaForm.ui.qml</file>
+        <file>qml/ResourceManager.js</file>
+    </qresource>
+</RCC>

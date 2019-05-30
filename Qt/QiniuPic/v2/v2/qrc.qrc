@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/photo_1296db_64x64.png</file>
+        <file>icon/qiniu_32x32.png</file>
+        <file>icon/setting_1296db_64x64.png</file>
+        <file>icon/up-load_8a8a8a_64x64.png</file>
+        <file>icon/up-load_1296db_64x64.png</file>
+        <file>icon/photo_8a8a8a_64x64.png</file>
+        <file>icon/setting_8a8a8a_64x64.png</file>
+    </qresource>
+</RCC>

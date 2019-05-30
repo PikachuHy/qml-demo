@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>686</width>
+    <height>509</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qrc.qrc">
+    <normaloff>:/icon/qiniu_32x32.png</normaloff>:/icon/qiniu_32x32.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>686</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuTray">
+    <property name="title">
+     <string>TrayMenu</string>
+    </property>
+    <widget class="QMenu" name="menuLink">
+     <property name="title">
+      <string>Link</string>
+     </property>
+     <addaction name="actionURL"/>
+     <addaction name="actionHTML"/>
+     <addaction name="actionMarkDown"/>
+    </widget>
+    <widget class="QMenu" name="menuAuto_Upload">
+     <property name="title">
+      <string>Auto Upload</string>
+     </property>
+     <addaction name="actionClipboard_Screenshot"/>
+     <addaction name="actionCopy_Picture"/>
+    </widget>
+    <addaction name="actionGo_Qiniu"/>
+    <addaction name="menuAuto_Upload"/>
+    <addaction name="menuLink"/>
+    <addaction name="actionShow_Main_Window"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuTray"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionURL">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>URL</string>
+   </property>
+  </action>
+  <action name="actionHTML">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>HTML</string>
+   </property>
+  </action>
+  <action name="actionMarkDown">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MarkDown</string>
+   </property>
+  </action>
+  <action name="actionClipboard_Screenshot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Clipboard Screenshot</string>
+   </property>
+  </action>
+  <action name="actionCopy_Picture">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Copy Picture</string>
+   </property>
+  </action>
+  <action name="actionGo_Qiniu">
+   <property name="text">
+    <string>Go Qiniu</string>
+   </property>
+  </action>
+  <action name="actionTest_Action_Name">
+   <property name="text">
+    <string>Test Action Name</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionShow_Main_Window">
+   <property name="text">
+    <string>Show Main Window</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="qrc.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionShow_Main_Window</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
