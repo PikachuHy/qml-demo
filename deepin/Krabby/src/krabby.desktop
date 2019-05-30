@@ -1,0 +1,15 @@
+[Desktop Entry]
+Comment=A simple type application.
+Exec=krabby
+GenericName=Krabby
+GenericName[zh_CN]=大钳蟹
+Icon=/usr/share/icons/krabby.png
+Name=Krabby
+Name[zh_CN]=大钳蟹
+Categories=Qt;Education;
+StartupNotify=true
+Terminal=false
+Type=Application
+X-Deepin-Vendor=user-custom
+Comment=a simple type application for deepin
+Comment[zh_CN]=一个简单的打字软件

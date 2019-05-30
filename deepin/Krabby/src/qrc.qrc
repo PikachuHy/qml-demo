@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/">
+        <file>test.txt</file>
+        <file>images/logo.png</file>
+        <file>audio/error.wav</file>
+        <file>audio/type.wav</file>
+        <file>images/logo32.png</file>
+        <file>images/krabby_finish_test.png</file>
+        <file>icon/speed.png</file>
+        <file>icon/time.png</file>
+        <file>icon/progress.png</file>
+        <file>icon/accuracy.png</file>
+        <file>icon/reset.png</file>
+        <file>article/Lyrics/My Heart Will Go On.txt</file>
+        <file>article/Speech/Independence Day.txt</file>
+        <file>article/Lyrics/Nothing's gonna change my love for you.txt</file>
+        <file>icon/article.png</file>
+        <file>icon/folder.png</file>
+        <file>article/Lyrics/My Love.txt</file>
+        <file>article/Lyrics/Take Me To Your Heart.txt</file>
+        <file>article/Speech/肯尼迪就职演说 Inaugural Address.txt</file>
+        <file>article/Speech/美国总统（富兰克林-罗斯福）就职演说 First Inaugural Address.txt</file>
+        <file>article/Speech/I Have a Dream.txt</file>
+    </qresource>
+</RCC>
