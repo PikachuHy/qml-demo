@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(DataStructures)
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_FLAGS "-O0")
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
