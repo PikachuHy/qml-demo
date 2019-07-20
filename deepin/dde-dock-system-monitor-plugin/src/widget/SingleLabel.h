@@ -10,6 +10,9 @@ class SingleLabel: public QLabel {
 Q_OBJECT
 public:
     explicit SingleLabel(QString text, QWidget *parent = nullptr);
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
 };
 
 

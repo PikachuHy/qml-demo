@@ -16,6 +16,8 @@ SystemMonitorWidget::SystemMonitorWidget(QWidget* parent): QWidget(parent) {
     auto cpu = new CpuWidget();
     auto memory = new MemoryWidget();
     auto network = new NetworkWidget();
+    hbox->setSpacing(0);
+    hbox->setContentsMargins(0,0,0,0);
     hbox->addWidget(cpu);
     hbox->addWidget(memory);
     hbox->addWidget(network);

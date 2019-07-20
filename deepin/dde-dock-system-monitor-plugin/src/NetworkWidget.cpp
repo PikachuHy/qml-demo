@@ -7,6 +7,8 @@
 #include "widget/DoubleLabel.h"
 #include <QLabel>
 #include <QGridLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 void getNetworkBandWidth(
         unsigned long long int &receiveBytes,
         unsigned long long int &sendBytes) {
@@ -48,20 +50,34 @@ void getNetworkBandWidth(
 }
 
 NetworkWidget::NetworkWidget(QWidget *parent) : QWidget(parent) {
+    setStyleSheet("QLabel {font-size: 8px;}");
+    setFixedWidth(48);
     auto uploadIcon = new DoubleIcon(":/right_top.svg");
     auto downloadIcon = new DoubleIcon(":/left_down.svg");
-    m_upload = new DoubleLabel("---");
-    m_download = new DoubleLabel("---");
-    auto grid = new QGridLayout();
-    grid->addWidget(uploadIcon, 0, 0);
-    grid->addWidget(m_upload, 0, 1);
-    grid->addWidget(downloadIcon, 1, 0);
-    grid->addWidget(m_download, 1, 1);
-    setLayout(grid);
+    m_upload = new DoubleLabel("0KiB");
+    m_download = new DoubleLabel("0KiB");
+    auto hbox1 = new QHBoxLayout();
+    hbox1->setContentsMargins(0,0,0,0);
+    hbox1->setSpacing(0);
+    auto hbox2 = new QHBoxLayout();
+    hbox2->setContentsMargins(0,0,0,0);
+    hbox2->setSpacing(0);
+    hbox1->addWidget(uploadIcon, 0, Qt::AlignVCenter | Qt::AlignLeft);
+    hbox1->addWidget(m_upload, 0, Qt::AlignVCenter | Qt::AlignRight);
+    hbox2->addWidget(downloadIcon, 0, Qt::AlignVCenter | Qt::AlignLeft);
+    hbox2->addWidget(m_download, 0, Qt::AlignVCenter | Qt::AlignRight);
+    auto vbox = new QVBoxLayout();
+    vbox->setSpacing(0);
+    vbox->setContentsMargins(0,0,0,0);
+    vbox->addStretch(1);
+    vbox->addLayout(hbox1);
+    vbox->addLayout(hbox2);
+    vbox->addStretch(1);
+    setLayout(vbox);
 }
 QString formatSpeed(int speed) {
     if (speed == 0) {
-        return "---";
+        return "0KiB";
     }
     if (speed < 1024) {
         return QString("%1KiB").arg(speed);

@@ -10,6 +10,9 @@ class DoubleIcon: public QLabel {
     Q_OBJECT
 public:
     DoubleIcon(QString iconPath, QWidget *parent = nullptr);
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
 };
 
 

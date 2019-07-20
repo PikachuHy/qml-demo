@@ -10,6 +10,9 @@ class DoubleLabel: public QLabel {
 Q_OBJECT
 public:
     explicit DoubleLabel(QString text, QWidget *parent = nullptr);
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
 };
 
 

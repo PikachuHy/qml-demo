@@ -98,8 +98,10 @@ unsigned long long getTotalCpuTime(unsigned long long &workTime)
 
 CpuWidget::CpuWidget(QWidget *parent) {
     auto icon = new SingleIcon(":/icon_cpu_dark.svg");
-    m_cpu = new SingleLabel("---");
+    m_cpu = new SingleLabel("00%");
     auto hbox = new QHBoxLayout();
+    hbox->setSpacing(0);
+    hbox->setContentsMargins(0,0,0,0);
     hbox->addWidget(icon);
     hbox->addWidget(m_cpu);
     setLayout(hbox);

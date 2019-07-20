@@ -13,7 +13,9 @@ MemoryWidget::MemoryWidget(QWidget *parent)
 : QWidget(parent) {
     auto hbox = new QHBoxLayout();
     auto icon = new SingleIcon(":/icon_memory_dark.svg");
-    m_memory = new SingleLabel("---");
+    m_memory = new SingleLabel("00%");
+    hbox->setSpacing(0);
+    hbox->setContentsMargins(0,0,0,0);
     hbox->addWidget(icon);
     hbox->addWidget(m_memory);
     setLayout(hbox);
