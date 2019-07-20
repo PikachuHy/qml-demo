@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>left_down.svg</file>
+        <file>right_top.svg</file>
+        <file>icon_cpu_dark.svg</file>
+        <file>icon_memory_dark.svg</file>
+    </qresource>
+</RCC>
