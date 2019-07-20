@@ -5,7 +5,7 @@ set(PLUGIN_NAME "system-monitor")
 
 # 设置项目名称
 project(${PLUGIN_NAME}
-        VERSION 1.0.0
+        VERSION 1.0.1
         DESCRIPTION "a simple system monitor plugin for dde dock"
         )
 set(CMAKE_CXX_STANDARD 17)
