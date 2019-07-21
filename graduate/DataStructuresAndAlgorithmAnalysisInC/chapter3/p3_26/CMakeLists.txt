@@ -1,0 +1,6 @@
+STRING( REGEX REPLACE ".*/(.*)" "\\1" CURRENT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR} )
+set(TARGET_NAME ${CURRENT_FOLDER})
+add_executable(${TARGET_NAME}_list  main.c debug.h deque.c deque.h)
+target_link_libraries(${TARGET_NAME}_list ${CONAN_LIBS})
+add_executable(${TARGET_NAME}_array  main.c debug.h arrayqueue.c deque.h)
+target_link_libraries(${TARGET_NAME}_array ${CONAN_LIBS})
