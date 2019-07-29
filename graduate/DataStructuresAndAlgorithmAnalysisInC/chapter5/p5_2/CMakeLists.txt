@@ -1,0 +1,6 @@
+STRING( REGEX REPLACE ".*/(.*)" "\\1" CURRENT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR} )
+set(TARGET_NAME ${CURRENT_FOLDER})
+add_executable(${TARGET_NAME}_HashSep  main.c debug.h HashSep.c HashSep.h test.c test.h)
+target_link_libraries(${TARGET_NAME}_HashSep ${CONAN_LIBS})
+add_executable(${TARGET_NAME}_HashLinear  main.c debug.h  test.c test.h)
+target_link_libraries(${TARGET_NAME}_HashLinear ${CONAN_LIBS})
