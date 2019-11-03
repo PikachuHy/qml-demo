@@ -1,0 +1,5 @@
+include_directories("../lib")
+add_executable(daterange daterange.c)
+target_link_libraries(daterange df347)
+add_executable(memory memory.c)
+add_executable(generateparam generateparam.c)

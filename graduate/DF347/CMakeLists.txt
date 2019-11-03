@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.9.1)
+project(DF347 C)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+add_executable(DF347 main.c)
+add_subdirectory(lib)
+add_subdirectory(test)
+add_subdirectory(benchmark)
+add_subdirectory(demo)
+target_link_libraries(DF347 df347)
