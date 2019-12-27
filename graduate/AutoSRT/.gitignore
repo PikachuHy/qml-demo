@@ -1,0 +1,5 @@
+cmake-build-debug/
+.DS_Store
+.idea/
+CMakeLists.txt.user
+3rd_part/
