@@ -17,6 +17,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_PREFIX_PATH "/Users/pikachu/Qt5.14.0/5.14.0/clang_64")
 find_package(Qt5Core 5.5)
 find_package(Qt5Network 5.5)
 find_package(PkgConfig)

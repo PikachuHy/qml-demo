@@ -4,31 +4,95 @@
 QINIU_BEGIN_NAMESPACE
 namespace Util {
 
-    QByteArray hmacSha1(QByteArray baseString, QByteArray key) {
-     int blockSize = 64; // HMAC-SHA-1 block size, defined in SHA-1 standard
-     if (key.length() > blockSize) { // if key is longer than block size (64), reduce key length with SHA-1 compression
-      key = QCryptographicHash::hash(key, QCryptographicHash::Sha1);
-     }
+/**
+ * Hashes the given string using the HMAC-SHA1 algorithm.
+ *
+ * \param key The string to be hashed
+ * \param secret The string that contains secret word
+ * \return The hashed string
+ */
+    QByteArray hmacSha1(const QString &key, const QString &secret) {
+        // Length of the text to be hashed
+        int text_length;
+        // For secret word
+        QByteArray K;
+        // Length of secret word
+        int K_length;
 
-     QByteArray innerPadding(blockSize, char(0x36)); // initialize inner padding with char "6"
-     QByteArray outerPadding(blockSize, char(0x5c)); // initialize outer padding with char "quot;
-     // ascii characters 0x36 ("6") and 0x5c ("quot;) are selected because they have large
-     // Hamming distance (http://en.wikipedia.org/wiki/Hamming_distance)
+        K_length = secret.size();
+        text_length = key.size();
 
-     for (int i = 0; i < key.length(); i++) {
-      innerPadding[i] =
-              innerPadding[i] ^ key.at(i); // XOR operation between every byte in key and innerpadding, of key length
-      outerPadding[i] =
-              outerPadding[i] ^ key.at(i); // XOR operation between every byte in key and outerpadding, of key length
-     }
+        // Need to do for XOR operation. Transforms QString to
+        // unsigned char
 
-// result = hash ( outerPadding CONCAT hash ( innerPadding CONCAT baseString ) ).toBase64
-     QByteArray total = outerPadding;
-     QByteArray part = innerPadding;
-     part.append(baseString);
-     total.append(QCryptographicHash::hash(part, QCryptographicHash::Sha1));
-     QByteArray hashed = QCryptographicHash::hash(total, QCryptographicHash::Sha1);
-     return hashed.toBase64();
+//    K = secret.toAscii();
+        K = secret.toLatin1();
+
+        // Inner padding
+        QByteArray ipad;
+        // Outer padding
+        QByteArray opad;
+
+        // If secret key > 64 bytes use this to obtain sha1 key
+        if (K_length > 64) {
+            QByteArray tempSecret;
+
+            tempSecret.append(secret);
+
+            K = QCryptographicHash::hash(tempSecret, QCryptographicHash::Sha1);
+            K_length = 20;
+        }
+
+        // Fills ipad and opad with zeros
+        ipad.fill(0, 64);
+        opad.fill(0, 64);
+
+        // Copies Secret to ipad and opad
+        ipad.replace(0, K_length, K);
+        opad.replace(0, K_length, K);
+
+        // XOR operation for inner and outer pad
+        for (int i = 0; i < 64; i++) {
+            ipad[i] = ipad[i] ^ 0x36;
+            opad[i] = opad[i] ^ 0x5c;
+        }
+
+        // Stores hashed content
+        QByteArray context;
+
+        // Appends XOR:ed ipad to context
+        context.append(ipad, 64);
+        // Appends key to context
+        context.append(key);
+
+        //Hashes inner pad
+        QByteArray Sha1 = QCryptographicHash::hash(context, QCryptographicHash::Sha1);
+
+        context.clear();
+        //Appends opad to context
+        context.append(opad, 64);
+        //Appends hashed inner pad to context
+        context.append(Sha1);
+
+        Sha1.clear();
+
+        // Hashes outerpad
+        Sha1 = QCryptographicHash::hash(context, QCryptographicHash::Sha1);
+
+        // String to return hashed stuff in Base64 format
+        QByteArray str(Sha1.toBase64());
+
+        return str;
+    }
+
+    QString urlSafe(QString s) {
+        while (s.contains("+")) {
+            s = s.replace("+", "-");
+        }
+        while (s.contains("/")) {
+            s = s.replace("/", "_");
+        }
+        return s;
     }
 }
 QINIU_END_NAMESPACE

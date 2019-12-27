@@ -5,7 +5,8 @@
 
 QINIU_BEGIN_NAMESPACE
 namespace Util {
-QByteArray hmacSha1(QByteArray baseString, QByteArray key);
+QByteArray hmacSha1(const QString &key, const QString &secret);
+    QString urlSafe(QString s);
 
 }
 QINIU_END_NAMESPACE

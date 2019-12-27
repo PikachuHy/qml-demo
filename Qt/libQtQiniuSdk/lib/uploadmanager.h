@@ -6,12 +6,14 @@
 
 #include "qiniu_global.h"
 QINIU_BEGIN_NAMESPACE
-class UploadManager: QObject
+class UploadManager: public QObject
 {
     Q_OBJECT
 public:
     explicit UploadManager(QObject* parent = nullptr);
     void put(QByteArray fileData, QString key, QString token);
+    signals:
+    void uploadFinished(QByteArray retBody);
 private:
     QNetworkAccessManager* m_manager;
 

@@ -1,12 +1,18 @@
 #include <QCoreApplication>
 #include <QtQiniu>
 #include <QFile>
+#include <QDebug>
 QINIU_USE_NAMESPACE
 QByteArray getFileData()
 {
     // 需要换成图片的路径
-    QFile file("/home/pikachu/CLionProjects/libQtQiniuSdk/logo-qiniu.png");
-    file.open(QIODevice::ReadOnly);
+    QString filepath = "/Users/pikachu/src/libQtQiniuSdk/logo-qiniu.png";
+    QFile file(filepath);
+    auto ret = file.open(QIODevice::ReadOnly);
+    if (!ret) {
+        qDebug() << "ERROR: "<< filepath << " is not exist.";
+        exit(1);
+    }
     QByteArray fdata = file.readAll();
     file.close();
     return fdata;

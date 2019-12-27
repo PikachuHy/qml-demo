@@ -30,6 +30,8 @@ UploadManager::UploadManager(QObject *parent):
     connect(m_manager, &QNetworkAccessManager::finished, [=](QNetworkReply *reply){
         QByteArray result = reply->readAll();
         qDebug ().noquote() << result;
+        emit uploadFinished(result);
+        this->deleteLater();
     });
 }
 
