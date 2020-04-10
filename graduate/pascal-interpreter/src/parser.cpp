@@ -53,10 +53,10 @@ ast *parser::expr() {
     return ret;
 }
 
-int binary_operator::accept(node_visitor *visitor) {
+int binary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int number::accept(node_visitor *visitor) {
+int number::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }

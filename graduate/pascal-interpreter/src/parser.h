@@ -14,14 +14,14 @@
 enum class ast_node_type {
     binary_operator, number, unknown
 };
-class node_visitor;
+class abstract_node_visitor;
 struct ast {
     ast_node_type type = ast_node_type::unknown;
     friend ostream &operator<<(ostream &os, const ast &ast) {
         os << "ast";
         return os;
     }
-    virtual int accept(node_visitor* visitor) = 0;
+    virtual int accept(abstract_node_visitor* visitor) = 0;
 };
 struct binary_operator: public ast {
     ast* left;
@@ -33,7 +33,7 @@ struct binary_operator: public ast {
         type = ast_node_type::binary_operator;
     }
 
-    int accept(node_visitor *visitor) override;
+    int accept(abstract_node_visitor *visitor) override;
 
     friend ostream &operator<<(ostream &os, const binary_operator &ast) {
         os << "binary_operator";
@@ -53,7 +53,7 @@ struct number: public ast {
         type = ast_node_type::number;
     }
 
-    int accept(node_visitor *visitor) override;
+    int accept(abstract_node_visitor *visitor) override;
 
     friend ostream &operator<<(ostream &os, const number &ast) {
         os << "number";
@@ -87,24 +87,18 @@ private:
     token cur_token;
     bool first = true;
 };
+struct abstract_node_visitor {
+    virtual int visit(number* node) = 0;
 
-struct node_visitor {
-    int visit(ast* node) {
-        switch (node->type) {
-            case ast_node_type::binary_operator:
-                return visit((binary_operator*)node);
-            case ast_node_type::number:
-                return visit((number*)node);
-        }
-        std::cout << "Error" << std::endl;
-        exit(1);
-    }
-    int visit(number* node) {
+    virtual int visit(binary_operator* node) = 0;
+};
+struct node_visitor: public abstract_node_visitor {
+    int visit(number* node) override {
         return node->value;
     }
-    int visit(binary_operator* node) {
-        auto a = visit(node->left);
-        auto b = visit(node->right);
+    int visit(binary_operator* node) override {
+        auto a = node->left->accept(this);
+        auto b = node->right->accept(this);
         switch (node->op.type) {
             case token_type::plus:
                 return a + b;
