@@ -10,6 +10,10 @@ const token token_constant::multiplication = token(token_type::multiplication, "
 const token token_constant::division = token(token_type::division, "/");
 const token token_constant::left_parenthesis = token(token_type::left_parenthesis, "(");
 const token token_constant::right_parenthesis = token(token_type::right_parenthesis, ")");
+const token token_constant::dot = token(token_type::dot, ".");
+const token token_constant::semicolon = token(token_type::semicolon, ";");
+const token token_constant::begin = token(token_type::begin, "BEGIN");
+const token token_constant::end = token(token_type::end, "END");
 const token token_constant::eof = token(token_type::eof, "-1");
 const token token_constant::unknown = token(token_type::unknown, "");
 const unordered_map<char, token> token_constant::arithmetic_operator_token_map = {
@@ -28,6 +32,13 @@ const std::unordered_map<char, token> token_constant::single_char_token_map = {
         {division.get_value<string>()[0], division},
         {left_parenthesis.get_value<string>()[0], left_parenthesis},
         {right_parenthesis.get_value<string>()[0], right_parenthesis},
+        {dot.get_value<string>()[0], dot},
+        {semicolon.get_value<string>()[0], semicolon},
+};
+const std::unordered_map<string, token> token_constant::keyword_token_map = {
+        {begin.get_value<string>(), begin},
+        {end.get_value<string>(), end},
+        {"DIV"s, division},
 };
 token::token(token_type type, string value, int pos) : type(type) {
     this->pos = pos;
@@ -78,6 +89,21 @@ ostream &operator<<(ostream &os, const token_type &type) {
             break;
         case token_type::right_parenthesis:
             os << ")";
+            break;
+        case token_type::begin:
+            os << "BEGIN";
+            break;
+        case token_type::end:
+            os << "END";
+            break;
+        case token_type::dot:
+            os << ".";
+            break;
+        case token_type::assignment:
+            os << ":=";
+            break;
+        case token_type::semicolon:
+            os << ";";
             break;
     }
     return os;

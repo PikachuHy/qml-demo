@@ -11,6 +11,7 @@
 #include <any>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 enum class ast_node_type {
     binary_operator, number, unknown
 };
@@ -60,6 +61,32 @@ struct unary_operator: public ast {
 
     int accept(abstract_node_visitor *visitor) override;
 };
+struct compound: public ast {
+    vector<ast*> children;
+
+    compound(vector<ast*> children) : children(std::move(children)) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+
+};
+struct noop: public ast {
+    int accept(abstract_node_visitor *visitor) override;
+};
+struct assignment: public ast {
+    ast* left;
+    ast* right;
+
+    assignment(ast *left, ast *right) : left(left), right(right) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
+struct variable_node: public ast {
+    token id;
+
+    variable_node(token id) : id(std::move(id)) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct number: public ast {
     int value;
 
@@ -81,22 +108,33 @@ struct number: public ast {
 class parser {
 public:
     explicit parser(lexer lexer);
-    ast* parse() { expr(); }
+    ast* parse();
+    ast* expr();
 private:
     void eat(token_type type);
-    void error(string msg, token_type type) {
+    void error(string msg, token_type expect_type) {
         std::cout << "Error: " << msg << std::endl;
         std::cout << _lexer.get_text() << std::endl;
         for(int i=0;i<cur_token.pos;i++) {
             std::cout << " ";
         }
         std::cout << "^" << std::endl;
-        std::cout << "Expect " << type << std::endl;
+        std::cout << "Expect " << expect_type << std::endl;
         throw msg;
     }
-    ast* expr();
+    void error(string msg = "Invalid syntax") {
+        std::cout << "Error: " << msg << std::endl;
+        exit(1);
+    }
     ast* factor();
     ast* term();
+    ast* program();
+    ast* compound_statement();
+    vector<ast*> statement_list();
+    ast* statement();
+    ast* assignment_statement();
+    ast* variable();
+    ast* empty();
 private:
     lexer _lexer;
     token cur_token;
@@ -108,6 +146,13 @@ struct abstract_node_visitor {
     virtual int visit(binary_operator* node) = 0;
 
     virtual int visit(unary_operator* node) = 0;
+
+    virtual int visit(noop* node) = 0;
+
+    virtual int visit(compound* node) = 0;
+    virtual int visit(assignment* node) = 0;
+    virtual int visit(variable_node* node) = 0;
+
 };
 struct node_visitor: public abstract_node_visitor {
     int visit(number* node) override {
@@ -139,6 +184,22 @@ struct node_visitor: public abstract_node_visitor {
         }
         std::cout << "Error" << std::endl;
         exit(1);
+    }
+
+    int visit(noop *node) override {
+        return 0;
+    }
+
+    int visit(compound *node) override {
+        return 0;
+    }
+
+    int visit(assignment *node) override {
+        return 0;
+    }
+
+    int visit(variable_node *node) override {
+        return 0;
     }
 };
 

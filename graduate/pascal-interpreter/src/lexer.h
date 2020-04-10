@@ -17,6 +17,7 @@ public:
     void enter_new_expr() { new_expr = true; }
 private:
     inline void advance() { pos++; }
+    inline char peek() { return text[pos+1];}
 private:
     string text;
     int pos;

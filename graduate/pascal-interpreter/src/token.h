@@ -16,6 +16,7 @@ enum class token_type {
     integer, left_parenthesis, right_parenthesis,
     plus, minus, multiplication, division,
     unary,
+    begin, end, dot, assignment, semicolon, identifier,
     eof, unknown
 };
 ostream &operator<<(ostream &os, const token_type &type);
@@ -51,11 +52,16 @@ namespace token_constant {
     extern const token division;
     extern const token left_parenthesis;
     extern const token right_parenthesis;
+    extern const token dot;
+    extern const token semicolon;
+    extern const token begin;
+    extern const token end;
     extern const token eof;
     extern const token unknown;
     extern const unordered_map<char, token> arithmetic_operator_token_map;
     extern const unordered_set<token_type> arithmetic_operator_token_type_set;
     extern const unordered_map<char, token> single_char_token_map;
+    extern const unordered_map<string, token> keyword_token_map;
 }
 
 
