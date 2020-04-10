@@ -25,6 +25,12 @@ private:
         return 0;
     }
 
+    int visit(unary_operator *node) override {
+        node->value->accept(this);
+        ret.push_back(node->op.get_value<string>());
+        return 0;
+    }
+
     std::vector<string> ret;
 
 };
@@ -43,6 +49,11 @@ private:
         return 0;
     }
 
+    int visit(unary_operator *node) override {
+        ret.push_back(node->op.get_value<string>());
+        node->value->accept(this);
+        return 0;
+    }
     int visit(number *node) override {
         ret.push_back(to_string(node->value));
         return 0;

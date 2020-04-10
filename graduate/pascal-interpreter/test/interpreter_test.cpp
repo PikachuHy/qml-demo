@@ -70,3 +70,17 @@ TEST(interpreter, parentheses_2) {
     ASSERT_EQ(10, interpreter("7 + 3 * (10 / (12 / (3 + 1) - 1)) / (2 + 3) - 5 - 3 + (8)").interpret());
     ASSERT_EQ(12, interpreter("7 + (((3 + 2)))").interpret());
 }
+TEST(interpreter, unary_1) {
+    ASSERT_EQ(5, interpreter("+ 5").interpret());
+    ASSERT_EQ(-5, interpreter("- 5").interpret());
+}
+TEST(interpreter, unary_2) {
+    ASSERT_EQ(2, interpreter("+ 5 + (-3)").interpret());
+    ASSERT_EQ(-8, interpreter("- 5 + (-3)").interpret());
+}
+TEST(interpreter, unary_3) {
+    int a =  5 - - - + - 3;
+    ASSERT_EQ(8, a);
+    ASSERT_EQ(8, interpreter(" 5 - - - + - 3").interpret());
+    ASSERT_EQ(10, interpreter("5 - - - + - (3 + 4) - +2").interpret());
+}

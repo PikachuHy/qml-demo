@@ -22,6 +22,12 @@ ast* parser::factor() {
         eat(token_type::integer);
         return new number{token};
     }
+    if (token.type == token_type::unary) {
+        eat(token_type::unary);
+        auto ret = new unary_operator{token, factor()};
+        return ret;
+    }
+    _lexer.enter_new_expr();
     eat(token_type::left_parenthesis);
     auto ret = expr();
     eat(token_type::right_parenthesis);
@@ -58,5 +64,9 @@ int binary_operator::accept(abstract_node_visitor *visitor) {
 }
 
 int number::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int unary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }

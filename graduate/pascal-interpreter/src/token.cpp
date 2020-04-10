@@ -12,6 +12,15 @@ const token token_constant::left_parenthesis = token(token_type::left_parenthesi
 const token token_constant::right_parenthesis = token(token_type::right_parenthesis, ")");
 const token token_constant::eof = token(token_type::eof, "-1");
 const token token_constant::unknown = token(token_type::unknown, "");
+const unordered_map<char, token> token_constant::arithmetic_operator_token_map = {
+        {plus.get_value<string>()[0], plus},
+        {minus.get_value<string>()[0], minus},
+        {multiplication.get_value<string>()[0], multiplication},
+        {division.get_value<string>()[0], division},
+};
+const unordered_set<token_type> token_constant::arithmetic_operator_token_type_set = {
+        token_type::plus, token_type::minus, token_type::multiplication, token_type::division, token_type::unary
+};
 const std::unordered_map<char, token> token_constant::single_char_token_map = {
         {plus.get_value<string>()[0], plus},
         {minus.get_value<string>()[0], minus},

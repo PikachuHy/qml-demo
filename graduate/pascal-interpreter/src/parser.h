@@ -44,7 +44,22 @@ struct binary_operator: public ast {
     }
 
 };
+struct unary_operator: public ast {
+    token op;
+    ast* value;
 
+    unary_operator(token op, ast *value) : op(std::move(op)), value(value) {}
+
+    friend ostream &operator<<(ostream &os, const unary_operator &ast) {
+        os << "unary_operator";
+        os << "(";
+        os << ast.op << ", " << *ast.value;
+        os << ")";
+        return os;
+    }
+
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct number: public ast {
     int value;
 
@@ -91,11 +106,22 @@ struct abstract_node_visitor {
     virtual int visit(number* node) = 0;
 
     virtual int visit(binary_operator* node) = 0;
+
+    virtual int visit(unary_operator* node) = 0;
 };
 struct node_visitor: public abstract_node_visitor {
     int visit(number* node) override {
         return node->value;
     }
+
+    int visit(unary_operator *node) override {
+        auto val = node->value->accept(this);
+        if (node->op.get_value<string>() == "-") {
+            val = -val;
+        }
+        return val;
+    }
+
     int visit(binary_operator* node) override {
         auto a = node->left->accept(this);
         auto b = node->right->accept(this);

@@ -11,6 +11,7 @@ lexer::lexer(string text) : text(std::move(text)) {
 }
 token lexer::get_next_token() {
     if (pos >= text.size()) return token_constant::eof;
+    token ret{token_type::unknown, text.substr(pos, 1), pos};
     while (text[pos] == ' ') {
         advance();
     }
@@ -19,15 +20,22 @@ token lexer::get_next_token() {
         while (isdigit(text[pos])) {
             advance();
         }
-        return {token_type::integer, text.substr(start, pos - start), start};
-    }
-    auto iter = token_constant::single_char_token_map.find(text[pos]);
-    if (iter != token_constant::single_char_token_map.end()) {
-        auto ret = iter->second;
-        ret.set_pos(pos);
+        ret = {token_type::integer, text.substr(start, pos - start), start};
+    } else if ((token_constant::arithmetic_operator_token_type_set.count(last_token.type) == 1
+    || last_token.type == token_type::unknown || last_token.type == token_type::left_parenthesis)
+        && (text[pos] == '+' || text[pos] == '-')
+    ) {
+        ret = {token_type::unary, text.substr(pos, 1), pos};
         advance();
-        return ret;
+    } else {
+        auto iter = token_constant::single_char_token_map.find(text[pos]);
+        if (iter != token_constant::single_char_token_map.end()) {
+            ret = iter->second;
+            ret.set_pos(pos);
+            advance();
+        }
     }
-    return {token_type::unknown, text.substr(pos, 1), pos};
+    last_token = ret;
+    return ret;
 }
 

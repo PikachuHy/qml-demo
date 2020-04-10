@@ -5,6 +5,7 @@
 #include "interpreter.h"
 
 int interpreter::interpret() {
-    return _parser.parse()->accept(&visitor);
+    auto ast = _parser.parse();
+    return ast->accept(&visitor);
 }
 
