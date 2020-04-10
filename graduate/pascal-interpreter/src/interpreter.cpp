@@ -8,18 +8,15 @@
 #include <vector>
 #include <stack>
 
-interpreter::interpreter(const lexer &_lexer) : _lexer(_lexer) {
-
-}
-
 /*
 expr: term ((PLUS|MINUS) term)*
 term: factor ((MUL|DIV) factor)*
 factor: INTEGER
  */
 int interpreter::expr() {
-    cur_token = get_next_token();
-    return expr_internal();
+//    cur_token = get_next_token();
+//    return expr_internal();
+    return interpret();
 }
 
 int interpreter::expr_internal() {
@@ -166,5 +163,9 @@ int interpreter::cal_with_table() {
         operands.push(c);
     }
     return operands.top();
+}
+
+int interpreter::interpret() {
+    return _parser.parse()->accept(&visitor);
 }
 

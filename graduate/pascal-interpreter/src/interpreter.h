@@ -6,6 +6,7 @@
 #define PASCAL_INTERPRETER_INTERPRETER_H
 #include "token.h"
 #include "lexer.h"
+#include "parser.h"
 #include <string>
 #include <iostream>
 #include <any>
@@ -16,12 +17,11 @@ using namespace std;
 
 class interpreter {
 public:
-    interpreter(const lexer &_lexer);
-    interpreter(const string& text) : interpreter(lexer(text)) {
+    interpreter(const string& text) : _lexer(lexer(text)), _parser(_lexer) {
         this->text = text;
     };
 
-    int expr();
+    int interpret();
 
     token get_next_token();
 
@@ -43,12 +43,14 @@ private:
     int factor();
     int term();
     int cal_with_table();
+    int expr();
+    int expr_internal();
 private:
     lexer _lexer;
+    parser _parser;
     token cur_token;
     string text;
-
-    int expr_internal();
+    node_visitor visitor;
 };
 
 

@@ -11,9 +11,8 @@ int main() {
         string s;
         getline(cin, s);
         if (s.empty()) continue;
-        lexer _lexer(s);
-        interpreter inter(_lexer);
-        std::cout << inter.expr() << std::endl;
+        interpreter inter(s);
+        std::cout << inter.interpret() << std::endl;
         } catch (std::exception& e) {
             std::cout << e.what() << std::endl;
         }
