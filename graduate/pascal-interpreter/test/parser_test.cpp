@@ -12,5 +12,7 @@ TEST(parser, 1) {
             token_constant::plus,
             new number{token{token_type::integer, "5"}},
     };
-    ASSERT_EQ(*expect, node);
+    ASSERT_TRUE(node);
+    auto t = dynamic_cast<binary_operator *>(node);
+    ASSERT_EQ(t->op, expect->op);
 }
