@@ -2,13 +2,14 @@
 #include <iostream>
 #include <any>
 #include <stack>
+#include <utility>
 #include <vector>
 #include <unordered_set>
 #include "token.h"
 using namespace std;
 class calculator {
 public:
-    calculator(const string &text) : text(text) {}
+    explicit calculator(string text) : text(std::move(text)) {}
     int eval() {
         std::stack<int> operands;
         std::stack<token_type> operators;

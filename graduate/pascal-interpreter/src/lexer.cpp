@@ -4,7 +4,9 @@
 
 #include "lexer.h"
 
-lexer::lexer(const string &text) : text(text) {
+#include <utility>
+
+lexer::lexer(string text) : text(std::move(text)) {
     pos = 0;
 }
 token lexer::get_next_token() {

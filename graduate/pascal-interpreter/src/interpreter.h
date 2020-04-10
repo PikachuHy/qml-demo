@@ -17,17 +17,12 @@ using namespace std;
 
 class interpreter {
 public:
-    interpreter(const string& text) : _lexer(lexer(text)), _parser(_lexer) {
+    explicit interpreter(const string& text) : _parser(lexer(text)) {
     };
 
     int interpret();
 
-    token get_next_token();
-
-    void reset() { _lexer.reset(); }
-
 private:
-    lexer _lexer;
     parser _parser;
     node_visitor visitor;
 };

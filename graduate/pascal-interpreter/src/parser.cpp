@@ -4,7 +4,9 @@
 
 #include "parser.h"
 
-parser::parser(const lexer &lexer) : _lexer(lexer) {}
+#include <utility>
+
+parser::parser(lexer lexer) : _lexer(std::move(lexer)) {}
 
 void parser::eat(token_type type) {
     if (cur_token.type == type) {

@@ -3,6 +3,7 @@
 //
 
 #include "token.h"
+// TODO 更好的方式写常量
 const token token_constant::plus = token(token_type::plus, "+");
 const token token_constant::minus = token(token_type::minus, "-");
 const token token_constant::multiplication = token(token_type::multiplication, "*");

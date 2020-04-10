@@ -9,7 +9,7 @@
 
 class lexer {
 public:
-    lexer(const string &text);
+    explicit lexer(string text);
 
     token get_next_token();
     inline const std::string & get_text() const { return text;}

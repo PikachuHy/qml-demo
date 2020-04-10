@@ -10,6 +10,7 @@
 #include <iostream>
 #include <any>
 #include <unordered_set>
+#include <utility>
 enum class ast_node_type {
     binary_operator, number, unknown
 };
@@ -27,8 +28,8 @@ struct binary_operator: public ast {
     token op;
     ast* right;
 
-    binary_operator(ast *left, const token &op, ast *right)
-        : left(left), op(op), right(right) {
+    binary_operator(ast *left, token op, ast *right)
+        : left(left), op(std::move(op)), right(right) {
         type = ast_node_type::binary_operator;
     }
 
@@ -47,7 +48,7 @@ struct binary_operator: public ast {
 struct number: public ast {
     int value;
 
-    number(const token &token) {
+    explicit number(const token &token) {
         value = token.get_value<int>();
         type = ast_node_type::number;
     }
@@ -64,7 +65,7 @@ struct number: public ast {
 };
 class parser {
 public:
-    parser(const lexer &lexer);
+    explicit parser(lexer lexer);
     ast* parse() { expr(); }
 private:
     void eat(token_type type);
