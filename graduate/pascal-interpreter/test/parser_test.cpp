@@ -356,19 +356,39 @@ END.  {Part10}
 )";
     auto node = parser(lexer(code)).parse();
     vector<string> expect = {
-            "_number", "2", ":=",
+            "number", "INTEGER", "var_dec",
+            "a", "INTEGER", "var_dec",
+            "b", "INTEGER", "var_dec",
+            "c", "INTEGER", "var_dec",
+            "x", "INTEGER", "var_dec",
+            "y", "REAL", "var_dec",
+
+
+            "number", "2", ":=",
             "a", "number", ":=",
             "b",
             "10", "a", "*",
-            "10", "number", "*", "4", "/",
+            "10", "number", "*", "4", "DIV",
             "+", ":=",
             "c", "a", "b", "-", "-", ":=",
             "compound",
-            "x", "11", ":=", "noop",
-            "compound"
+            "x", "11", ":=",
+            "y", "20", "7", "/", "3.14", "+", ":=",
+            "noop",
+            "compound",
+            "block",
+            "program"
     };
 
     ASSERT_EQ(expect, post_node_visitor().expr(node));
+    // debug
+    int offset = 40;
+    vector<string> a;
+    auto b = post_node_visitor().expr(node);
+    vector<string> c;
+    a.insert(a.end(), expect.begin()+offset, expect.end());
+    c.insert(c.end(), b.begin()+offset, b.end());
+    ASSERT_EQ(a, c);
 
 }
 
@@ -388,14 +408,14 @@ END.  {Part10AST}
 )";
     auto node = parser(lexer(code)).parse();
     vector<string> expect = {
-            "a", "integer", "var_dec",
-            "b", "integer", "var_dec",
-            "y", "real", "var_dec",
+            "a", "INTEGER", "var_dec",
+            "b", "INTEGER", "var_dec",
+            "y", "REAL", "var_dec",
 
             "a", "2", ":=",
             "b",
             "10", "a", "*",
-            "10", "a", "*", "4", "div",
+            "10", "a", "*", "4", "DIV",
             "+", ":=",
             "y", "20", "7", "/", "3.14", "+", ":=",
             "noop",

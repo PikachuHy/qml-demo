@@ -39,6 +39,14 @@ token lexer::get_next_token() {
     while (text[pos] == ' ' || text[pos] == '\n') {
         advance();
     }
+    if (text[pos] == '{') {
+        advance();
+        while (text[pos] != '}') {
+            advance();
+        }
+        advance();
+        return get_next_token();
+    }
     if (text[pos] == '_' || isalpha(text[pos])) {
         auto cur_col = col;
         auto start = pos;
