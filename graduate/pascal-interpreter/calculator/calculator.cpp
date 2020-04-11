@@ -5,17 +5,132 @@
 #include <utility>
 #include <vector>
 #include <unordered_set>
-#include "token.h"
+
 using namespace std;
+
+
+template<typename Enumeration>
+auto as_integer(Enumeration const value)
+-> typename std::underlying_type<Enumeration>::type {
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
+
+enum class token_type {
+    integer_const, real_const,
+    left_parenthesis, right_parenthesis,
+    plus, minus, multiplication, division,
+    unary,
+    eof, unknown
+};
+
+ostream &operator<<(ostream &os, const token_type &type) {
+
+    switch (type) {
+        case token_type::integer_const:
+            os << "integer_const";
+            break;
+        case token_type::plus:
+            os << "plus(+)";
+            break;
+        case token_type::minus:
+            os << "minus(-)";
+            break;
+        case token_type::multiplication:
+            os << "multiplication(*)";
+            break;
+        case token_type::division:
+            os << "division(/)";
+            break;
+        case token_type::eof:
+            os << "eof";
+            break;
+        case token_type::unknown:
+            os << "unknown";
+            break;
+        case token_type::left_parenthesis:
+            os << "(";
+            break;
+        case token_type::right_parenthesis:
+            os << ")";
+            break;
+        case token_type::real_const:
+            os << "real_const";
+            break;
+        case token_type::unary:
+            os << "unary(+ -)";
+            break;
+        default:
+            os << "token no implement to_string(). ";
+            os << "token code: " << as_integer(type);
+    }
+    return os;
+}
+
+struct token {
+    token_type type = token_type::unknown;
+    any value;
+    string raw;
+    int pos;
+
+    token(token_type type = token_type::unknown, string value = ""s,
+          int pos = 0) : type(type), raw(value), pos(pos) {
+        if (type == token_type::integer_const) {
+            this->value = atoi(value.c_str());
+        } else if (type == token_type::real_const) {
+            this->value = atof(value.c_str());
+        } else {
+            this->value = value;
+        }
+    }
+
+
+    template<typename T>
+    T get_value() const {
+        return std::any_cast<T>(value);
+    }
+
+    friend ostream &operator<<(ostream &os, const token &token) {
+        os << "type: " << token.type << " value: " << token.get_value<string>();
+        return os;
+    }
+
+    bool operator==(const token &rhs) const {
+        if (type != rhs.type) return false;
+        return raw == rhs.raw;
+    }
+
+    bool operator!=(const token &rhs) const {
+        return !(rhs == *this);
+    }
+};
+namespace token_constant {
+    const token eof = token(token_type::eof, "-1");
+    const token plus = token(token_type::plus, "+");
+    const token minus = token(token_type::minus, "-");
+    const token multiplication = token(token_type::multiplication, "*");
+    const token division = token(token_type::division, "/");
+    const token left_parenthesis = token(token_type::left_parenthesis, "(");
+    const token right_parenthesis = token(token_type::right_parenthesis, ")");
+
+    const std::unordered_map<char, token> single_char_token_map = {
+            {plus.get_value<string>()[0],              plus},
+            {minus.get_value<string>()[0],             minus},
+            {multiplication.get_value<string>()[0],    multiplication},
+            {division.get_value<string>()[0],          division},
+            {left_parenthesis.get_value<string>()[0],  left_parenthesis},
+            {right_parenthesis.get_value<string>()[0], right_parenthesis},
+    };
+}
 class calculator {
 public:
     explicit calculator(string text) : text(std::move(text)) {}
+
     int eval() {
         std::stack<int> operands;
         std::stack<token_type> operators;
         unordered_set<token_type> operators_set = {
                 token_type::plus, token_type::minus,
-                token_type::multiplication, token_type::integer_division
+                token_type::multiplication, token_type::division
         };
         unordered_set<token_type> valid_token_set = operators_set;
         valid_token_set.insert(token_type::integer_const);
@@ -25,10 +140,10 @@ public:
         op_priority_table[2][0] = -1;
         op_priority_table[2][1] = -1;
         std::unordered_map<token_type, int> token_type_index = {
-                {token_type::plus,             0},
-                {token_type::minus,            1},
-                {token_type::multiplication,   2},
-                {token_type::integer_division, 3},
+                {token_type::plus,           0},
+                {token_type::minus,          1},
+                {token_type::multiplication, 2},
+                {token_type::division,       3},
         };
 
         cur_token = get_next_token();
@@ -75,6 +190,7 @@ public:
 
 private:
     inline void advance() { pos++; }
+
     token get_next_token() {
         if (pos >= text.size()) return token_constant::eof;
         while (text[pos] == ' ') {
@@ -85,17 +201,17 @@ private:
             while (isdigit(text[pos])) {
                 advance();
             }
-            return {token_type::integer_const, text.substr(start, pos - start), start};
+            return token(token_type::integer_const, text.substr(start, pos - start), start);
         }
         auto iter = token_constant::single_char_token_map.find(text[pos]);
         if (iter != token_constant::single_char_token_map.end()) {
             auto ret = iter->second;
-            ret.set_pos(pos);
             advance();
             return ret;
         }
-        return {token_type::unknown, text.substr(pos, 1), pos};
+        return token(token_type::unknown, text.substr(pos, 1), pos);
     }
+
     void eat(token_type type) {
         if (cur_token.type == type) {
             cur_token = get_next_token();
@@ -103,6 +219,7 @@ private:
         }
         error("Invalid syntax", type);
     }
+
     int cal(int a, int b, token_type type) {
         switch (type) {
             case token_type::plus:
@@ -111,23 +228,25 @@ private:
                 return a - b;
             case token_type::multiplication:
                 return a * b;
-            case token_type::integer_division:
+            case token_type::division:
                 return a / b;
             default:
                 break;
         }
         return -1;
     }
+
     void error(string msg, token_type type) {
         std::cout << "Error: " << msg << std::endl;
         std::cout << text << std::endl;
-        for(int i=0;i<cur_token.pos;i++) {
+        for (int i = 0; i < cur_token.pos; i++) {
             std::cout << " ";
         }
         std::cout << "^" << std::endl;
         std::cout << "Expect " << type << std::endl;
         throw msg;
     }
+
     void error(const std::unordered_set<token_type> &set) const {
         std::cout << "Error type." << std::endl;
         std::cout << "Expect: ";
@@ -139,13 +258,14 @@ private:
         std::cout << "current value: " << cur_token.get_value<string>() << std::endl;
         exit(1);
     }
+
 private:
     token cur_token;
     string text;
     int pos = 0;
 };
 
-#ifndef TEST
+#ifndef CATCH_CONFIG_MAIN
 int main() {
     while (true) {
         try {
