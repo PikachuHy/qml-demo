@@ -91,9 +91,12 @@ token lexer::get_next_token() {
         if (iter != token_constant::single_char_token_map.end()) {
             ret = create_token(iter->second);
             advance();
+        } else if (text[pos] == '\0') ret = token_type::eof;
+        else {
+            ret = create_token(token_type::unknown, text.substr(pos, 1));
         }
     }
-    if (text[pos] == '\0') ret = token_type::eof;
+
     last_token = ret;
     return ret;
 }

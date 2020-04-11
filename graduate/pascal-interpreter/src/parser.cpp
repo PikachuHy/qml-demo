@@ -11,11 +11,16 @@ parser::parser(lexer lexer) : _lexer(std::move(lexer)) {
 }
 
 void parser::eat(token_type type) {
+    if (cur_token.type == token_type::unknown) {
+        string msg = "Unknown char: ";
+        msg += cur_token.raw;
+        ERROR(msg, type);
+    }
     if (cur_token.type == type) {
         cur_token = _lexer.get_next_token();
         return;
     }
-    error("Invalid syntax", type);
+    ERROR("Invalid syntax", type);
 }
 
 ast *parser::factor() {

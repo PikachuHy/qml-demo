@@ -12,6 +12,10 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#define ERROR(msg, type) \
+std::cout << __FILE__ << ":" << __LINE__ << std::endl; \
+error(msg, type);
+
 enum class ast_node_type {
     binary_operator, number, unknown
 };
