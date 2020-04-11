@@ -20,8 +20,12 @@ void parser::eat(token_type type) {
 
 ast *parser::factor() {
     auto token = this->cur_token;
-    if (token.type == token_type::integer) {
-        eat(token_type::integer);
+    if (token.type == token_type::integer_const) {
+        eat(token_type::integer_const);
+        return new number{token};
+    }
+    if (token.type == token_type::real_const) {
+        eat(token_type::real_const);
         return new number{token};
     }
     if (token.type == token_type::unary) {
@@ -42,7 +46,8 @@ ast *parser::factor() {
 ast *parser::term() {
     auto ret = factor();
     while (cur_token.type == token_type::multiplication
-           || cur_token.type == token_type::division) {
+           || cur_token.type == token_type::integer_division
+           || cur_token.type == token_type::float_division) {
         auto token = cur_token;
         eat(token.type);
         ret = new binary_operator(ret, token, factor());
@@ -62,7 +67,15 @@ ast *parser::expr() {
 }
 
 ast *parser::program() {
-    auto ret = compound_statement();
+    ast* ret;
+    if (cur_token.type == token_type::program) {
+        eat(token_type::program);
+        auto name = variable()->id.get_value<string>();
+        eat(token_type::semicolon);
+        ret = new program_node(name, block());
+    } else {
+        ast* ret = compound_statement();
+    }
     eat(token_type::dot);
     return ret;
 }
@@ -82,7 +95,7 @@ ast *parser::parse() {
     return ret;
 }
 
-ast *parser::variable() {
+variable_node *parser::variable() {
     auto ret = new variable_node(cur_token);
     eat(token_type::identifier);
     return ret;
@@ -123,6 +136,50 @@ ast *parser::assignment_statement() {
     return new assignment{var, expr()};
 }
 
+ast *parser::block() {
+    vector<ast*> children;
+    auto dec = declarations();
+    children.insert(children.end(), dec.begin(), dec.end());
+    children.emplace_back(compound_statement());
+    return new block_node{children};
+}
+
+vector<ast *> parser::declarations() {
+    vector<ast*> ret;
+    if (cur_token.type == token_type::variable) {
+        eat(token_type::variable);
+        while (cur_token.type == token_type::identifier) {
+            auto var_dec = variable_declaration();
+            ret.insert(ret.end(), var_dec.begin(), var_dec.end());
+            eat(token_type::semicolon);
+        }
+    } else {
+        ret.emplace_back(empty());
+    }
+    return ret;
+}
+
+vector<ast *> parser::variable_declaration() {
+    vector<string> variables;
+    auto name = cur_token.get_value<string>();
+    variables.emplace_back(name);
+    eat(token_type::identifier);
+    while (cur_token.type == token_type::comma) {
+        eat(token_type::comma);
+        name = cur_token.get_value<string>();
+        variables.emplace_back(name);
+        eat(token_type::identifier);
+    }
+    eat(token_type::colon);
+    auto type = cur_token.get_value<string>();
+    eat(token_type::type_specification);
+    vector<ast*> ret;
+    for(const auto& it: variables) {
+        ret.push_back(new variable_declaration_node{it, type});
+    }
+    return ret;
+}
+
 int binary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
@@ -148,5 +205,17 @@ int assignment::accept(abstract_node_visitor *visitor) {
 }
 
 int variable_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int program_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int block_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int variable_declaration_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }

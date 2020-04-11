@@ -3,47 +3,69 @@
 //
 
 #include "token.h"
+
 // TODO 更好的方式写常量
 const token token_constant::plus = token(token_type::plus, "+");
 const token token_constant::minus = token(token_type::minus, "-");
 const token token_constant::multiplication = token(token_type::multiplication, "*");
-const token token_constant::division = token(token_type::division, "/");
+const token token_constant::integer_division = token(token_type::integer_division, "/");
+const token token_constant::float_division = token(token_type::float_division, "DIV");
 const token token_constant::left_parenthesis = token(token_type::left_parenthesis, "(");
 const token token_constant::right_parenthesis = token(token_type::right_parenthesis, ")");
 const token token_constant::dot = token(token_type::dot, ".");
 const token token_constant::semicolon = token(token_type::semicolon, ";");
+const token token_constant::colon = token(token_type::colon, ":");
+const token token_constant::comma = token(token_type::comma, ",");
 const token token_constant::begin = token(token_type::begin, "BEGIN");
 const token token_constant::end = token(token_type::end, "END");
+const token token_constant::variable = token(token_type::variable, "VAR");
+const token token_constant::real = token(token_type::type_specification, "REAL");
+const token token_constant::integer = token(token_type::type_specification, "INTEGER");
 const token token_constant::eof = token(token_type::eof, "-1");
 const token token_constant::unknown = token(token_type::unknown, "");
+const token token_constant::program = token(token_type::program, "PROGRAM");
 const unordered_map<char, token> token_constant::arithmetic_operator_token_map = {
-        {plus.get_value<string>()[0], plus},
-        {minus.get_value<string>()[0], minus},
-        {multiplication.get_value<string>()[0], multiplication},
-        {division.get_value<string>()[0], division},
+        {plus.get_value<string>()[0],             plus},
+        {minus.get_value<string>()[0],            minus},
+        {multiplication.get_value<string>()[0],   multiplication},
+        {integer_division.get_value<string>()[0], integer_division},
 };
 const unordered_set<token_type> token_constant::arithmetic_operator_token_type_set = {
-        token_type::plus, token_type::minus, token_type::multiplication, token_type::division, token_type::unary
+        token_type::plus,
+        token_type::minus,
+        token_type::multiplication,
+        token_type::integer_division,
+        token_type::unary
 };
 const std::unordered_map<char, token> token_constant::single_char_token_map = {
-        {plus.get_value<string>()[0], plus},
-        {minus.get_value<string>()[0], minus},
-        {multiplication.get_value<string>()[0], multiplication},
-        {division.get_value<string>()[0], division},
-        {left_parenthesis.get_value<string>()[0], left_parenthesis},
+        {plus.get_value<string>()[0],              plus},
+        {minus.get_value<string>()[0],             minus},
+        {multiplication.get_value<string>()[0],    multiplication},
+        {integer_division.get_value<string>()[0],  integer_division},
+        {left_parenthesis.get_value<string>()[0],  left_parenthesis},
         {right_parenthesis.get_value<string>()[0], right_parenthesis},
-        {dot.get_value<string>()[0], dot},
-        {semicolon.get_value<string>()[0], semicolon},
+        {dot.get_value<string>()[0],               dot},
+        {semicolon.get_value<string>()[0],         semicolon},
+        {colon.get_value<string>()[0],             colon},
+        {comma.get_value<string>()[0],             comma},
 };
 const std::unordered_map<string, token> token_constant::keyword_token_map = {
-        {begin.get_value<string>(), begin},
-        {end.get_value<string>(), end},
-        {"DIV"s, division},
+        {begin.get_value<string>(),          begin},
+        {end.get_value<string>(),            end},
+        {float_division.get_value<string>(), float_division},
+        {program.get_value<string>(),        program},
+        {variable.get_value<string>(),       variable},
+        {real.get_value<string>(),           real},
+        {integer.get_value<string>(),        integer},
+
 };
+
 token::token(token_type type, string value, int row, int col, string_view source_code)
-: type(type), row(row), col(col), source_code(source_code) {
-    if (type == token_type::integer) {
+        : type(type), row(row), col(col), source_code(source_code), raw(value) {
+    if (type == token_type::integer_const) {
         this->value = atoi(value.c_str());
+    } else if (type == token_type::real_const) {
+        this->value = atof(value.c_str());
     } else {
         this->value = value;
     }
@@ -51,7 +73,7 @@ token::token(token_type type, string value, int row, int col, string_view source
 
 bool token::operator==(const token &rhs) const {
     if (type != rhs.type) return false;
-    if (type == token_type::integer) {
+    if (type == token_type::integer_const) {
         return get_value<int>() == rhs.get_value<int>();
     }
     return get_value<string>() == rhs.get_value<string>();
@@ -63,7 +85,7 @@ bool token::operator!=(const token &rhs) const {
 
 ostream &operator<<(ostream &os, const token_type &type) {
     switch (type) {
-        case token_type::integer:
+        case token_type::integer_const:
             os << "integer";
             break;
         case token_type::plus:
@@ -75,7 +97,7 @@ ostream &operator<<(ostream &os, const token_type &type) {
         case token_type::multiplication:
             os << "multiplication";
             break;
-        case token_type::division:
+        case token_type::integer_division:
             os << "division";
             break;
         case token_type::eof:

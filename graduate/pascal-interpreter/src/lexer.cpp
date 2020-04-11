@@ -59,12 +59,26 @@ token lexer::get_next_token() {
         advance();
         advance();
     } else if (isdigit(text[pos])) {
+        bool is_real = false;
         auto cur_col = col;
         auto start = pos;
         while (isdigit(text[pos])) {
             advance();
         }
-        ret = create_token(token_type::integer, text.substr(start, pos - start));
+        if (text[pos] == '.') {
+            is_real = true;
+            advance();
+        }
+        while (isdigit(text[pos])) {
+            advance();
+        }
+        auto value = text.substr(start, pos - start);
+        if (is_real) {
+
+            ret = create_token(token_type::real_const, value);
+        } else {
+            ret = create_token(token_type::integer_const, value);
+        }
         ret.col = cur_col;
     } else if ((token_constant::arithmetic_operator_token_type_set.count(last_token.type) == 1
     || last_token.type == token_type::unknown || last_token.type == token_type::left_parenthesis)
@@ -79,6 +93,7 @@ token lexer::get_next_token() {
             advance();
         }
     }
+    if (text[pos] == '\0') ret = token_type::eof;
     last_token = ret;
     return ret;
 }

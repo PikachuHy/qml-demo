@@ -21,7 +21,7 @@ private:
     }
 
     int visit(number *node) override {
-        ret.push_back(to_string(node->value));
+        ret.push_back(node->num.raw);
         return 0;
     }
 
@@ -53,6 +53,27 @@ private:
 
     int visit(variable_node *node) override {
         ret.push_back(node->id.get_value<string>());
+        return 0;
+    }
+
+    int visit(program_node *node) override {
+        node->child->accept(this);
+        ret.emplace_back("program");
+        return 0;
+    }
+
+    int visit(block_node *node) override {
+        for(auto it: node->children) {
+            it->accept(this);
+        }
+        ret.emplace_back("block");
+        return 0;
+    }
+
+    int visit(variable_declaration_node *node) override {
+        ret.push_back(node->name);
+        ret.push_back(node->type);
+        ret.emplace_back("var_dec");
         return 0;
     }
 
@@ -100,6 +121,18 @@ private:
         return 0;
     }
 
+    int visit(program_node *node) override {
+        return 0;
+    }
+
+    int visit(block_node *node) override {
+        return 0;
+    }
+
+    int visit(variable_declaration_node *node) override {
+        return 0;
+    }
+
     std::vector<string> ret;
 
 };
@@ -107,9 +140,9 @@ private:
 TEST(parser, 1) {
     auto node = parser(lexer("3 + 5")).expr();
     auto expect = new binary_operator {
-            new number{token{token_type::integer, "3"}},
+            new number{token{token_type::integer_const, "3"}},
             token_constant::plus,
-            new number{token{token_type::integer, "5"}},
+            new number{token{token_type::integer_const, "5"}},
     };
     ASSERT_TRUE(node);
     auto t = dynamic_cast<binary_operator *>(node);
@@ -144,7 +177,7 @@ TEST(parser, pre_2) {
     ASSERT_EQ(expect, pre_node_visitor().expr(node));
 }
 
-TEST(parser, pascal_1) {
+TEST(parser, pascal_part9_1) {
 
     auto code = R"(BEGIN  END.)";
     auto node = parser(lexer(code)).parse();
@@ -157,7 +190,7 @@ TEST(parser, pascal_1) {
 
 }
 
-TEST(parser, pascal_2) {
+TEST(parser, pascal_part9_2) {
 
     auto code = R"(
     BEGIN
@@ -181,7 +214,7 @@ TEST(parser, pascal_2) {
     ASSERT_EQ(expect, post_node_visitor().expr(node));
 
 }
-TEST(parser, pascal_3) {
+TEST(parser, pascal_part9_3) {
 
     auto code = R"(BEGIN
     BEGIN
@@ -209,7 +242,7 @@ END.)";
     ASSERT_EQ(expect, post_node_visitor().expr(node));
 
 }
-TEST(parser, pascal_4) {
+TEST(parser, pascal_part9_4) {
 
     auto code = R"(BEGIN
     BEGIN
@@ -237,7 +270,7 @@ END.)";
     ASSERT_EQ(expect, post_node_visitor().expr(node));
 
 }
-TEST(parser, pascal_5) {
+TEST(parser, pascal_part9_5) {
 
     auto code = R"(BEGIN
     BEGIN
@@ -265,7 +298,7 @@ END.)";
     ASSERT_EQ(expect, post_node_visitor().expr(node));
 
 }
-TEST(parser, pascal_6) {
+TEST(parser, pascal_part9_6) {
 
     auto code = R"(BEGIN
     BEGIN
@@ -293,3 +326,120 @@ END.)";
     ASSERT_EQ(expect, post_node_visitor().expr(node));
 
 }
+
+
+TEST(parser, pascal_part10_1) {
+
+    auto code = R"(
+PROGRAM Part10;
+VAR
+   number     : INTEGER;
+   a, b, c, x : INTEGER;
+   y          : REAL;
+
+BEGIN {Part10}
+   BEGIN
+      number := 2;
+      a := number;
+      b := 10 * a + 10 * number DIV 4;
+      c := a - - b
+   END;
+   x := 11;
+   y := 20 / 7 + 3.14;
+   { writeln('a = ', a); }
+   { writeln('b = ', b); }
+   { writeln('c = ', c); }
+   { writeln('number = ', number); }
+   { writeln('x = ', x); }
+   { writeln('y = ', y); }
+END.  {Part10}
+)";
+    auto node = parser(lexer(code)).parse();
+    vector<string> expect = {
+            "_number", "2", ":=",
+            "a", "number", ":=",
+            "b",
+            "10", "a", "*",
+            "10", "number", "*", "4", "/",
+            "+", ":=",
+            "c", "a", "b", "-", "-", ":=",
+            "compound",
+            "x", "11", ":=", "noop",
+            "compound"
+    };
+
+    ASSERT_EQ(expect, post_node_visitor().expr(node));
+
+}
+
+TEST(parser, pascal_part10_2) {
+
+    auto code = R"(
+PROGRAM Part10AST;
+VAR
+   a, b : INTEGER;
+   y    : REAL;
+
+BEGIN {Part10AST}
+   a := 2;
+   b := 10 * a + 10 * a DIV 4;
+   y := 20 / 7 + 3.14;
+END.  {Part10AST}
+)";
+    auto node = parser(lexer(code)).parse();
+    vector<string> expect = {
+            "a", "integer", "var_dec",
+            "b", "integer", "var_dec",
+            "y", "real", "var_dec",
+
+            "a", "2", ":=",
+            "b",
+            "10", "a", "*",
+            "10", "a", "*", "4", "div",
+            "+", ":=",
+            "y", "20", "7", "/", "3.14", "+", ":=",
+            "noop",
+            "compound",
+            "block",
+            "program"
+    };
+
+    ASSERT_EQ(expect, post_node_visitor().expr(node));
+
+}
+TEST(parser, pascal_part10_3) {
+
+    auto code = R"(
+PROGRAM Part10AST;
+VAR
+   a, b : INTEGER;
+   y    : REAL;
+
+BEGIN
+   a := 2;
+   b := 10 * a + 10 * a DIV 4;
+   y := 20 / 7 + 3.14;
+END.
+)";
+    auto node = parser(lexer(code)).parse();
+    vector<string> expect = {
+            "a", "INTEGER", "var_dec",
+            "b", "INTEGER", "var_dec",
+            "y", "REAL", "var_dec",
+
+            "a", "2", ":=",
+            "b",
+            "10", "a", "*",
+            "10", "a", "*", "4", "DIV",
+            "+", ":=",
+            "y", "20", "7", "/", "3.14", "+", ":=",
+            "noop",
+            "compound",
+            "block",
+            "program"
+    };
+
+    ASSERT_EQ(expect, post_node_visitor().expr(node));
+
+}
+

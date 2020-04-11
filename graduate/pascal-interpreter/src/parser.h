@@ -24,6 +24,21 @@ struct ast {
     }
     virtual int accept(abstract_node_visitor* visitor) = 0;
 };
+struct program_node: public ast {
+    string name;
+    ast* child;
+
+    program_node(string name, ast *child) : name(name), child(child) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
+struct block_node: public ast {
+    vector<ast*> children;
+
+    block_node(vector<ast*>  children) : children(std::move(children)) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct binary_operator: public ast {
     ast* left;
     token op;
@@ -89,9 +104,9 @@ struct variable_node: public ast {
 };
 struct number: public ast {
     int value;
-
+    token num;
     explicit number(const token &token) {
-        value = token.get_value<int>();
+        num = token;
         type = ast_node_type::number;
     }
 
@@ -104,6 +119,16 @@ struct number: public ast {
         os << ")";
         return os;
     }
+};
+
+struct variable_declaration_node: public ast {
+    string name;
+    string type;
+
+    variable_declaration_node(string name, string type)
+    : name(std::move(name)), type(std::move(type)) {}
+
+    int accept(abstract_node_visitor *visitor) override;
 };
 class parser {
 public:
@@ -133,14 +158,21 @@ private:
     vector<ast*> statement_list();
     ast* statement();
     ast* assignment_statement();
-    ast* variable();
+    variable_node* variable();
     ast* empty();
+    ast* block();
+    vector<ast*> declarations();
+    vector<ast*> variable_declaration();
 private:
     lexer _lexer;
     token cur_token;
     bool first = true;
 };
 struct abstract_node_visitor {
+    virtual int visit(program_node* node) = 0;
+    virtual int visit(block_node* node) = 0;
+    virtual int visit(variable_declaration_node* node) = 0;
+
     virtual int visit(number* node) = 0;
 
     virtual int visit(binary_operator* node) = 0;
@@ -177,7 +209,7 @@ struct node_visitor: public abstract_node_visitor {
                 return a - b;
             case token_type::multiplication:
                 return a * b;
-            case token_type::division:
+            case token_type::integer_division:
                 return a / b;
             default:
                 break;
@@ -199,6 +231,18 @@ struct node_visitor: public abstract_node_visitor {
     }
 
     int visit(variable_node *node) override {
+        return 0;
+    }
+
+    int visit(program_node *node) override {
+        return 0;
+    }
+
+    int visit(block_node *node) override {
+        return 0;
+    }
+
+    int visit(variable_declaration_node *node) override {
         return 0;
     }
 };

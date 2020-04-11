@@ -15,26 +15,26 @@ public:
         std::stack<token_type> operators;
         unordered_set<token_type> operators_set = {
                 token_type::plus, token_type::minus,
-                token_type::multiplication, token_type::division
+                token_type::multiplication, token_type::integer_division
         };
         unordered_set<token_type> valid_token_set = operators_set;
-        valid_token_set.insert(token_type::integer);
+        valid_token_set.insert(token_type::integer_const);
         std::vector<std::vector<int>> op_priority_table(4, std::vector<int>(4, 1));
         op_priority_table[3][0] = -1;
         op_priority_table[3][1] = -1;
         op_priority_table[2][0] = -1;
         op_priority_table[2][1] = -1;
         std::unordered_map<token_type, int> token_type_index = {
-                {token_type::plus,           0},
-                {token_type::minus,          1},
-                {token_type::multiplication, 2},
-                {token_type::division,       3},
+                {token_type::plus,             0},
+                {token_type::minus,            1},
+                {token_type::multiplication,   2},
+                {token_type::integer_division, 3},
         };
 
         cur_token = get_next_token();
         while (cur_token != token_constant::eof) {
             operands.push(cur_token.get_value<int>());
-            eat(token_type::integer);
+            eat(token_type::integer_const);
             if (cur_token == token_constant::eof) break;
             if (operators_set.find(cur_token.type) != operators_set.end()) {
                 while (!operators.empty()) {
@@ -61,7 +61,7 @@ public:
             auto a = operands.top();
             operands.pop();
             if (operands.empty()) {
-                error("Invalid syntax", token_type::integer);
+                error("Invalid syntax", token_type::integer_const);
             }
             auto b = operands.top();
             operands.pop();
@@ -85,7 +85,7 @@ private:
             while (isdigit(text[pos])) {
                 advance();
             }
-            return {token_type::integer, text.substr(start, pos - start), start};
+            return {token_type::integer_const, text.substr(start, pos - start), start};
         }
         auto iter = token_constant::single_char_token_map.find(text[pos]);
         if (iter != token_constant::single_char_token_map.end()) {
@@ -111,7 +111,7 @@ private:
                 return a - b;
             case token_type::multiplication:
                 return a * b;
-            case token_type::division:
+            case token_type::integer_division:
                 return a / b;
             default:
                 break;
