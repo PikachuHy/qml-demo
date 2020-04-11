@@ -93,11 +93,29 @@ ast *parser::compound_statement() {
 }
 
 ast *parser::parse() {
+#ifdef TEST
     auto ret = program();
     if (cur_token.type != token_type::eof) {
         error("code not end", token_type::eof);
     }
     return ret;
+#else
+    switch (cur_token.type) {
+
+        case token_type::integer_const:
+        case token_type::real_const:
+        case token_type::left_parenthesis:
+        case token_type::right_parenthesis:
+        case token_type::unary:
+            return expr();
+        case token_type::program:
+            return program();
+        case token_type::begin:
+            return compound_statement();
+        default:
+            return nullptr;
+    }
+#endif
 }
 
 variable_node *parser::variable() {

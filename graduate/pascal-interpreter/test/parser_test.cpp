@@ -101,7 +101,7 @@ private:
         return 0;
     }
     int visit(number *node) override {
-        ret.push_back(to_string(node->value));
+        ret.push_back(node->num.raw);
         return 0;
     }
 
@@ -259,7 +259,7 @@ END.)";
             "a", "number", ":=",
             "b",
             "10", "a", "*",
-            "10", "number", "*", "4", "/",
+            "10", "number", "*", "4", "DIV",
             "+", ":=",
             "c", "a", "b", "-", "-", ":=",
             "compound",
@@ -287,7 +287,7 @@ END.)";
             "a", "number", ":=",
             "b",
             "10", "a", "*",
-            "10", "number", "*", "4", "/",
+            "10", "number", "*", "4", "DIV",
             "+", ":=",
             "c", "a", "b", "-", "-", ":=",
             "compound",
@@ -315,7 +315,7 @@ END.)";
             "a", "number", ":=",
             "b",
             "10", "a", "*",
-            "10", "number", "*", "4", "/",
+            "10", "number", "*", "4", "DIV",
             "+", ":=",
             "c", "a", "b", "-", "-", ":=",
             "compound",
