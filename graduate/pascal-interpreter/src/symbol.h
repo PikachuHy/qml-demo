@@ -12,6 +12,9 @@
 #include <unordered_map>
 #include <sstream>
 #include "fifo_map.hpp"
+#define DEBUG \
+std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+
 using namespace std;
 struct symbol {
     std::string name;
@@ -25,7 +28,7 @@ struct symbol {
     virtual std::string to_string() const  = 0;
 };
 struct builtin_type_symbol: public symbol {
-    builtin_type_symbol(const std::string &name) : symbol(name) {}
+    builtin_type_symbol(const std::string name) : symbol(name) {}
 
 
     string to_string() const override {
@@ -33,7 +36,7 @@ struct builtin_type_symbol: public symbol {
     }
 };
 struct variable_symbol: public symbol {
-    variable_symbol(std::string name, symbol *type): symbol(std::move(name), type) {}
+    variable_symbol(const std::string name, symbol *type): symbol(std::move(name), type) {}
 
     string to_string() const override {
         std::string ret;
@@ -60,6 +63,11 @@ public:
         log += "Lookup: ";
         log += name;
         logger.push_back(log);
+        if (symbols.find(name) == symbols.end()) {
+            DEBUG;
+            std::cout << "ERROR: " << "Unknown type " << name << std::endl;
+            exit(1);
+        }
         return symbols[name];
     }
     std::string to_string() {

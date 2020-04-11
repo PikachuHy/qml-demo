@@ -85,7 +85,7 @@ private:
         return 0;
     }
 };
-class pre_node_visitor: abstract_node_visitor {
+class pre_node_visitor: node_visitor_adaptor {
 public:
     vector<string> expr(ast* node) {
         ret.clear();
@@ -109,39 +109,6 @@ private:
         ret.push_back(node->num.raw);
         return 0;
     }
-
-    int visit(noop *node) override {
-        return 0;
-    }
-
-    int visit(compound *node) override {
-        return 0;
-    }
-
-    int visit(assignment *node) override {
-        return 0;
-    }
-
-    int visit(variable_node *node) override {
-        return 0;
-    }
-
-    int visit(program_node *node) override {
-        return 0;
-    }
-
-    int visit(block_node *node) override {
-        return 0;
-    }
-
-    int visit(variable_declaration_node *node) override {
-        return 0;
-    }
-
-    int visit(procedure_node *node) override {
-        return 0;
-    }
-
     std::vector<string> ret;
 
 };

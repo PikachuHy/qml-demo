@@ -5,6 +5,7 @@
 #ifndef PASCAL_INTERPRETER_PARSER_H
 #define PASCAL_INTERPRETER_PARSER_H
 #include "token.h"
+#include "symbol.h"
 #include "lexer.h"
 #include <string>
 #include <iostream>
@@ -200,7 +201,66 @@ struct abstract_node_visitor {
     virtual int visit(variable_node* node) = 0;
 
 };
-struct node_visitor: public abstract_node_visitor {
+struct node_visitor_adaptor: public abstract_node_visitor {
+    int visit(program_node *node) override {
+        node->child->accept(this);
+        return 0;
+    }
+
+    int visit(procedure_node *node) override {
+        node->child->accept(this);
+        return 0;
+    }
+
+    int visit(block_node *node) override {
+        for(auto it: node->children) {
+            it->accept(this);
+        }
+        return 0;
+    }
+
+    int visit(variable_declaration_node *node) override {
+        return 0;
+    }
+
+    int visit(number *node) override {
+        return 0;
+    }
+
+    int visit(binary_operator *node) override {
+        node->left->accept(this);
+        node->right->accept(this);
+        return 0;
+    }
+
+    int visit(unary_operator *node) override {
+        node->value->accept(this);
+        return 0;
+    }
+
+    int visit(noop *node) override {
+        return 0;
+    }
+
+    int visit(compound *node) override {
+        for(auto it: node->children) {
+            it->accept(this);
+        }
+        return 0;
+    }
+
+    int visit(assignment *node) override {
+        node->left->accept(this);
+        node->right->accept(this);
+        return 0;
+    }
+
+    int visit(variable_node *node) override {
+        return 0;
+    }
+
+};
+struct node_visitor: public node_visitor_adaptor {
     int visit(number* node) override {
         return node->value;
     }
@@ -231,38 +291,28 @@ struct node_visitor: public abstract_node_visitor {
         std::cout << "Error" << std::endl;
         exit(1);
     }
-
-    int visit(noop *node) override {
-        return 0;
+};
+struct symbol_node_visitor: public node_visitor_adaptor {
+    symbol_node_visitor(symbol_table &table) : table(table) {
+        auto int_type = new builtin_type_symbol("INTEGER");
+        table.define(int_type);
+        auto real_type = new builtin_type_symbol("REAL");
+        table.define(real_type);
     }
 
-    int visit(compound *node) override {
-        return 0;
-    }
-
-    int visit(assignment *node) override {
+    int visit(variable_declaration_node *node) override {
+        auto type = table.lookup(node->type);
+        table.define(new variable_symbol(node->name, type));
         return 0;
     }
 
     int visit(variable_node *node) override {
+        auto name = node->id.get_value<string>();
+        auto type = table.lookup(name);
         return 0;
     }
 
-    int visit(program_node *node) override {
-        return 0;
-    }
-
-    int visit(block_node *node) override {
-        return 0;
-    }
-
-    int visit(variable_declaration_node *node) override {
-        return 0;
-    }
-
-    int visit(procedure_node *node) override {
-        return 0;
-    }
+private:
+    symbol_table& table;
 };
-
 #endif //PASCAL_INTERPRETER_PARSER_H
