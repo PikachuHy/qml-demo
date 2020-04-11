@@ -25,7 +25,7 @@ TEST_CASE("single operator") {
         CHECK(calculator("3*15").eval() == 45);
 
     }
-    SECTION("divsion") {
+    SECTION("division") {
         CHECK(calculator("15/3").eval() == 5);
 
     }
