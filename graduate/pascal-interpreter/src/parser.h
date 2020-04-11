@@ -114,8 +114,8 @@ private:
     void eat(token_type type);
     void error(string msg, token_type expect_type) {
         std::cout << "Error: " << msg << std::endl;
-        std::cout << _lexer.get_text() << std::endl;
-        for(int i=0;i<cur_token.pos;i++) {
+        std::cout << cur_token.source_code << std::endl;
+        for(int i=0;i<cur_token.col;i++) {
             std::cout << " ";
         }
         std::cout << "^" << std::endl;

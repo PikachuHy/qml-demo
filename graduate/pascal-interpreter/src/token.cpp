@@ -40,8 +40,8 @@ const std::unordered_map<string, token> token_constant::keyword_token_map = {
         {end.get_value<string>(), end},
         {"DIV"s, division},
 };
-token::token(token_type type, string value, int pos) : type(type) {
-    this->pos = pos;
+token::token(token_type type, string value, int row, int col, string_view source_code)
+: type(type), row(row), col(col), source_code(source_code) {
     if (type == token_type::integer) {
         this->value = atoi(value.c_str());
     } else {

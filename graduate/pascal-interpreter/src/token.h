@@ -23,17 +23,16 @@ ostream &operator<<(ostream &os, const token_type &type);
 struct token {
     token_type type = token_type::unknown;
     any value;
-    int pos;
-    token(token_type type = token_type::unknown, string value = ""s, int pos = 0);
+    int row;
+    int col;
+    string_view source_code;
+    token(token_type type = token_type::unknown, string value = ""s,
+            int row = 0, int col = 0, string_view source_code = ""sv);
 
 
     template<typename T>
     T get_value() const {
         return std::any_cast<T>(value);
-    }
-    token set_pos(int pos) {
-        this->pos = pos;
-        return *this;
     }
     friend ostream &operator<<(ostream &os, const token &token) {
         os << "type: " << token.type << " value: " << token.get_value<string>();

@@ -6,6 +6,7 @@
 #define PASCAL_INTERPRETER_LEXER_H
 
 #include "token.h"
+#include <vector>
 
 class lexer {
 public:
@@ -16,12 +17,25 @@ public:
     void reset() { pos = 0;}
     void enter_new_expr() { new_expr = true; }
 private:
-    inline void advance() { pos++; }
+    inline void advance() {
+        if (text[pos] == '\n') {
+            row++;
+            col = 0;
+        } else {
+            col++;
+        }
+        pos++;
+    }
     inline char peek() { return text[pos+1];}
+    token create_token(token t);
+    token create_token(token_type type, const string& value);
 private:
     string text;
     int pos;
+    int row;
+    int col;
     bool new_expr = true;
+    std::vector<string_view> source_code;
     token last_token;
 };
 
