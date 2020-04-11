@@ -36,6 +36,14 @@ struct program_node: public ast {
 
     int accept(abstract_node_visitor *visitor) override;
 };
+struct procedure_node: public ast {
+    string name;
+    ast* child;
+
+    procedure_node(string name, ast *child) : name(name), child(child) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct block_node: public ast {
     vector<ast*> children;
 
@@ -158,6 +166,7 @@ private:
     ast* factor();
     ast* term();
     ast* program();
+    vector<ast*> procedure();
     ast* compound_statement();
     vector<ast*> statement_list();
     ast* statement();
@@ -174,6 +183,7 @@ private:
 };
 struct abstract_node_visitor {
     virtual int visit(program_node* node) = 0;
+    virtual int visit(procedure_node* node) = 0;
     virtual int visit(block_node* node) = 0;
     virtual int visit(variable_declaration_node* node) = 0;
 
@@ -247,6 +257,10 @@ struct node_visitor: public abstract_node_visitor {
     }
 
     int visit(variable_declaration_node *node) override {
+        return 0;
+    }
+
+    int visit(procedure_node *node) override {
         return 0;
     }
 };

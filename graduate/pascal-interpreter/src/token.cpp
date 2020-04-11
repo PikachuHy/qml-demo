@@ -24,6 +24,7 @@ const token token_constant::integer = token(token_type::type_specification, "INT
 const token token_constant::eof = token(token_type::eof, "-1");
 const token token_constant::unknown = token(token_type::unknown, "");
 const token token_constant::program = token(token_type::program, "PROGRAM");
+const token token_constant::procedure = token(token_type::procedure, "PROCEDURE");
 const unordered_map<char, token> token_constant::arithmetic_operator_token_map = {
         {plus.get_value<string>()[0],             plus},
         {minus.get_value<string>()[0],            minus},
@@ -57,6 +58,7 @@ const std::unordered_map<string, token> token_constant::keyword_token_map = {
         {variable.get_value<string>(),       variable},
         {real.get_value<string>(),           real},
         {integer.get_value<string>(),        integer},
+        {procedure.get_value<string>(),        procedure},
 
 };
 
@@ -86,19 +88,19 @@ bool token::operator!=(const token &rhs) const {
 ostream &operator<<(ostream &os, const token_type &type) {
     switch (type) {
         case token_type::integer_const:
-            os << "integer";
+            os << "integer_const";
             break;
         case token_type::plus:
-            os << "plus";
+            os << "plus(+)";
             break;
         case token_type::minus:
-            os << "minus";
+            os << "minus(-)";
             break;
         case token_type::multiplication:
-            os << "multiplication";
+            os << "multiplication(*)";
             break;
         case token_type::integer_division:
-            os << "division";
+            os << "integer_division(DIV)";
             break;
         case token_type::eof:
             os << "eof";
@@ -122,11 +124,41 @@ ostream &operator<<(ostream &os, const token_type &type) {
             os << ".";
             break;
         case token_type::assignment:
-            os << ":=";
+            os << "assignment(:=)";
             break;
         case token_type::semicolon:
-            os << ";";
+            os << "semicolon(;)";
             break;
+        case token_type::real_const:
+            os << "real_const";
+            break;
+        case token_type::float_division:
+            os << "float_division(/)";
+            break;
+        case token_type::unary:
+            os << "unary(+ -)";
+            break;
+        case token_type::program:
+            os << "program";
+            break;
+        case token_type::variable:
+            os << "variable";
+            break;
+        case token_type::type_specification:
+            os << "type_specification";
+            break;
+        case token_type::comma:
+            os << "comma(,)";
+            break;
+        case token_type::colon:
+            os << "colon(:)";
+            break;
+        case token_type::identifier:
+            os << "identifier";
+            break;
+        default:
+            os << "token no implement to_string(). ";
+            os << "token code: " << as_integer(type);
     }
     return os;
 }

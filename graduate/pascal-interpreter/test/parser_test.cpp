@@ -79,6 +79,11 @@ private:
 
     std::vector<string> ret;
 
+    int visit(procedure_node *node) override {
+        node->child->accept(this);
+        ret.emplace_back("proc_dec");
+        return 0;
+    }
 };
 class pre_node_visitor: abstract_node_visitor {
 public:
@@ -130,6 +135,10 @@ private:
     }
 
     int visit(variable_declaration_node *node) override {
+        return 0;
+    }
+
+    int visit(procedure_node *node) override {
         return 0;
     }
 
@@ -453,6 +462,69 @@ END.
             "10", "a", "*", "4", "DIV",
             "+", ":=",
             "y", "20", "7", "/", "3.14", "+", ":=",
+            "noop",
+            "compound",
+            "block",
+            "program"
+    };
+
+    ASSERT_EQ(expect, post_node_visitor().expr(node));
+
+}
+
+
+TEST(parser, pascal_part12_1) {
+
+    auto code = R"(
+PROGRAM Part12;
+VAR
+   a : INTEGER;
+
+PROCEDURE P1;
+VAR
+   a : REAL;
+   k : INTEGER;
+
+   PROCEDURE P2;
+   VAR
+      a, z : INTEGER;
+   BEGIN {P2}
+      z := 777;
+   END;  {P2}
+
+BEGIN {P1}
+
+END;  {P1}
+
+BEGIN {Part12}
+   a := 10;
+END.  {Part12}
+)";
+    auto node = parser(lexer(code)).parse();
+    vector<string> expect = {
+            "a", "INTEGER", "var_dec",
+
+            "a", "REAL", "var_dec",
+            "k", "INTEGER", "var_dec",
+
+            "a", "INTEGER", "var_dec",
+            "z", "INTEGER", "var_dec",
+
+            "z", "777", ":=",
+            "noop",
+            "compound",
+            "block",
+
+            "proc_dec",
+
+            "noop",
+            "compound",
+
+            "block",
+
+            "proc_dec",
+
+            "a", "10", ":=",
             "noop",
             "compound",
             "block",

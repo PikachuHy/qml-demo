@@ -11,13 +11,19 @@
 #include <unordered_map>
 #include <unordered_set>
 using namespace std;
+template <typename Enumeration>
+auto as_integer(Enumeration const value)
+-> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
 
 enum class token_type {
     integer_const, real_const,
     left_parenthesis, right_parenthesis,
     plus, minus, multiplication, integer_division, float_division,
     unary,
-    program,
+    program, procedure,
     variable, type_specification, comma, colon,
     begin, end, dot, assignment, semicolon, identifier,
     eof, unknown
@@ -68,6 +74,7 @@ namespace token_constant {
     extern const token eof;
     extern const token unknown;
     extern const token program;
+    extern const token procedure;
     extern const unordered_map<char, token> arithmetic_operator_token_map;
     extern const unordered_set<token_type> arithmetic_operator_token_type_set;
     extern const unordered_map<char, token> single_char_token_map;

@@ -169,6 +169,7 @@ ast *parser::block() {
 
 vector<ast *> parser::declarations() {
     vector<ast*> ret;
+    bool noop = true;
     if (cur_token.type == token_type::variable) {
         eat(token_type::variable);
         while (cur_token.type == token_type::identifier) {
@@ -176,9 +177,14 @@ vector<ast *> parser::declarations() {
             ret.insert(ret.end(), var_dec.begin(), var_dec.end());
             eat(token_type::semicolon);
         }
-    } else {
-        ret.emplace_back(empty());
+        noop = false;
     }
+    if (cur_token.type == token_type::procedure) {
+        auto p = procedure();
+        ret.insert(ret.end(), p.begin(), p.end());
+        noop = false;
+    }
+    if (noop) ret.emplace_back(empty());
     return ret;
 }
 
@@ -200,6 +206,21 @@ vector<ast *> parser::variable_declaration() {
     for(const auto& it: variables) {
         ret.push_back(new variable_declaration_node{it, type});
     }
+    return ret;
+}
+
+vector<ast *> parser::procedure() {
+    vector<ast *> ret;
+    while (cur_token.type == token_type::procedure) {
+        eat(token_type::procedure);
+        auto name = cur_token.get_value<string>();
+        eat(token_type::identifier);
+        eat(token_type::semicolon);
+        auto p = new procedure_node(name, block());
+        eat(token_type::semicolon);
+        ret.push_back(p);
+    }
+
     return ret;
 }
 
@@ -232,6 +253,10 @@ int variable_node::accept(abstract_node_visitor *visitor) {
 }
 
 int program_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int procedure_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
