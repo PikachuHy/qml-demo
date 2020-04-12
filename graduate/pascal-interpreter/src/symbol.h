@@ -11,7 +11,7 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
-#include "fifo_map.hpp"
+#include <nlohmann/fifo_map.hpp>
 #define DEBUG \
 std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 
