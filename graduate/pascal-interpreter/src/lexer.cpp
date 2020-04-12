@@ -2,6 +2,7 @@
 // Created by pikachu on 2020/4/9.
 //
 
+#include "common.h"
 #include "lexer.h"
 
 #include <utility>

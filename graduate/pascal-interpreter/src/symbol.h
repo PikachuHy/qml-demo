@@ -12,9 +12,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <nlohmann/fifo_map.hpp>
-#define DEBUG \
-std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-
+#include "token.h"
 using namespace std;
 struct symbol {
     std::string name;
@@ -32,59 +30,42 @@ struct builtin_type_symbol: public symbol {
 
 
     string to_string() const override {
-        return name;
+        return fmt::format("<BuiltinTypeSymbol(name='{}')>", name);
     }
 };
 struct variable_symbol: public symbol {
     variable_symbol(const std::string name, symbol *type): symbol(std::move(name), type) {}
 
     string to_string() const override {
-        std::string ret;
-        ret += "<"s;
-        ret += name;
-        ret += ":"s;
-        ret += type->to_string();
-        ret += ">"s;
-        return ret;
+        return fmt::format("<VarSymbol(name='{}', type='{}')>", name, type->name);
     }
 };
+struct procedure_symbol: public symbol {
+    vector<variable_symbol*> params;
 
-class symbol_table {
+    explicit procedure_symbol(const string &name) : symbol(name) {}
+
+    string to_string() const override;
+};
+extern std::vector<std::string> logger;
+class scoped_symbol_table {
 public:
-    void define(symbol* symbol) {
-        std::string log;
-        log += "Define: ";
-        log += symbol->to_string();
-        logger.push_back(log);
-        symbols[symbol->name] = symbol;
+    explicit scoped_symbol_table(string name = "global", scoped_symbol_table *scope = nullptr);
+
+    virtual ~scoped_symbol_table() {
+
     }
-    symbol* lookup(const std::string & name) {
-        std::string log;
-        log += "Lookup: ";
-        log += name;
-        logger.push_back(log);
-        if (symbols.find(name) == symbols.end()) {
-            DEBUG;
-            std::cout << "ERROR: " << "Unknown type " << name << std::endl;
-            exit(1);
-        }
-        return symbols[name];
-    }
-    std::string to_string() {
-        std::string ret;
-        ret += "Symbols: "s;
-        ret += "["s;
-        for(auto [k, v] : symbols) {
-            ret += v->to_string();
-            ret += ", ";
-        }
-        ret += "]"s;
-        return ret;
-    }
-    const vector<string> & get_log() { return logger;}
+
+    void define(symbol* symbol);
+    void insert(symbol* symbol);
+    symbol* lookup(const std::string & name);
+    std::string to_string();
+    std::string to_table_string();
 private:
-    std::vector<std::string> logger;
 //    std::unordered_map<std::string, symbol*> symbols;
     nlohmann::fifo_map<std::string, symbol*> symbols;
+    std::string scope_name;
+    int scope_level = 1;
+    scoped_symbol_table* enclosing_scope = nullptr;
 };
 #endif //PASCAL_INTERPRETER_SYMBOL_H

@@ -2,6 +2,7 @@
 // Created by pikachu on 2020/4/11.
 //
 
+#include "common.h"
 #include "symbol.h"
 #include "parser.h"
 #include <gtest/gtest.h>
@@ -35,7 +36,7 @@ TEST(symbol, to_string) {
 }
 
 TEST(symbol, symbol_table) {
-    auto table = symbol_table();
+    auto table = scoped_symbol_table();
     auto int_type = builtin_type_symbol("INTEGER");
     table.define(&int_type);
     ASSERT_EQ(table.to_string(), "Symbols: [INTEGER, ]");
@@ -57,7 +58,7 @@ TEST(symbol, symbol_table) {
             "Define: REAL",
             "Define: <y:REAL>"
     };
-    ASSERT_EQ(log, table.get_log());
+    ASSERT_EQ(log, logger);
 }
 
 
@@ -74,7 +75,7 @@ BEGIN
 END.
 )";
     auto node = parser(lexer(code)).parse();
-    symbol_table table;
+    auto table = new scoped_symbol_table();
     auto visitor = symbol_node_visitor(table);
     node->accept(&visitor);
     vector<string> log = {
@@ -85,9 +86,9 @@ END.
             "Lookup: REAL",
             "Define: <y:REAL>",
     };
-    ASSERT_EQ(log, table.get_log());
+    ASSERT_EQ(log, logger);
     auto expect = "Symbols: [INTEGER, REAL, <x:INTEGER>, <y:REAL>, ]";
-    ASSERT_EQ(expect, table.to_string());
+    ASSERT_EQ(expect, table->to_string());
 
 }
 
@@ -109,7 +110,7 @@ BEGIN {Part11}
 END.  {Part11}
 )";
     auto node = parser(lexer(code)).parse();
-    symbol_table table;
+    auto table = new scoped_symbol_table();
     auto visitor = symbol_node_visitor(table);
     node->accept(&visitor);
     vector<string> log = {
@@ -131,8 +132,103 @@ END.  {Part11}
             "Lookup: number",
             "Lookup: y"
     };
-    ASSERT_EQ(log, table.get_log());
+    ASSERT_EQ(log, logger);
     auto expect = "Symbols: [INTEGER, REAL, <number:INTEGER>, <a:INTEGER>, <b:INTEGER>, <y:REAL>, ]";
-    ASSERT_EQ(expect, table.to_string());
+    ASSERT_EQ(expect, table->to_string());
+}
+
+struct expr_node_visitor: public node_visitor_adaptor {
+    int visit(assignment *node) override {
+        flag = true;
+        return node_visitor_adaptor::visit(node);
+    }
+
+    int visit(variable_node *node) override {
+        if (flag) {
+            vec.push_back(node->id.raw);
+        }
+        return node_visitor_adaptor::visit(node);
+    }
+
+    bool flag = true;
+    vector<string> vec;
+};
+TEST(symbol, pascal_part14_1) {
+    testing::internal::CaptureStdout();
+    auto code = R"(
+program Main;
+   var x, y: real;
+
+   procedure Alpha(a : integer);
+      var y : integer;
+   begin
+      x := a + x + y;
+   end;
+
+begin { Main }
+
+end.  { Main }
+)";
+    auto output = R"(SCOPE (SCOPED SYMBOL TABLE)
+===========================
+Scope name     : Alpha
+Scope level    : 2
+Enclosing scope: global
+Scope (Scoped symbol table) contents
+------------------------------------
+      a: <VarSymbol(name='a', type='INTEGER')>
+      y: <VarSymbol(name='y', type='INTEGER')>
+SCOPE (SCOPED SYMBOL TABLE)
+===========================
+Scope name     : global
+Scope level    : 1
+Enclosing scope: None
+Scope (Scoped symbol table) contents
+------------------------------------
+INTEGER: <BuiltinTypeSymbol(name='INTEGER')>
+   REAL: <BuiltinTypeSymbol(name='REAL')>
+      x: <VarSymbol(name='x', type='REAL')>
+      y: <VarSymbol(name='y', type='REAL')>
+  Alpha: <ProcedureSymbol(name=Alpha, parameters=[<VarSymbol(name='a', type='INTEGER')>])>
+
+)";
+    auto node = parser(lexer(code)).parse();
+    auto table = new scoped_symbol_table();
+    auto visitor = symbol_node_visitor(table);
+    node->accept(&visitor);
+    vector<string> log = {
+            "ENTER scope: global",
+            "Insert: INTEGER",
+            "Insert: REAL",
+            "Lookup: REAL. (Scope name: global)",
+            "Insert: x",
+            "Lookup: REAL. (Scope name: global)",
+            "Insert: y",
+            "Insert: Alpha",
+            "ENTER scope: Alpha",
+            "Lookup: INTEGER. (Scope name: Alpha)",
+            "Lookup: INTEGER. (Scope name: global)",
+            "Insert: a",
+            "Lookup: INTEGER. (Scope name: Alpha)",
+            "Lookup: INTEGER. (Scope name: global)",
+            "Insert: y",
+            "Lookup: x. (Scope name: Alpha)",
+            "Lookup: x. (Scope name: global)",
+            "Lookup: a. (Scope name: Alpha)",
+            "Lookup: x. (Scope name: Alpha)",
+            "Lookup: x. (Scope name: global)",
+            "Lookup: y. (Scope name: Alpha)",
+    };
+    expr_node_visitor expr;
+    node->accept(&expr);
+    vector<string> expr_string = {
+            "x", "a", "x", "y"
+    };
+    ASSERT_EQ(expr_string, expr.vec);
+    ASSERT_EQ(log, logger);
+    auto table_string = table->to_table_string();
+    std::cout << table_string << std::endl;
+    std::string my_output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(output, my_output);
 }
 

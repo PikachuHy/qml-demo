@@ -2,8 +2,9 @@
 // Created by pikachu on 2020/4/10.
 //
 
+#include "common.h"
 #include "parser.h"
-
+#include "symbol.h"
 #include <utility>
 
 parser::parser(lexer lexer) : _lexer(std::move(lexer)) {
@@ -215,8 +216,32 @@ vector<ast *> parser::procedure() {
         eat(token_type::procedure);
         auto name = cur_token.get_value<string>();
         eat(token_type::identifier);
+        vector<variable_declaration_node*> param_nodes;
+        if (cur_token.type == token_type::left_parenthesis) {
+            eat(token_type::left_parenthesis);
+            while (true) {
+                vector<token> params;
+                params.push_back(cur_token);
+                eat(token_type::identifier);
+                while (cur_token.type == token_type::comma) {
+                    eat(token_type::comma);
+                    params.push_back(cur_token);
+                    eat(token_type::identifier);
+                }
+                eat(token_type::colon);
+                auto type = cur_token;
+                for (const auto& param : params) {
+                    param_nodes.emplace_back(
+                            new variable_declaration_node(param.get_value<string>(), type.get_value<string>()));
+                }
+                eat(token_type::type_specification);
+                if (cur_token.type != token_type::semicolon) break;
+                eat(token_type::semicolon);
+            }
+            eat(token_type::right_parenthesis);
+        }
         eat(token_type::semicolon);
-        auto p = new procedure_node(name, block());
+        auto p = new procedure_node(name, param_nodes, block());
         eat(token_type::semicolon);
         ret.push_back(p);
     }
@@ -266,4 +291,45 @@ int block_node::accept(abstract_node_visitor *visitor) {
 
 int variable_declaration_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
+}
+
+symbol_node_visitor::symbol_node_visitor(scoped_symbol_table *table) {
+    auto int_type = new builtin_type_symbol("INTEGER");
+    table->insert(int_type);
+    auto real_type = new builtin_type_symbol("REAL");
+    table->insert(real_type);
+    tables.push_back(table);
+    cur_table = table;
+}
+
+int symbol_node_visitor::visit(variable_declaration_node *node) {
+    auto type = cur_table->lookup(node->type);
+    cur_table->insert(new variable_symbol(node->name, type));
+    return 0;
+}
+
+int symbol_node_visitor::visit(variable_node *node) {
+    auto name = node->id.get_value<string>();
+    auto type = cur_table->lookup(name);
+    return 0;
+}
+
+int symbol_node_visitor::visit(procedure_node *node) {
+    auto proc = new procedure_symbol(node->name);
+    cur_table->insert(proc);
+    auto table = new scoped_symbol_table(node->name, cur_table);
+    for(auto param : node->params) {
+        auto type = table->lookup(param->type);
+        auto var_symbol = new variable_symbol(param->name, type);
+        table->insert(var_symbol);
+        proc->params.push_back(var_symbol);
+    }
+    tables.push_back(table);
+    cur_table = table;
+    node->child->accept(this);
+    tables.pop_back();
+    std::cout << cur_table->to_table_string();
+    delete cur_table;
+    cur_table = tables.back();
+    return 0;
 }

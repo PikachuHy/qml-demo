@@ -37,11 +37,13 @@ struct program_node: public ast {
 
     int accept(abstract_node_visitor *visitor) override;
 };
+struct variable_declaration_node;
 struct procedure_node: public ast {
     string name;
+    vector<variable_declaration_node*> params;
     ast* child;
 
-    procedure_node(string name, ast *child) : name(name), child(child) {}
+    procedure_node(string name, vector<variable_declaration_node*> params, ast *child) : name(name), params(std::move(params)), child(child) {}
 
     int accept(abstract_node_visitor *visitor) override;
 };
@@ -293,26 +295,16 @@ struct node_visitor: public node_visitor_adaptor {
     }
 };
 struct symbol_node_visitor: public node_visitor_adaptor {
-    symbol_node_visitor(symbol_table &table) : table(table) {
-        auto int_type = new builtin_type_symbol("INTEGER");
-        table.define(int_type);
-        auto real_type = new builtin_type_symbol("REAL");
-        table.define(real_type);
-    }
+    explicit symbol_node_visitor(scoped_symbol_table * table);
 
-    int visit(variable_declaration_node *node) override {
-        auto type = table.lookup(node->type);
-        table.define(new variable_symbol(node->name, type));
-        return 0;
-    }
+    int visit(variable_declaration_node *node) override;
 
-    int visit(variable_node *node) override {
-        auto name = node->id.get_value<string>();
-        auto type = table.lookup(name);
-        return 0;
-    }
+    int visit(variable_node *node) override;
+
+    int visit(procedure_node *node) override;
 
 private:
-    symbol_table& table;
+    scoped_symbol_table* cur_table;
+    vector<scoped_symbol_table*> tables;
 };
 #endif //PASCAL_INTERPRETER_PARSER_H

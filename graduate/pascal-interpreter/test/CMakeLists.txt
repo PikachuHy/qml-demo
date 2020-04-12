@@ -13,6 +13,7 @@ foreach (_test_file ${TEST_SRC_FILES})
   target_link_libraries (${_test_name}
     pascal-interpreter_body
     GTest::GTest GTest::Main
+    fmt::fmt
   )
   add_test (${_test_name} ${_test_name})
 endforeach ()

@@ -1,7 +1,7 @@
 //
 // Created by pikachu on 2020/4/9.
 //
-
+#include "common.h"
 #include "token.h"
 
 // TODO 更好的方式写常量
