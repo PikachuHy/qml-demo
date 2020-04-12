@@ -58,7 +58,6 @@ TEST(symbol, symbol_table) {
             "Define: REAL",
             "Define: <y:REAL>"
     };
-    ASSERT_EQ(log, logger);
 }
 
 
@@ -86,7 +85,6 @@ END.
             "Lookup: REAL",
             "Define: <y:REAL>",
     };
-    ASSERT_EQ(log, logger);
     auto expect = "Symbols: [INTEGER, REAL, <x:INTEGER>, <y:REAL>, ]";
     ASSERT_EQ(expect, table->to_string());
 
@@ -132,28 +130,12 @@ END.  {Part11}
             "Lookup: number",
             "Lookup: y"
     };
-    ASSERT_EQ(log, logger);
     auto expect = "Symbols: [INTEGER, REAL, <number:INTEGER>, <a:INTEGER>, <b:INTEGER>, <y:REAL>, ]";
     ASSERT_EQ(expect, table->to_string());
 }
 
-struct expr_node_visitor: public node_visitor_adaptor {
-    int visit(assignment *node) override {
-        flag = true;
-        return node_visitor_adaptor::visit(node);
-    }
-
-    int visit(variable_node *node) override {
-        if (flag) {
-            vec.push_back(node->id.raw);
-        }
-        return node_visitor_adaptor::visit(node);
-    }
-
-    bool flag = true;
-    vector<string> vec;
-};
 TEST(symbol, pascal_part14_1) {
+    spdlog::set_pattern("%v");
     testing::internal::CaptureStdout();
     auto code = R"(
 program Main;
@@ -169,7 +151,30 @@ begin { Main }
 
 end.  { Main }
 )";
-    auto output = R"(SCOPE (SCOPED SYMBOL TABLE)
+    auto output = R"(ENTER scope: global
+Insert: INTEGER
+Insert: REAL
+Lookup: REAL. (Scope name: global)
+Insert: x
+Lookup: REAL. (Scope name: global)
+Insert: y
+Insert: Alpha
+ENTER scope: Alpha
+Lookup: INTEGER. (Scope name: Alpha)
+Lookup: INTEGER. (Scope name: global)
+Insert: a
+Lookup: INTEGER. (Scope name: Alpha)
+Lookup: INTEGER. (Scope name: global)
+Insert: y
+Lookup: x. (Scope name: Alpha)
+Lookup: x. (Scope name: global)
+Lookup: a. (Scope name: Alpha)
+Lookup: x. (Scope name: Alpha)
+Lookup: x. (Scope name: global)
+Lookup: y. (Scope name: Alpha)
+
+
+SCOPE (SCOPED SYMBOL TABLE)
 ===========================
 Scope name     : Alpha
 Scope level    : 2
@@ -178,6 +183,11 @@ Scope (Scoped symbol table) contents
 ------------------------------------
       a: <VarSymbol(name='a', type='INTEGER')>
       y: <VarSymbol(name='y', type='INTEGER')>
+
+
+LEAVE scope: Alpha
+
+
 SCOPE (SCOPED SYMBOL TABLE)
 ===========================
 Scope name     : global
@@ -191,43 +201,18 @@ INTEGER: <BuiltinTypeSymbol(name='INTEGER')>
       y: <VarSymbol(name='y', type='REAL')>
   Alpha: <ProcedureSymbol(name=Alpha, parameters=[<VarSymbol(name='a', type='INTEGER')>])>
 
+
+LEAVE scope: global
 )";
     auto node = parser(lexer(code)).parse();
     auto table = new scoped_symbol_table();
     auto visitor = symbol_node_visitor(table);
     node->accept(&visitor);
-    vector<string> log = {
-            "ENTER scope: global",
-            "Insert: INTEGER",
-            "Insert: REAL",
-            "Lookup: REAL. (Scope name: global)",
-            "Insert: x",
-            "Lookup: REAL. (Scope name: global)",
-            "Insert: y",
-            "Insert: Alpha",
-            "ENTER scope: Alpha",
-            "Lookup: INTEGER. (Scope name: Alpha)",
-            "Lookup: INTEGER. (Scope name: global)",
-            "Insert: a",
-            "Lookup: INTEGER. (Scope name: Alpha)",
-            "Lookup: INTEGER. (Scope name: global)",
-            "Insert: y",
-            "Lookup: x. (Scope name: Alpha)",
-            "Lookup: x. (Scope name: global)",
-            "Lookup: a. (Scope name: Alpha)",
-            "Lookup: x. (Scope name: Alpha)",
-            "Lookup: x. (Scope name: global)",
-            "Lookup: y. (Scope name: Alpha)",
-    };
-    expr_node_visitor expr;
-    node->accept(&expr);
-    vector<string> expr_string = {
-            "x", "a", "x", "y"
-    };
-    ASSERT_EQ(expr_string, expr.vec);
-    ASSERT_EQ(log, logger);
+
     auto table_string = table->to_table_string();
-    std::cout << table_string << std::endl;
+    std::cout << std::endl << std::endl;
+    std::cout << table_string << std::endl << std::endl;
+    delete table;
     std::string my_output = testing::internal::GetCapturedStdout();
     ASSERT_EQ(output, my_output);
 }

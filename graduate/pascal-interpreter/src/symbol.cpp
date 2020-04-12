@@ -3,7 +3,6 @@
 //
 #include "common.h"
 #include "symbol.h"
-std::vector<std::string> logger;
 string procedure_symbol::to_string() const {
     std::string param_string;
     if (params.empty()) {
@@ -21,29 +20,24 @@ string procedure_symbol::to_string() const {
 
 scoped_symbol_table::scoped_symbol_table(string name, scoped_symbol_table *scope)
         : scope_name(std::move(name)), enclosing_scope(scope) {
-    logger.push_back(fmt::format("ENTER scope: {}", scope_name));
+    spdlog::info("ENTER scope: {}", scope_name);
     if (scope) {
         scope_level = scope->scope_level + 1;
     }
 }
 
 void scoped_symbol_table::define(symbol *symbol) {
-    std::string log;
-    log += "Define: ";
-    log += symbol->to_string();
-    logger.push_back(log);
+    spdlog::info("Define: {}", symbol->to_string());
     symbols[symbol->name] = symbol;
 }
 
 void scoped_symbol_table::insert(symbol *symbol) {
-    std::string log;
-    logger.push_back(fmt::format("Insert: {}", symbol->name));
+    spdlog::info("Insert: {}", symbol->name);
     symbols[symbol->name] = symbol;
 }
 
 symbol *scoped_symbol_table::lookup(const string &name) {
-    std::string log;
-    logger.push_back(fmt::format("Lookup: {}. (Scope name: {})", name, scope_name));
+    spdlog::info("Lookup: {}. (Scope name: {})", name, scope_name);
     if (symbols.find(name) == symbols.end()) {
         if (enclosing_scope) return enclosing_scope->lookup(name);
 

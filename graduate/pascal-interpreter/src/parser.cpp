@@ -328,7 +328,9 @@ int symbol_node_visitor::visit(procedure_node *node) {
     cur_table = table;
     node->child->accept(this);
     tables.pop_back();
+    std::cout << std::endl << std::endl;
     std::cout << cur_table->to_table_string();
+    std::cout << std::endl << std::endl;
     delete cur_table;
     cur_table = tables.back();
     return 0;

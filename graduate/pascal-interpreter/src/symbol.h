@@ -47,13 +47,12 @@ struct procedure_symbol: public symbol {
 
     string to_string() const override;
 };
-extern std::vector<std::string> logger;
 class scoped_symbol_table {
 public:
     explicit scoped_symbol_table(string name = "global", scoped_symbol_table *scope = nullptr);
 
     virtual ~scoped_symbol_table() {
-
+        spdlog::info("LEAVE scope: {}", scope_name);
     }
 
     void define(symbol* symbol);
