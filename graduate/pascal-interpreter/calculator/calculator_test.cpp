@@ -3,7 +3,7 @@
 //
 
 #define CATCH_CONFIG_MAIN
-#include <catch/catch.hpp>
+#include <catch2/catch.hpp>
 #include "calculator.cpp"
 TEST_CASE("single number") {
     CHECK(calculator("3").eval() == 3);

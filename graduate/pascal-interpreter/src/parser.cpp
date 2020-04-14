@@ -134,7 +134,8 @@ vector<ast *> parser::statement_list() {
         ret.insert(ret.end(), nodes.begin(), nodes.end());
     }
     if (cur_token.type == token_type::identifier) {
-        error();
+        SPDLOG_ERROR("Invalid syntax");
+        throw invalid_syntax_exception();
     }
     return ret;
 }
@@ -247,6 +248,17 @@ vector<ast *> parser::procedure() {
     }
 
     return ret;
+}
+
+void parser::error(string msg, token_type expect_type) {
+    std::cout << "Error: " << msg << std::endl;
+    std::cout << cur_token.source_code << std::endl;
+    for(int i=0;i<cur_token.col;i++) {
+        std::cout << " ";
+    }
+    std::cout << "^" << std::endl;
+    std::cout << "Expect " << expect_type << std::endl;
+    throw invalid_syntax_exception(msg);
 }
 
 int binary_operator::accept(abstract_node_visitor *visitor) {

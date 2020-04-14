@@ -3,6 +3,7 @@
 //
 #include "common.h"
 #include "symbol.h"
+#include "token.h"
 string procedure_symbol::to_string() const {
     std::string param_string;
     if (params.empty()) {
@@ -33,6 +34,11 @@ void scoped_symbol_table::define(symbol *symbol) {
 
 void scoped_symbol_table::insert(symbol *symbol) {
     spdlog::info("Insert: {}", symbol->name);
+    if (symbols.find(symbol->name) != symbols.end()) {
+        auto msg = fmt::format("Error: Duplicate identifier '{}' found", symbol->name);
+        SPDLOG_ERROR(msg);
+        throw invalid_semantic_exception(msg);
+    }
     symbols[symbol->name] = symbol;
 }
 
@@ -78,4 +84,16 @@ std::string scoped_symbol_table::to_table_string() {
         ret += fmt::format("{:>7}: {}\n", k, v->to_string());
     }
     return ret;
+}
+
+scoped_symbol_table::~scoped_symbol_table() {
+    spdlog::info("LEAVE scope: {}", scope_name);
+}
+
+string builtin_type_symbol::to_string() const {
+    return fmt::format("<BuiltinTypeSymbol(name='{}')>", name);
+}
+
+string variable_symbol::to_string() const {
+    return fmt::format("<VarSymbol(name='{}', type='{}')>", name, type->name);
 }

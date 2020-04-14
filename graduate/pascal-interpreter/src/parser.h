@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 #define ERROR(msg, type) \
-std::cout << __FILE__ << ":" << __LINE__ << std::endl; \
+SPDLOG_ERROR(msg); \
 error(msg, type);
 
 enum class ast_node_type {
@@ -152,20 +152,7 @@ public:
     ast* expr();
 private:
     void eat(token_type type);
-    void error(string msg, token_type expect_type) {
-        std::cout << "Error: " << msg << std::endl;
-        std::cout << cur_token.source_code << std::endl;
-        for(int i=0;i<cur_token.col;i++) {
-            std::cout << " ";
-        }
-        std::cout << "^" << std::endl;
-        std::cout << "Expect " << expect_type << std::endl;
-        throw msg;
-    }
-    void error(string msg = "Invalid syntax") {
-        std::cout << "Error: " << msg << std::endl;
-        exit(1);
-    }
+    void error(string msg, token_type expect_type);
     ast* factor();
     ast* term();
     ast* program();

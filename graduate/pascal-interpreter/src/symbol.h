@@ -29,16 +29,12 @@ struct builtin_type_symbol: public symbol {
     builtin_type_symbol(const std::string name) : symbol(name) {}
 
 
-    string to_string() const override {
-        return fmt::format("<BuiltinTypeSymbol(name='{}')>", name);
-    }
+    string to_string() const override;
 };
 struct variable_symbol: public symbol {
     variable_symbol(const std::string name, symbol *type): symbol(std::move(name), type) {}
 
-    string to_string() const override {
-        return fmt::format("<VarSymbol(name='{}', type='{}')>", name, type->name);
-    }
+    string to_string() const override;
 };
 struct procedure_symbol: public symbol {
     vector<variable_symbol*> params;
@@ -51,9 +47,7 @@ class scoped_symbol_table {
 public:
     explicit scoped_symbol_table(string name = "global", scoped_symbol_table *scope = nullptr);
 
-    virtual ~scoped_symbol_table() {
-        spdlog::info("LEAVE scope: {}", scope_name);
-    }
+    virtual ~scoped_symbol_table();
 
     void define(symbol* symbol);
     void insert(symbol* symbol);

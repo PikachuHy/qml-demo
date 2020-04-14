@@ -217,3 +217,32 @@ LEAVE scope: global
     ASSERT_EQ(output, my_output);
 }
 
+
+TEST(symbol, pascal_part14_2) {
+    auto code = R"(
+program Main;
+   var x, y: real;
+
+   procedure Alpha(a : integer);
+      var y : integer;
+      var a : real;  { ERROR here! }
+   begin
+      x := a + x + y;
+   end;
+
+begin { Main }
+
+end.  { Main }
+)";
+    try {
+        auto node = parser(lexer(code)).parse();
+        auto table = new scoped_symbol_table();
+        auto visitor = symbol_node_visitor(table);
+        node->accept(&visitor);
+        ASSERT_FALSE(true);
+    } catch (std::exception& e) {
+        string msg = e.what();
+        ASSERT_EQ("Error: Duplicate identifier 'a' found", msg);
+    }
+}
+
