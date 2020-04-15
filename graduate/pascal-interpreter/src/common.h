@@ -23,7 +23,7 @@ class invalid_semantic_exception: public std::exception {
 public:
     explicit invalid_semantic_exception(std::string msg) : msg(std::move(msg)) {}
 
-    const char *what() {
+    const char *what() const noexcept override {
         return msg.c_str();
     }
 

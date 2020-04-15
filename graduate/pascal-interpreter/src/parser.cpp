@@ -172,7 +172,8 @@ ast *parser::block() {
 vector<ast *> parser::declarations() {
     vector<ast*> ret;
     bool noop = true;
-    if (cur_token.type == token_type::variable) {
+    // TODO: 这里的语法有问题
+    while (cur_token.type == token_type::variable) {
         eat(token_type::variable);
         while (cur_token.type == token_type::identifier) {
             auto var_dec = variable_declaration();
