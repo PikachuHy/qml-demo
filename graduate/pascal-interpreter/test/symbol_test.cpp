@@ -246,3 +246,29 @@ end.  { Main }
     }
 }
 
+
+TEST(symbol, pascal_part16_1) {
+    auto code = R"(
+program Main;
+
+procedure Alpha(a : integer; b : integer);
+var x : integer;
+begin
+   x := (a + b ) * 2;
+end;
+
+begin { Main }
+
+   Alpha(3 + 5, 7);  { procedure call }
+
+end.  { Main }
+)";
+    auto node = parser(lexer(code)).parse();
+    auto table = new scoped_symbol_table();
+    auto visitor = symbol_node_visitor(table);
+    node->accept(&visitor);
+
+    std::cout << table->to_table_string() << std::endl;
+    delete table;
+}
+

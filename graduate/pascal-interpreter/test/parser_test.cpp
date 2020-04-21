@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include "parser.h"
 #include <vector>
-class post_node_visitor: abstract_node_visitor {
+class post_node_visitor: node_visitor_adaptor {
 public:
     vector<string> expr(ast* node) {
         ret.clear();

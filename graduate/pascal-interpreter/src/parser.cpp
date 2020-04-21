@@ -145,7 +145,13 @@ ast *parser::statement() {
         return compound_statement();
     }
     if (cur_token.type == token_type::identifier) {
-        return assignment_statement();
+        auto id = cur_token;
+        eat(token_type::identifier);
+        if (cur_token.type == token_type::left_parenthesis) {
+            return procedure_call_statement(id);
+        } else {
+            return assignment_statement(id);
+        };
     }
     return empty();
 }
@@ -154,11 +160,10 @@ ast *parser::empty() {
     return new noop();
 }
 
-ast *parser::assignment_statement() {
-    auto var = variable();
+ast *parser::assignment_statement(token id) {
     eat(token_type::assignment);
 
-    return new assignment{var, expr()};
+    return new assignment(new variable_node(id), expr());
 }
 
 ast *parser::block() {
@@ -262,6 +267,18 @@ void parser::error(string msg, token_type expect_type) {
     throw invalid_syntax_exception(msg);
 }
 
+ast *parser::procedure_call_statement(token id) {
+    vector<ast*> params;
+    eat(token_type::left_parenthesis);
+    params.push_back(expr());
+    while (cur_token.type == token_type::comma) {
+        eat(token_type::comma);
+        params.push_back(expr());
+    }
+    eat(token_type::right_parenthesis);
+    return new procedure_call_node(id.get_value<string>(), params);
+}
+
 int binary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
@@ -347,4 +364,8 @@ int symbol_node_visitor::visit(procedure_node *node) {
     delete cur_table;
     cur_table = tables.back();
     return 0;
+}
+
+int procedure_call_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
 }

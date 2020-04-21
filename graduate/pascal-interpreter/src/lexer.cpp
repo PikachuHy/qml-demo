@@ -48,7 +48,18 @@ token lexer::get_next_token() {
         advance();
         return get_next_token();
     }
-    if (text[pos] == '_' || isalpha(text[pos])) {
+    if (text[pos] == '\'') {
+        auto cur_col = col;
+        advance();
+        auto start = pos;
+        while (text[pos] != '\'') {
+            advance();
+        }
+        auto str = text.substr(start, pos - start);
+        advance();
+        ret = create_token(token_type::string_const, str);
+        ret.col = cur_col;
+    } else if (text[pos] == '_' || isalpha(text[pos])) {
         auto cur_col = col;
         auto start = pos;
         while (text[pos] == '_' || isalnum(text[pos])) {

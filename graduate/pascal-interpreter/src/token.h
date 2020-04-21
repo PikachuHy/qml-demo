@@ -22,11 +22,13 @@ auto as_integer(Enumeration const value)
 }
 
 enum class token_type {
-    integer_const, real_const,
+    integer_const, real_const, string_const,
     left_parenthesis, right_parenthesis,
     plus, minus, multiplication, integer_division, float_division,
-    unary,
-    program, procedure,
+    unary, equality,
+    program, procedure, function,
+    if_token, then_token, else_token,
+    for_token, to_token, do_token,
     variable, type_specification, comma, colon,
     begin, end, dot, assignment, semicolon, identifier,
     eof, unknown
@@ -74,10 +76,20 @@ namespace token_constant {
     extern const token variable;
     extern const token real;
     extern const token integer;
+    extern const token longint;
     extern const token eof;
     extern const token unknown;
     extern const token program;
     extern const token procedure;
+    extern const token function;
+    extern const token if_token;
+    extern const token then_token;
+    extern const token else_token;
+    extern const token for_token;
+    extern const token to_token;
+    extern const token do_token;
+    extern const token equality;
+    extern const token assignment;
     extern const unordered_map<char, token> arithmetic_operator_token_map;
     extern const unordered_set<token_type> arithmetic_operator_token_type_set;
     extern const unordered_map<char, token> single_char_token_map;
