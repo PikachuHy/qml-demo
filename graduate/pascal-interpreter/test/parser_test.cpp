@@ -5,7 +5,15 @@
 #include <gtest/gtest.h>
 #include "parser.h"
 #include <vector>
-class post_node_visitor: node_visitor_adaptor {
+string string_join(const vector<string>& vec, string seg) {
+    string ret;
+    for(const auto& it: vec) {
+        ret += it;
+        ret += seg;
+    }
+    return ret;
+}
+class post_node_visitor: public node_visitor_adaptor {
 public:
     vector<string> expr(ast* node) {
         ret.clear();
@@ -16,23 +24,23 @@ private:
     int visit(binary_operator* node) override {
         node->left->accept(this);
         node->right->accept(this);
-        ret.push_back(node->op.get_value<string>());
+        std::cout << node->op.raw << std::endl;
         return 0;
     }
 
     int visit(number *node) override {
-        ret.push_back(node->num.raw);
+        std::cout << node->num.raw << std::endl;
         return 0;
     }
 
     int visit(unary_operator *node) override {
         node->value->accept(this);
-        ret.push_back(node->op.get_value<string>());
+        std::cout << node->op.raw << std::endl;
         return 0;
     }
 
     int visit(noop *node) override {
-        ret.emplace_back("noop");
+        std::cout << "noop" << std::endl;
         return 0;
     }
 
@@ -40,25 +48,25 @@ private:
         for(auto it: node->children) {
             it->accept(this);
         }
-        ret.emplace_back("compound");
+        std::cout << "compound" << std::endl;
         return 0;
     }
 
     int visit(assignment *node) override {
         node->left->accept(this);
         node->right->accept(this);
-        ret.emplace_back(":=");
+        std::cout << ":=" << std::endl;
         return 0;
     }
 
     int visit(variable_node *node) override {
-        ret.push_back(node->id.get_value<string>());
+        std::cout << node->id.raw << std::endl;
         return 0;
     }
 
     int visit(program_node *node) override {
         node->child->accept(this);
-        ret.emplace_back("program");
+        std::cout << "program" << std::endl;
         return 0;
     }
 
@@ -66,14 +74,14 @@ private:
         for(auto it: node->children) {
             it->accept(this);
         }
-        ret.emplace_back("block");
+        std::cout << "block" << std::endl;
         return 0;
     }
 
     int visit(variable_declaration_node *node) override {
-        ret.push_back(node->name);
-        ret.push_back(node->type);
-        ret.emplace_back("var_dec");
+        std::cout << node->get_name() << std::endl;
+        std::cout << node->get_type() << std::endl;
+        std::cout << "var dec" << std::endl;
         return 0;
     }
 
@@ -81,7 +89,72 @@ private:
 
     int visit(procedure_node *node) override {
         node->child->accept(this);
-        ret.emplace_back("proc_dec");
+        std::cout << "proc dec" << std::endl;
+        return 0;
+    }
+
+    int visit(string_node *node) override {
+        std::cout << "string const: " << node->value.raw << std::endl;
+        return 0;
+    }
+
+    int visit(procedure_call_node *node) override {
+        for(auto it: node->params) {
+            it->accept(this);
+        }
+        std::cout << "proc call: " << node->name << std::endl;
+        return 0;
+    }
+
+    int visit(function_node *node) override {
+        for(auto it: node->params) {
+            it->accept(this);
+        }
+        node->ret_type->accept(this);
+        node->child->accept(this);
+        std::cout << "func dec: " << node->name <<  std::endl;
+        return 0;
+    }
+
+    int visit(if_node *node) override {
+        node->condition->accept(this);
+        node->if_block->accept(this);
+        node->else_block->accept(this);
+        std::cout << "if" << std::endl;
+        return 0;
+    }
+
+    int visit(bool_expr_node *node) override {
+        node->left->accept(this);
+        node->right->accept(this);
+        std::cout << node->op.raw << std::endl;
+        return 0;
+    }
+
+    int visit(for_node *node) override {
+        node->init->accept(this);
+        node->end->accept(this);
+        node->block->accept(this);
+        std::cout << "for" << std::endl;
+        return 0;
+    }
+
+    int visit(function_call_node *node) override {
+
+        for(auto it: node->params) {
+            it->accept(this);
+        }
+        std::cout << "func call: " << node->name << std::endl;
+        return 0;
+    }
+
+    int visit(identifier_node *node) override {
+        std::cout << node->value << std::endl;
+        return 0;
+    }
+
+    int visit(type_node *node) override {
+        std::cout << node->value << std::endl;
         return 0;
     }
 };
@@ -129,14 +202,24 @@ TEST(parser, post_1) {
     vector<string> expect = {
             "3", "5", "+"
     };
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 }
 TEST(parser, post_2) {
     auto node = parser(lexer("(5 + 3) * 12 / 3")).expr();
     vector<string> expect = {
             "5", "3", "+", "12", "*", "3", "/"
     };
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 }
 TEST(parser, pre_1) {
     auto node = parser(lexer("2 + 3")).expr();
@@ -162,7 +245,12 @@ TEST(parser, pascal_part9_1) {
             "compound"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 
@@ -187,7 +275,12 @@ TEST(parser, pascal_part9_2) {
             "compound"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 TEST(parser, pascal_part9_3) {
@@ -215,7 +308,12 @@ END.)";
             "compound"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 TEST(parser, pascal_part9_4) {
@@ -243,7 +341,12 @@ END.)";
             "compound"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 TEST(parser, pascal_part9_5) {
@@ -271,7 +374,12 @@ END.)";
             "compound"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 TEST(parser, pascal_part9_6) {
@@ -299,7 +407,12 @@ END.)";
             "compound"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 
@@ -332,12 +445,12 @@ END.  {Part10}
 )";
     auto node = parser(lexer(code)).parse();
     vector<string> expect = {
-            "number", "INTEGER", "var_dec",
-            "a", "INTEGER", "var_dec",
-            "b", "INTEGER", "var_dec",
-            "c", "INTEGER", "var_dec",
-            "x", "INTEGER", "var_dec",
-            "y", "REAL", "var_dec",
+            "number", "INTEGER", "var dec",
+            "a", "INTEGER", "var dec",
+            "b", "INTEGER", "var dec",
+            "c", "INTEGER", "var dec",
+            "x", "INTEGER", "var dec",
+            "y", "REAL", "var dec",
 
 
             "number", "2", ":=",
@@ -356,15 +469,12 @@ END.  {Part10}
             "program"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
-    // debug
-    int offset = 40;
-    vector<string> a;
-    auto b = post_node_visitor().expr(node);
-    vector<string> c;
-    a.insert(a.end(), expect.begin()+offset, expect.end());
-    c.insert(c.end(), b.begin()+offset, b.end());
-    ASSERT_EQ(a, c);
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 
@@ -384,9 +494,9 @@ END.  {Part10AST}
 )";
     auto node = parser(lexer(code)).parse();
     vector<string> expect = {
-            "a", "INTEGER", "var_dec",
-            "b", "INTEGER", "var_dec",
-            "y", "REAL", "var_dec",
+            "a", "INTEGER", "var dec",
+            "b", "INTEGER", "var dec",
+            "y", "REAL", "var dec",
 
             "a", "2", ":=",
             "b",
@@ -400,7 +510,12 @@ END.  {Part10AST}
             "program"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 TEST(parser, pascal_part10_3) {
@@ -419,9 +534,9 @@ END.
 )";
     auto node = parser(lexer(code)).parse();
     vector<string> expect = {
-            "a", "INTEGER", "var_dec",
-            "b", "INTEGER", "var_dec",
-            "y", "REAL", "var_dec",
+            "a", "INTEGER", "var dec",
+            "b", "INTEGER", "var dec",
+            "y", "REAL", "var dec",
 
             "a", "2", ":=",
             "b",
@@ -435,7 +550,12 @@ END.
             "program"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
 
 }
 
@@ -469,27 +589,27 @@ END.  {Part12}
 )";
     auto node = parser(lexer(code)).parse();
     vector<string> expect = {
-            "a", "INTEGER", "var_dec",
+            "a", "INTEGER", "var dec",
 
-            "a", "REAL", "var_dec",
-            "k", "INTEGER", "var_dec",
+            "a", "REAL", "var dec",
+            "k", "INTEGER", "var dec",
 
-            "a", "INTEGER", "var_dec",
-            "z", "INTEGER", "var_dec",
+            "a", "INTEGER", "var dec",
+            "z", "INTEGER", "var dec",
 
             "z", "777", ":=",
             "noop",
             "compound",
             "block",
 
-            "proc_dec",
+            "proc dec",
 
             "noop",
             "compound",
 
             "block",
 
-            "proc_dec",
+            "proc dec",
 
             "a", "10", ":=",
             "noop",
@@ -498,7 +618,62 @@ END.  {Part12}
             "program"
     };
 
-    ASSERT_EQ(expect, post_node_visitor().expr(node));
+    testing::internal::CaptureStdout();
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    auto expect_string = string_join(expect, "\n"s);
+    ASSERT_EQ(expect_string, output);
+
+}
+
+
+TEST(parser, sample) {
+
+    auto code = R"(
+program factorial;
+
+function factorial(n: integer): longint;
+begin
+    if n = 0 then
+        factorial := 1
+    else
+        factorial := n * factorial(n - 1);
+end;
+
+var
+    n: integer;
+
+begin
+    for n := 0 to 16 do
+        writeln(n, '! = ', factorial(n));
+end.
+)";
+    testing::internal::CaptureStdout();
+    auto node = parser(lexer(code)).parse();
+    vector<string> list = {
+            "n", "INTEGER", "var dec",
+            "LONGINT", "noop",
+            "n", "0", "=",
+            "factorial", "1", ":=",
+            "block",
+            "factorial", "n",
+            "n", "1", "-",
+            "proc call: factorial",
+            "*", ":=", "block", "if",
+            "compound", "block", "func dec: factorial",
+            "n", "INTEGER", "var dec",
+            "n", "0", ":=", "16",
+            "n", "string const: ! = ",
+            "n", "proc call: factorial",
+            "proc call: writeln",
+            "for", "compound", "block", "program"
+    };
+    post_node_visitor visitor;
+    node->accept(&visitor);
+    std::string output = testing::internal::GetCapturedStdout();
+    std::string expect = string_join(list, "\n"s);
+    ASSERT_EQ(expect, output);
 
 }
 

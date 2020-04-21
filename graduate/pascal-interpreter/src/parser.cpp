@@ -34,6 +34,10 @@ ast *parser::factor() {
         eat(token_type::real_const);
         return new number{token};
     }
+    if (token.type == token_type::string_const) {
+        eat(token_type::string_const);
+        return new string_node(token);
+    }
     if (token.type == token_type::unary) {
         eat(token_type::unary);
         auto ret = new unary_operator{token, factor()};
@@ -46,7 +50,13 @@ ast *parser::factor() {
         eat(token_type::right_parenthesis);
         return ret;
     }
-    return variable();
+    auto id = cur_token;
+    eat(token_type::identifier);
+    if (cur_token.type == token_type::left_parenthesis) {
+        return procedure_call_statement(id);
+    } else {
+        return new variable_node(id);
+    }
 }
 
 ast *parser::term() {
@@ -76,7 +86,8 @@ ast *parser::program() {
     ast* ret;
     if (cur_token.type == token_type::program) {
         eat(token_type::program);
-        auto name = variable()->id.get_value<string>();
+        auto name = cur_token.get_value<string>();
+        eat(token_type::identifier);
         eat(token_type::semicolon);
         ret = new program_node(name, block());
     } else {
@@ -151,7 +162,11 @@ ast *parser::statement() {
             return procedure_call_statement(id);
         } else {
             return assignment_statement(id);
-        };
+        }
+    } else if (cur_token.type == token_type::if_token) {
+        return if_statement();
+    } else if (cur_token.type == token_type::for_token) {
+        return for_statement();
     }
     return empty();
 }
@@ -178,41 +193,50 @@ vector<ast *> parser::declarations() {
     vector<ast*> ret;
     bool noop = true;
     // TODO: 这里的语法有问题
-    while (cur_token.type == token_type::variable) {
-        eat(token_type::variable);
-        while (cur_token.type == token_type::identifier) {
-            auto var_dec = variable_declaration();
-            ret.insert(ret.end(), var_dec.begin(), var_dec.end());
-            eat(token_type::semicolon);
+    while (cur_token.type == token_type::variable
+        || cur_token.type == token_type::procedure
+        || cur_token.type == token_type::function
+    ) {
+
+        if (cur_token.type == token_type::variable) {
+            eat(token_type::variable);
+            while (cur_token.type == token_type::identifier) {
+                auto var_dec = variable_declaration();
+                ret.insert(ret.end(), var_dec.begin(), var_dec.end());
+                eat(token_type::semicolon);
+            }
+            noop = false;
+        } else if (cur_token.type == token_type::procedure) {
+            auto p = procedure();
+            ret.insert(ret.end(), p.begin(), p.end());
+            noop = false;
+        } else if (cur_token.type == token_type::function) {
+            auto p = function();
+            ret.insert(ret.end(), p.begin(), p.end());
+            noop = false;
         }
-        noop = false;
-    }
-    if (cur_token.type == token_type::procedure) {
-        auto p = procedure();
-        ret.insert(ret.end(), p.begin(), p.end());
-        noop = false;
     }
     if (noop) ret.emplace_back(empty());
     return ret;
 }
 
 vector<ast *> parser::variable_declaration() {
-    vector<string> variables;
-    auto name = cur_token.get_value<string>();
+    vector<identifier_node*> variables;
+    auto name = new identifier_node(cur_token);
     variables.emplace_back(name);
     eat(token_type::identifier);
     while (cur_token.type == token_type::comma) {
         eat(token_type::comma);
-        name = cur_token.get_value<string>();
+        name = new identifier_node(cur_token);
         variables.emplace_back(name);
         eat(token_type::identifier);
     }
     eat(token_type::colon);
-    auto type = cur_token.get_value<string>();
+    auto type = new type_node(cur_token);
     eat(token_type::type_specification);
     vector<ast*> ret;
     for(const auto& it: variables) {
-        ret.push_back(new variable_declaration_node{it, type});
+        ret.push_back(new variable_declaration_node(it, type));
     }
     return ret;
 }
@@ -236,10 +260,9 @@ vector<ast *> parser::procedure() {
                     eat(token_type::identifier);
                 }
                 eat(token_type::colon);
-                auto type = cur_token;
                 for (const auto& param : params) {
-                    param_nodes.emplace_back(
-                            new variable_declaration_node(param.get_value<string>(), type.get_value<string>()));
+                    param_nodes.emplace_back(new variable_declaration_node{
+                        new identifier_node(param), new type_node(cur_token)});
                 }
                 eat(token_type::type_specification);
                 if (cur_token.type != token_type::semicolon) break;
@@ -256,6 +279,46 @@ vector<ast *> parser::procedure() {
     return ret;
 }
 
+vector<ast *> parser::function() {
+    vector<ast *> ret;
+    while (cur_token.type == token_type::function) {
+        eat(token_type::function);
+        auto name = cur_token.get_value<string>();
+        eat(token_type::identifier);
+        vector<variable_declaration_node*> param_nodes;
+        if (cur_token.type == token_type::left_parenthesis) {
+            eat(token_type::left_parenthesis);
+            while (true) {
+                vector<token> params;
+                params.push_back(cur_token);
+                eat(token_type::identifier);
+                while (cur_token.type == token_type::comma) {
+                    eat(token_type::comma);
+                    params.push_back(cur_token);
+                    eat(token_type::identifier);
+                }
+                eat(token_type::colon);
+                for (const auto& param : params) {
+                    param_nodes.emplace_back(new variable_declaration_node{
+                            new identifier_node(param), new type_node(cur_token)});
+                }
+                eat(token_type::type_specification);
+                if (cur_token.type != token_type::semicolon) break;
+                eat(token_type::semicolon);
+            }
+            eat(token_type::right_parenthesis);
+        }
+        eat(token_type::colon);
+        auto ret_type = new type_node(cur_token);
+        eat(token_type::type_specification);
+        eat(token_type::semicolon);
+        auto p = new function_node(name, param_nodes, ret_type, block());
+        eat(token_type::semicolon);
+        ret.push_back(p);
+    }
+
+    return ret;
+}
 void parser::error(string msg, token_type expect_type) {
     std::cout << "Error: " << msg << std::endl;
     std::cout << cur_token.source_code << std::endl;
@@ -278,6 +341,47 @@ ast *parser::procedure_call_statement(token id) {
     eat(token_type::right_parenthesis);
     return new procedure_call_node(id.get_value<string>(), params);
 }
+
+ast *parser::if_statement() {
+    eat(token_type::if_token);
+    auto left = expr();
+    auto op = cur_token;
+    eat(op.type);
+    auto cond = new bool_expr_node(left, op, expr());
+    eat(token_type::then_token);
+    auto if_block = statement();
+    eat(token_type::else_token);
+    auto ret = new if_node(cond, new block_node({if_block}), new block_node({statement()}));
+    eat(token_type::semicolon);
+    return ret;
+}
+
+ast *parser::for_statement() {
+    eat(token_type::for_token);
+    auto id = cur_token;
+    eat(token_type::identifier);
+    auto init = assignment_statement(id);
+    eat(token_type::to_token);
+    auto end = new number(cur_token);
+    eat(token_type::integer_const);
+    eat(token_type::do_token);
+    auto ret = new for_node(init, end, statement());
+    eat(token_type::semicolon);
+    return ret;
+}
+
+ast *parser::function_call_statement(token id) {
+    vector<ast*> params;
+    eat(token_type::left_parenthesis);
+    params.push_back(expr());
+    while (cur_token.type == token_type::comma) {
+        eat(token_type::comma);
+        params.push_back(expr());
+    }
+    eat(token_type::right_parenthesis);
+    return new procedure_call_node(id.get_value<string>(), params);
+}
+
 
 int binary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
@@ -310,8 +414,18 @@ int variable_node::accept(abstract_node_visitor *visitor) {
 int program_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
+int type_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+int identifier_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
 
 int procedure_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int function_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
@@ -333,8 +447,8 @@ symbol_node_visitor::symbol_node_visitor(scoped_symbol_table *table) {
 }
 
 int symbol_node_visitor::visit(variable_declaration_node *node) {
-    auto type = cur_table->lookup(node->type);
-    cur_table->insert(new variable_symbol(node->name, type));
+    auto type = cur_table->lookup(node->get_type());
+    cur_table->insert(new variable_symbol(node->get_name(), type));
     return 0;
 }
 
@@ -349,8 +463,8 @@ int symbol_node_visitor::visit(procedure_node *node) {
     cur_table->insert(proc);
     auto table = new scoped_symbol_table(node->name, cur_table);
     for(auto param : node->params) {
-        auto type = table->lookup(param->type);
-        auto var_symbol = new variable_symbol(param->name, type);
+        auto type = table->lookup(param->get_type());
+        auto var_symbol = new variable_symbol(param->get_name(), type);
         table->insert(var_symbol);
         proc->params.push_back(var_symbol);
     }
@@ -367,5 +481,24 @@ int symbol_node_visitor::visit(procedure_node *node) {
 }
 
 int procedure_call_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int function_call_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int if_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+int for_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int bool_expr_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+int string_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }

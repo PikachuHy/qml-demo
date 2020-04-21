@@ -29,6 +29,18 @@ struct ast {
     }
     virtual int accept(abstract_node_visitor* visitor) = 0;
 };
+struct identifier_node: public ast {
+    string value;
+
+    identifier_node(token token) : value(token.raw) {}
+    int accept(abstract_node_visitor *visitor) override;
+};
+struct type_node: public ast {
+    string value;
+
+    type_node(token token) : value(token.raw) {}
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct program_node: public ast {
     string name;
     ast* child;
@@ -47,11 +59,30 @@ struct procedure_node: public ast {
 
     int accept(abstract_node_visitor *visitor) override;
 };
+struct function_node: public ast {
+    string name;
+    vector<variable_declaration_node*> params;
+    type_node* ret_type;
+    ast* child;
+
+    function_node(string name, vector<variable_declaration_node*> params, type_node* ret_type, ast *child)
+    : name(name), params(std::move(params)), ret_type(ret_type), child(child) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct procedure_call_node: public ast {
     string name;
     vector<ast*> params;
 
     procedure_call_node(const string &name, const vector<ast*> & params) : name(name), params(params) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
+struct function_call_node: public ast {
+    string name;
+    vector<ast*> params;
+
+    function_call_node(const string &name, const vector<ast*> & params) : name(name), params(params) {}
 
     int accept(abstract_node_visitor *visitor) override;
 };
@@ -118,6 +149,34 @@ struct assignment: public ast {
 
     int accept(abstract_node_visitor *visitor) override;
 };
+struct if_node: public ast {
+    ast* condition;
+    ast* if_block;
+    ast* else_block;
+
+    if_node(ast *condition, ast *ifBlock, ast *elseBlock) : condition(condition), if_block(ifBlock),
+                                                            else_block(elseBlock) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+
+};
+struct for_node: public ast {
+    ast* init;
+    ast* end;
+    ast* block;
+
+    for_node(ast *init, ast* end, ast *block) : init(init), end(end), block(block) {}
+
+    int accept(abstract_node_visitor *visitor) override;
+};
+struct bool_expr_node: public ast {
+    ast* left;
+    token op;
+    ast* right;
+
+    bool_expr_node(ast *left, token op, ast *right) : left(left), op(std::move(op)), right(right) {}
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct variable_node: public ast {
     token id;
 
@@ -143,15 +202,21 @@ struct number: public ast {
         return os;
     }
 };
-
+struct string_node: public ast {
+    token value;
+    string_node(token value) : value(std::move(value)) {}
+    int accept(abstract_node_visitor *visitor) override;
+};
 struct variable_declaration_node: public ast {
-    string name;
-    string type;
+    identifier_node* name;
+    type_node* type;
 
-    variable_declaration_node(string name, string type)
-    : name(std::move(name)), type(std::move(type)) {}
+    variable_declaration_node(identifier_node *name, type_node *type) : name(name), type(type) {}
 
     int accept(abstract_node_visitor *visitor) override;
+
+    string get_name() {return name->value;}
+    string get_type() {return type->value;}
 };
 class parser {
 public:
@@ -165,11 +230,15 @@ private:
     ast* term();
     ast* program();
     vector<ast*> procedure();
+    vector<ast*> function();
     ast* compound_statement();
     vector<ast*> statement_list();
     ast* statement();
     ast* procedure_call_statement(token id);
+    ast* function_call_statement(token id);
     ast* assignment_statement(token id);
+    ast* if_statement();
+    ast* for_statement();
     variable_node* variable();
     ast* empty();
     ast* block();
@@ -182,12 +251,17 @@ private:
 };
 struct abstract_node_visitor {
     virtual int visit(program_node* node) = 0;
+    virtual int visit(identifier_node* node) = 0;
+    virtual int visit(type_node* node) = 0;
     virtual int visit(procedure_node* node) = 0;
+    virtual int visit(function_node* node) = 0;
     virtual int visit(procedure_call_node* node) = 0;
+    virtual int visit(function_call_node* node) = 0;
     virtual int visit(block_node* node) = 0;
     virtual int visit(variable_declaration_node* node) = 0;
 
     virtual int visit(number* node) = 0;
+    virtual int visit(string_node* node) = 0;
 
     virtual int visit(binary_operator* node) = 0;
 
@@ -197,7 +271,10 @@ struct abstract_node_visitor {
 
     virtual int visit(compound* node) = 0;
     virtual int visit(assignment* node) = 0;
+    virtual int visit(if_node* node) = 0;
+    virtual int visit(bool_expr_node* node) = 0;
     virtual int visit(variable_node* node) = 0;
+    virtual int visit(for_node* node) = 0;
 
 };
 struct node_visitor_adaptor: public abstract_node_visitor {
@@ -223,6 +300,9 @@ struct node_visitor_adaptor: public abstract_node_visitor {
     }
 
     int visit(number *node) override {
+        return 0;
+    }
+    int visit(string_node *node) override {
         return 0;
     }
 
@@ -262,6 +342,32 @@ struct node_visitor_adaptor: public abstract_node_visitor {
         return 0;
     }
 
+    int visit(function_node *node) override {
+        return 0;
+    }
+
+    int visit(if_node *node) override {
+        return 0;
+    }
+
+    int visit(bool_expr_node *node) override {
+        return 0;
+    }
+
+    int visit(for_node *node) override {
+        return 0;
+    }
+    int visit(function_call_node *node) override {
+        return 0;
+    }
+
+    int visit(identifier_node *node) override {
+        return 0;
+    }
+
+    int visit(type_node *node) override {
+        return 0;
+    }
 };
 struct node_visitor: public node_visitor_adaptor {
     int visit(number* node) override {
