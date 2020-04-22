@@ -15,7 +15,7 @@
 using namespace std;
 
 
-class interpreter {
+class interpreter: public node_visitor_adaptor {
 public:
     explicit interpreter(const string& text) : _parser(lexer(text)) {
     };
@@ -24,7 +24,6 @@ public:
 
 private:
     parser _parser;
-    node_visitor visitor;
 };
 
 

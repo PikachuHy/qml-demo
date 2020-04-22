@@ -383,57 +383,57 @@ ast *parser::function_call_statement(token id) {
 }
 
 
-int binary_operator::accept(abstract_node_visitor *visitor) {
+void binary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int number::accept(abstract_node_visitor *visitor) {
+void number::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int unary_operator::accept(abstract_node_visitor *visitor) {
+void unary_operator::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int compound::accept(abstract_node_visitor *visitor) {
+void compound::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int noop::accept(abstract_node_visitor *visitor) {
+void noop::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int assignment::accept(abstract_node_visitor *visitor) {
+void assignment::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int variable_node::accept(abstract_node_visitor *visitor) {
+void variable_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int program_node::accept(abstract_node_visitor *visitor) {
+void program_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
-int type_node::accept(abstract_node_visitor *visitor) {
+void type_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
-int identifier_node::accept(abstract_node_visitor *visitor) {
-    return visitor->visit(this);
-}
-
-int procedure_node::accept(abstract_node_visitor *visitor) {
+void identifier_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int function_node::accept(abstract_node_visitor *visitor) {
+void procedure_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int block_node::accept(abstract_node_visitor *visitor) {
+void function_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int variable_declaration_node::accept(abstract_node_visitor *visitor) {
+void block_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+void variable_declaration_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
@@ -446,19 +446,17 @@ symbol_node_visitor::symbol_node_visitor(scoped_symbol_table *table) {
     cur_table = table;
 }
 
-int symbol_node_visitor::visit(variable_declaration_node *node) {
+void symbol_node_visitor::visit(variable_declaration_node *node) {
     auto type = cur_table->lookup(node->get_type());
     cur_table->insert(new variable_symbol(node->get_name(), type));
-    return 0;
 }
 
-int symbol_node_visitor::visit(variable_node *node) {
+void symbol_node_visitor::visit(variable_node *node) {
     auto name = node->id.get_value<string>();
     auto type = cur_table->lookup(name);
-    return 0;
 }
 
-int symbol_node_visitor::visit(procedure_node *node) {
+void symbol_node_visitor::visit(procedure_node *node) {
     auto proc = new procedure_symbol(node->name);
     cur_table->insert(proc);
     auto table = new scoped_symbol_table(node->name, cur_table);
@@ -477,28 +475,27 @@ int symbol_node_visitor::visit(procedure_node *node) {
     std::cout << std::endl << std::endl;
     delete cur_table;
     cur_table = tables.back();
-    return 0;
 }
 
-int procedure_call_node::accept(abstract_node_visitor *visitor) {
+void procedure_call_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int function_call_node::accept(abstract_node_visitor *visitor) {
+void function_call_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int if_node::accept(abstract_node_visitor *visitor) {
+void if_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
-int for_node::accept(abstract_node_visitor *visitor) {
-    return visitor->visit(this);
-}
-
-int bool_expr_node::accept(abstract_node_visitor *visitor) {
+void for_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-int string_node::accept(abstract_node_visitor *visitor) {
+void bool_expr_node::accept(abstract_node_visitor *visitor) {
+    return visitor->visit(this);
+}
+
+void string_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }

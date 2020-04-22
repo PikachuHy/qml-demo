@@ -21,141 +21,141 @@ public:
         return ret;
     }
 private:
-    int visit(binary_operator* node) override {
+    void visit(binary_operator* node) override {
         node->left->accept(this);
         node->right->accept(this);
         std::cout << node->op.raw << std::endl;
-        return 0;
+        
     }
 
-    int visit(number *node) override {
+    void visit(number *node) override {
         std::cout << node->num.raw << std::endl;
-        return 0;
+        
     }
 
-    int visit(unary_operator *node) override {
+    void visit(unary_operator *node) override {
         node->value->accept(this);
         std::cout << node->op.raw << std::endl;
-        return 0;
+        
     }
 
-    int visit(noop *node) override {
+    void visit(noop *node) override {
         std::cout << "noop" << std::endl;
-        return 0;
+        
     }
 
-    int visit(compound *node) override {
+    void visit(compound *node) override {
         for(auto it: node->children) {
             it->accept(this);
         }
         std::cout << "compound" << std::endl;
-        return 0;
+        
     }
 
-    int visit(assignment *node) override {
+    void visit(assignment *node) override {
         node->left->accept(this);
         node->right->accept(this);
         std::cout << ":=" << std::endl;
-        return 0;
+        
     }
 
-    int visit(variable_node *node) override {
+    void visit(variable_node *node) override {
         std::cout << node->id.raw << std::endl;
-        return 0;
+        
     }
 
-    int visit(program_node *node) override {
+    void visit(program_node *node) override {
         node->child->accept(this);
         std::cout << "program" << std::endl;
-        return 0;
+        
     }
 
-    int visit(block_node *node) override {
+    void visit(block_node *node) override {
         for(auto it: node->children) {
             it->accept(this);
         }
         std::cout << "block" << std::endl;
-        return 0;
+        
     }
 
-    int visit(variable_declaration_node *node) override {
+    void visit(variable_declaration_node *node) override {
         std::cout << node->get_name() << std::endl;
         std::cout << node->get_type() << std::endl;
         std::cout << "var dec" << std::endl;
-        return 0;
+        
     }
 
     std::vector<string> ret;
 
-    int visit(procedure_node *node) override {
+    void visit(procedure_node *node) override {
         node->child->accept(this);
         std::cout << "proc dec" << std::endl;
-        return 0;
+        
     }
 
-    int visit(string_node *node) override {
+    void visit(string_node *node) override {
         std::cout << "string const: " << node->value.raw << std::endl;
-        return 0;
+        
     }
 
-    int visit(procedure_call_node *node) override {
+    void visit(procedure_call_node *node) override {
         for(auto it: node->params) {
             it->accept(this);
         }
         std::cout << "proc call: " << node->name << std::endl;
-        return 0;
+        
     }
 
-    int visit(function_node *node) override {
+    void visit(function_node *node) override {
         for(auto it: node->params) {
             it->accept(this);
         }
         node->ret_type->accept(this);
         node->child->accept(this);
         std::cout << "func dec: " << node->name <<  std::endl;
-        return 0;
+        
     }
 
-    int visit(if_node *node) override {
+    void visit(if_node *node) override {
         node->condition->accept(this);
         node->if_block->accept(this);
         node->else_block->accept(this);
         std::cout << "if" << std::endl;
-        return 0;
+        
     }
 
-    int visit(bool_expr_node *node) override {
+    void visit(bool_expr_node *node) override {
         node->left->accept(this);
         node->right->accept(this);
         std::cout << node->op.raw << std::endl;
-        return 0;
+        
     }
 
-    int visit(for_node *node) override {
+    void visit(for_node *node) override {
         node->init->accept(this);
         node->end->accept(this);
         node->block->accept(this);
         std::cout << "for" << std::endl;
-        return 0;
+        
     }
 
-    int visit(function_call_node *node) override {
+    void visit(function_call_node *node) override {
 
         for(auto it: node->params) {
             it->accept(this);
         }
         std::cout << "func call: " << node->name << std::endl;
-        return 0;
+        
     }
 
-    int visit(identifier_node *node) override {
+    void visit(identifier_node *node) override {
         std::cout << node->value << std::endl;
-        return 0;
+        
     }
 
-    int visit(type_node *node) override {
+    void visit(type_node *node) override {
         std::cout << node->value << std::endl;
-        return 0;
+        
     }
 };
 class pre_node_visitor: node_visitor_adaptor {
@@ -166,21 +166,21 @@ public:
         return ret;
     }
 private:
-    int visit(binary_operator* node) override {
+    void visit(binary_operator* node) override {
         ret.push_back(node->op.get_value<string>());
         node->left->accept(this);
         node->right->accept(this);
-        return 0;
+        
     }
 
-    int visit(unary_operator *node) override {
+    void visit(unary_operator *node) override {
         ret.push_back(node->op.get_value<string>());
         node->value->accept(this);
-        return 0;
+        
     }
-    int visit(number *node) override {
+    void visit(number *node) override {
         ret.push_back(node->num.raw);
-        return 0;
+        
     }
     std::vector<string> ret;
 

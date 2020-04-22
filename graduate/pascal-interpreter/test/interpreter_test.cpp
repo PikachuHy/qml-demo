@@ -84,3 +84,30 @@ TEST(interpreter, unary_3) {
     ASSERT_EQ(8, interpreter(" 5 - - - + - 3").interpret());
     ASSERT_EQ(10, interpreter("5 - - - + - (3 + 4) - +2").interpret());
 }
+
+TEST(interpreter, memory) {
+    string code = R"(
+program Main;
+var x, y : integer;
+begin { Main }
+   y := 7;
+   x := (y + 3) * 3;
+end.  { Main }
+)";
+    string expect = R"(
+ENTER: PROGRAM Main
+CALL STACK
+1: PROGRAM Main
+
+
+LEAVE: PROGRAM Main
+CALL STACK
+1: PROGRAM Main
+   y                   : 7
+   x                   : 30
+)";
+    testing::internal::CaptureStdout();
+    interpreter(code).interpret();
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
+}

@@ -7,6 +7,6 @@
 
 int interpreter::interpret() {
     auto ast = _parser.parse();
-    return ast->accept(&visitor);
+    return 0;
 }
 
