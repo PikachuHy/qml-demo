@@ -9,59 +9,72 @@
 #include <sstream>
 
 TEST(symbol, to_string) {
-    std::stringstream ss;
-    std::string ret;
-    auto int_type = builtin_type_symbol("INTEGER");
-    ss << &int_type;
-    ss >> ret;
-    ASSERT_EQ(ret, "INTEGER");
-    auto real_type = builtin_type_symbol("REAL");
-    ret = "";
-    ss.clear();
-    ss << &real_type;
-    ss >> ret;
-    ASSERT_EQ(ret, "REAL");
-    auto var_x_symbol = variable_symbol("x", &int_type);
-    ret = "";
-    ss.clear();
-    ss << &var_x_symbol;
-    ss >> ret;
-    ASSERT_EQ(ret, "<x:INTEGER>");
-    auto var_y_symbol = variable_symbol("y", &real_type);
-    ret = "";
-    ss.clear();
-    ss << &var_y_symbol;
-    ss >> ret;
-    ASSERT_EQ(ret, "<y:REAL>");
+    spdlog::set_pattern("%v");
+    testing::internal::CaptureStdout();
+    auto expect = R"(
+<BuiltinTypeSymbol(name='INTEGER')>
+<BuiltinTypeSymbol(name='REAL')>
+<VarSymbol(name='x', type='INTEGER')>
+<VarSymbol(name='y', type='REAL')>
+)";
+    std::cout << std::endl;
+    auto int_type = new builtin_type_symbol("INTEGER");
+    std::cout << int_type << std::endl;
+    auto real_type = new builtin_type_symbol("REAL");
+    std::cout << real_type << std::endl;
+    auto var_x_symbol = new variable_symbol("x", int_type);
+    std::cout << var_x_symbol << std::endl;
+    auto var_y_symbol = new variable_symbol("y", real_type);
+    std::cout << var_y_symbol << std::endl;
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
 }
 
 TEST(symbol, symbol_table) {
+    spdlog::set_pattern("%v");
+    testing::internal::CaptureStdout();
+    auto expect = R"(
+ENTER scope: global
+Define: <BuiltinTypeSymbol(name='INTEGER')>
+Define: <VarSymbol(name='x', type='INTEGER')>
+Define: <BuiltinTypeSymbol(name='REAL')>
+Define: <VarSymbol(name='y', type='REAL')>
+Symbols: [<BuiltinTypeSymbol(name='INTEGER')>, <VarSymbol(name='x', type='INTEGER')>, <BuiltinTypeSymbol(name='REAL')>, <VarSymbol(name='y', type='REAL')>, ]
+)";
+    std::cout << std::endl;
     auto table = scoped_symbol_table();
     auto int_type = builtin_type_symbol("INTEGER");
     table.define(&int_type);
-    ASSERT_EQ(table.to_string(), "Symbols: [INTEGER, ]");
 
     auto var_x_symbol = variable_symbol("x", &int_type);
     table.define(&var_x_symbol);
-    ASSERT_EQ(table.to_string(), "Symbols: [INTEGER, <x:INTEGER>, ]");
 
     auto real_type = builtin_type_symbol("REAL");
     table.define(&real_type);
-    ASSERT_EQ(table.to_string(), "Symbols: [INTEGER, <x:INTEGER>, REAL, ]");
+
     auto var_y_symbol = variable_symbol("y", &real_type);
     table.define(&var_y_symbol);
-    ASSERT_EQ(table.to_string(), "Symbols: [INTEGER, <x:INTEGER>, REAL, <y:REAL>, ]");
 
-    vector<string> log = {
-            "Define: INTEGER",
-            "Define: <x:INTEGER>",
-            "Define: REAL",
-            "Define: <y:REAL>"
-    };
+    std::cout << table.to_string() << std::endl;
+
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
 }
 
 
 TEST(symbol, pascal_part11_1) {
+    spdlog::set_pattern("%v");
+    testing::internal::CaptureStdout();
+    auto expect = R"(
+ENTER scope: global
+Insert: INTEGER
+Insert: REAL
+Lookup: INTEGER. (Scope name: global)
+Insert: x
+Lookup: REAL. (Scope name: global)
+Insert: y
+Symbols: [<BuiltinTypeSymbol(name='INTEGER')>, <BuiltinTypeSymbol(name='REAL')>, <VarSymbol(name='x', type='INTEGER')>, <VarSymbol(name='y', type='REAL')>, ]
+)";
 
     auto code = R"(
 PROGRAM Part11;
@@ -73,26 +86,42 @@ BEGIN
 
 END.
 )";
+    std::cout << std::endl;
     auto node = parser(lexer(code)).parse();
     auto table = new scoped_symbol_table();
     auto visitor = symbol_node_visitor(table);
     node->accept(&visitor);
-    vector<string> log = {
-            "Define: INTEGER",
-            "Define: REAL",
-            "Lookup: INTEGER",
-            "Define: <x:INTEGER>",
-            "Lookup: REAL",
-            "Define: <y:REAL>",
-    };
-    auto expect = "Symbols: [INTEGER, REAL, <x:INTEGER>, <y:REAL>, ]";
-    ASSERT_EQ(expect, table->to_string());
+    std::cout << table->to_string() << std::endl;
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
 
 }
 
 
 TEST(symbol, pascal_part11_2) {
-
+    spdlog::set_pattern("%v");
+    testing::internal::CaptureStdout();
+    auto expect = R"(
+ENTER scope: global
+Insert: INTEGER
+Insert: REAL
+Lookup: INTEGER. (Scope name: global)
+Insert: number
+Lookup: INTEGER. (Scope name: global)
+Insert: a
+Lookup: INTEGER. (Scope name: global)
+Insert: b
+Lookup: REAL. (Scope name: global)
+Insert: y
+Lookup: number. (Scope name: global)
+Lookup: a. (Scope name: global)
+Lookup: number. (Scope name: global)
+Lookup: b. (Scope name: global)
+Lookup: a. (Scope name: global)
+Lookup: number. (Scope name: global)
+Lookup: y. (Scope name: global)
+Symbols: [<BuiltinTypeSymbol(name='INTEGER')>, <BuiltinTypeSymbol(name='REAL')>, <VarSymbol(name='number', type='INTEGER')>, <VarSymbol(name='a', type='INTEGER')>, <VarSymbol(name='b', type='INTEGER')>, <VarSymbol(name='y', type='REAL')>, ]
+)";
     auto code = R"(
 PROGRAM Part11;
 VAR
@@ -107,31 +136,14 @@ BEGIN {Part11}
    y := 20 / 7 + 3.14
 END.  {Part11}
 )";
+    std::cout << std::endl;
     auto node = parser(lexer(code)).parse();
     auto table = new scoped_symbol_table();
     auto visitor = symbol_node_visitor(table);
     node->accept(&visitor);
-    vector<string> log = {
-            "Define: INTEGER",
-            "Define: REAL",
-            "Lookup: INTEGER",
-            "Define: <number:INTEGER>",
-            "Lookup: INTEGER",
-            "Define: <a:INTEGER>",
-            "Lookup: INTEGER",
-            "Define: <b:INTEGER>",
-            "Lookup: REAL",
-            "Define: <y:REAL>",
-            "Lookup: number",
-            "Lookup: a",
-            "Lookup: number",
-            "Lookup: b",
-            "Lookup: a",
-            "Lookup: number",
-            "Lookup: y"
-    };
-    auto expect = "Symbols: [INTEGER, REAL, <number:INTEGER>, <a:INTEGER>, <b:INTEGER>, <y:REAL>, ]";
-    ASSERT_EQ(expect, table->to_string());
+    std::cout << table->to_string() << std::endl;
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
 }
 
 TEST(symbol, pascal_part14_1) {
@@ -151,7 +163,8 @@ begin { Main }
 
 end.  { Main }
 )";
-    auto output = R"(ENTER scope: global
+    auto output = R"(
+ENTER scope: global
 Insert: INTEGER
 Insert: REAL
 Lookup: REAL. (Scope name: global)
@@ -204,6 +217,7 @@ INTEGER: <BuiltinTypeSymbol(name='INTEGER')>
 
 LEAVE scope: global
 )";
+    std::cout << std::endl;
     auto node = parser(lexer(code)).parse();
     auto table = new scoped_symbol_table();
     auto visitor = symbol_node_visitor(table);
@@ -244,31 +258,5 @@ end.  { Main }
         string msg = e.what();
         ASSERT_EQ("Error: Duplicate identifier 'a' found", msg);
     }
-}
-
-
-TEST(symbol, pascal_part16_1) {
-    auto code = R"(
-program Main;
-
-procedure Alpha(a : integer; b : integer);
-var x : integer;
-begin
-   x := (a + b ) * 2;
-end;
-
-begin { Main }
-
-   Alpha(3 + 5, 7);  { procedure call }
-
-end.  { Main }
-)";
-    auto node = parser(lexer(code)).parse();
-    auto table = new scoped_symbol_table();
-    auto visitor = symbol_node_visitor(table);
-    node->accept(&visitor);
-
-    std::cout << table->to_table_string() << std::endl;
-    delete table;
 }
 
