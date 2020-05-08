@@ -4,6 +4,26 @@
 #include "common.h"
 #include "symbol.h"
 #include "token.h"
+
+
+string function_symbol::to_string() const {
+    std::string param_string;
+    if (params.empty()) {
+        param_string += "[]";
+    } else {
+        param_string += "[";
+        for(int i=0;i<params.size()-1;i++) {
+            param_string += fmt::format("{}, ", params[i]->to_string());
+        }
+        param_string += params.back()->to_string();
+        param_string += "]";
+    }
+    assert(ret_value != nullptr);
+    assert(ret_value->type != nullptr);
+    return fmt::format("<FunctionSymbol(name={}, parameters={}, return_type={})>", name, param_string, ret_value->type->name);
+}
+
+
 string procedure_symbol::to_string() const {
     std::string param_string;
     if (params.empty()) {
@@ -48,6 +68,7 @@ symbol *scoped_symbol_table::lookup(const string &name) {
         if (enclosing_scope) return enclosing_scope->lookup(name);
 
         SPDLOG_ERROR("Unknown type {}", name);
+        std::cerr << __BASE_FILE__ << ":" << __LINE__ << " " << "Unknown type " << name << std::endl;
         exit(1);
     }
     return symbols[name];
@@ -96,4 +117,18 @@ string builtin_type_symbol::to_string() const {
 
 string variable_symbol::to_string() const {
     return fmt::format("<VarSymbol(name='{}', type='{}')>", name, type->name);
+}
+
+string builtin_procedure_symbol::to_string() const {
+    return fmt::format("<BuiltinProcedureSymbol(name='{}')>", name);
+}
+
+builtin_symbol_table::builtin_symbol_table() {
+    auto int_type = new builtin_type_symbol("INTEGER");
+    insert(int_type);
+    auto real_type = new builtin_type_symbol("REAL");
+    insert(real_type);
+    insert(new builtin_type_symbol("LONGINT"));
+    auto writeln_proc = new builtin_procedure_symbol("writeln");
+    insert(writeln_proc);
 }

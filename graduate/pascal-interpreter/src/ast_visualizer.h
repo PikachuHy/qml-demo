@@ -37,7 +37,7 @@ private:
 
     void visit(variable_node *node) override;
 
-    void visit(procedure_call_node *node) override;
+    void visit(procedure_or_function_call_node *node) override;
 
     void visit(function_node *node) override;
 
@@ -46,8 +46,6 @@ private:
     void visit(bool_expr_node *node) override;
 
     void visit(for_node *node) override;
-
-    void visit(function_call_node *node) override;
 
     void visit(identifier_node *node) override;
 

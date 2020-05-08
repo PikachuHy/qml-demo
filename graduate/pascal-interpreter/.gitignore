@@ -3,3 +3,5 @@ build
 .vscode
 .idea
 thirdparty/
+**/pascal/*
+!**/pascal/*.pas

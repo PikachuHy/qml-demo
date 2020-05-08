@@ -109,7 +109,7 @@ void ast_visualizer::visit(variable_node *node) {
     add_node(node, node->id.raw);
 }
 
-void ast_visualizer::visit(procedure_call_node *node) {
+void ast_visualizer::visit(procedure_or_function_call_node *node) {
     add_node(node, fmt::format("proc call: {}", node->name));
     for(auto it: node->params) {
         it->accept(this);
@@ -158,13 +158,6 @@ void ast_visualizer::visit(for_node *node) {
     add_edge(node, node->block);
 }
 
-void ast_visualizer::visit(function_call_node *node) {
-    add_node(node, fmt::format("func call: {}", node->name));
-    for(auto it: node->params) {
-        it->accept(this);
-        add_edge(node, it);
-    }
-}
 
 void ast_visualizer::visit(identifier_node *node) {
     add_node(node, node->value);

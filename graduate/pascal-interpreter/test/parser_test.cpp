@@ -98,7 +98,7 @@ private:
         
     }
 
-    void visit(procedure_call_node *node) override {
+    void visit(procedure_or_function_call_node *node) override {
         for(auto it: node->params) {
             it->accept(this);
         }
@@ -136,15 +136,6 @@ private:
         node->end->accept(this);
         node->block->accept(this);
         std::cout << "for" << std::endl;
-        
-    }
-
-    void visit(function_call_node *node) override {
-
-        for(auto it: node->params) {
-            it->accept(this);
-        }
-        std::cout << "func call: " << node->name << std::endl;
         
     }
 

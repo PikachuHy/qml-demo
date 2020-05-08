@@ -70,19 +70,11 @@ struct function_node: public ast {
 
     void accept(abstract_node_visitor *visitor) override;
 };
-struct procedure_call_node: public ast {
+struct procedure_or_function_call_node: public ast {
     string name;
     vector<ast*> params;
 
-    procedure_call_node(const string &name, const vector<ast*> & params) : name(name), params(params) {}
-
-    void accept(abstract_node_visitor *visitor) override;
-};
-struct function_call_node: public ast {
-    string name;
-    vector<ast*> params;
-
-    function_call_node(const string &name, const vector<ast*> & params) : name(name), params(params) {}
+    procedure_or_function_call_node(const string &name, const vector<ast*> & params) : name(name), params(params) {}
 
     void accept(abstract_node_visitor *visitor) override;
 };
@@ -234,8 +226,8 @@ private:
     ast* compound_statement();
     vector<ast*> statement_list();
     ast* statement();
-    ast* procedure_call_statement(token id);
-    ast* function_call_statement(token id);
+    ast* procedure_or_function_call_statement(token id);
+
     ast* assignment_statement(token id);
     ast* if_statement();
     ast* for_statement();
@@ -255,8 +247,7 @@ struct abstract_node_visitor {
     virtual void visit(type_node* node) = 0;
     virtual void visit(procedure_node* node) = 0;
     virtual void visit(function_node* node) = 0;
-    virtual void visit(procedure_call_node* node) = 0;
-    virtual void visit(function_call_node* node) = 0;
+    virtual void visit(procedure_or_function_call_node* node) = 0;
     virtual void visit(block_node* node) = 0;
     virtual void visit(variable_declaration_node* node) = 0;
 
@@ -329,7 +320,7 @@ struct node_visitor_adaptor: public abstract_node_visitor {
     void visit(variable_node *node) override {
     }
 
-    void visit(procedure_call_node *node) override {
+    void visit(procedure_or_function_call_node *node) override {
         for(auto it: node->params) it->accept(this);
     }
 
@@ -355,9 +346,6 @@ struct node_visitor_adaptor: public abstract_node_visitor {
         node->end->accept(this);
         node->block->accept(this);
     }
-    void visit(function_call_node *node) override {
-        for(auto it: node->params) it->accept(this);
-    }
 
     void visit(identifier_node *node) override {
     }
@@ -374,6 +362,12 @@ struct symbol_node_visitor: public node_visitor_adaptor {
     void visit(variable_node *node) override;
 
     void visit(procedure_node *node) override;
+
+    void visit(function_node *node) override;
+
+    void visit(procedure_or_function_call_node *node) override;
+
+    void visit(program_node *node) override;
 
 private:
     scoped_symbol_table* cur_table;

@@ -31,6 +31,12 @@ struct builtin_type_symbol: public symbol {
 
     string to_string() const override;
 };
+struct builtin_procedure_symbol: public symbol {
+    builtin_procedure_symbol(const std::string name) : symbol(name) {}
+
+
+    string to_string() const override;
+};
 struct variable_symbol: public symbol {
     variable_symbol(const std::string name, symbol *type): symbol(std::move(name), type) {}
 
@@ -40,6 +46,13 @@ struct procedure_symbol: public symbol {
     vector<variable_symbol*> params;
 
     explicit procedure_symbol(const string &name) : symbol(name) {}
+
+    string to_string() const override;
+};
+struct function_symbol: public symbol {
+    vector<variable_symbol*> params;
+    symbol* ret_value;
+    explicit function_symbol(const string &name) : symbol(name) {}
 
     string to_string() const override;
 };
@@ -58,7 +71,11 @@ private:
 //    std::unordered_map<std::string, symbol*> symbols;
     nlohmann::fifo_map<std::string, symbol*> symbols;
     std::string scope_name;
-    int scope_level = 1;
+    int scope_level = 0;
     scoped_symbol_table* enclosing_scope = nullptr;
+};
+class builtin_symbol_table: public scoped_symbol_table {
+public:
+    builtin_symbol_table();
 };
 #endif //PASCAL_INTERPRETER_SYMBOL_H

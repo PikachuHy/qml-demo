@@ -53,7 +53,7 @@ ast *parser::factor() {
     auto id = cur_token;
     eat(token_type::identifier);
     if (cur_token.type == token_type::left_parenthesis) {
-        return procedure_call_statement(id);
+        return procedure_or_function_call_statement(id);
     } else {
         return new variable_node(id);
     }
@@ -159,7 +159,7 @@ ast *parser::statement() {
         auto id = cur_token;
         eat(token_type::identifier);
         if (cur_token.type == token_type::left_parenthesis) {
-            return procedure_call_statement(id);
+            return procedure_or_function_call_statement(id);
         } else {
             return assignment_statement(id);
         }
@@ -330,7 +330,7 @@ void parser::error(string msg, token_type expect_type) {
     throw invalid_syntax_exception(msg);
 }
 
-ast *parser::procedure_call_statement(token id) {
+ast *parser::procedure_or_function_call_statement(token id) {
     vector<ast*> params;
     eat(token_type::left_parenthesis);
     params.push_back(expr());
@@ -339,7 +339,7 @@ ast *parser::procedure_call_statement(token id) {
         params.push_back(expr());
     }
     eat(token_type::right_parenthesis);
-    return new procedure_call_node(id.get_value<string>(), params);
+    return new procedure_or_function_call_node(id.get_value<string>(), params);
 }
 
 ast *parser::if_statement() {
@@ -368,18 +368,6 @@ ast *parser::for_statement() {
     auto ret = new for_node(init, end, statement());
     eat(token_type::semicolon);
     return ret;
-}
-
-ast *parser::function_call_statement(token id) {
-    vector<ast*> params;
-    eat(token_type::left_parenthesis);
-    params.push_back(expr());
-    while (cur_token.type == token_type::comma) {
-        eat(token_type::comma);
-        params.push_back(expr());
-    }
-    eat(token_type::right_parenthesis);
-    return new procedure_call_node(id.get_value<string>(), params);
 }
 
 
@@ -438,10 +426,6 @@ void variable_declaration_node::accept(abstract_node_visitor *visitor) {
 }
 
 symbol_node_visitor::symbol_node_visitor(scoped_symbol_table *table) {
-    auto int_type = new builtin_type_symbol("INTEGER");
-    table->insert(int_type);
-    auto real_type = new builtin_type_symbol("REAL");
-    table->insert(real_type);
     tables.push_back(table);
     cur_table = table;
 }
@@ -454,6 +438,45 @@ void symbol_node_visitor::visit(variable_declaration_node *node) {
 void symbol_node_visitor::visit(variable_node *node) {
     auto name = node->id.get_value<string>();
     auto type = cur_table->lookup(name);
+}
+
+void symbol_node_visitor::visit(program_node *node) {
+    auto table = new scoped_symbol_table(node->name, cur_table);
+    tables.push_back(table);
+    cur_table = table;
+    node->child->accept(this);
+    tables.pop_back();
+    std::cout << std::endl << std::endl;
+    std::cout << cur_table->to_table_string();
+    std::cout << std::endl << std::endl;
+    delete cur_table;
+    cur_table = tables.back();
+}
+
+void symbol_node_visitor::visit(function_node *node) {
+    auto func = new function_symbol(node->name);
+    cur_table->insert(func);
+    auto table = new scoped_symbol_table(node->name, cur_table);
+    for(auto param : node->params) {
+        auto type = table->lookup(param->get_type());
+        auto var_symbol = new variable_symbol(param->get_name(), type);
+        table->insert(var_symbol);
+        func->params.push_back(var_symbol);
+    }
+    auto ret_symbol_type = table->lookup(node->ret_type->value);
+    auto ret_symbol = new variable_symbol(node->name, ret_symbol_type);
+    table->insert(ret_symbol);
+    func->ret_value = ret_symbol;
+
+    tables.push_back(table);
+    cur_table = table;
+    node->child->accept(this);
+    tables.pop_back();
+    std::cout << std::endl << std::endl;
+    std::cout << cur_table->to_table_string();
+    std::cout << std::endl << std::endl;
+    delete cur_table;
+    cur_table = tables.back();
 }
 
 void symbol_node_visitor::visit(procedure_node *node) {
@@ -477,13 +500,18 @@ void symbol_node_visitor::visit(procedure_node *node) {
     cur_table = tables.back();
 }
 
-void procedure_call_node::accept(abstract_node_visitor *visitor) {
+void symbol_node_visitor::visit(procedure_or_function_call_node *node) {
+    auto t = cur_table->lookup(node->name);
+    for(auto it: node->params) {
+        it->accept(this);
+    }
+}
+
+
+void procedure_or_function_call_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
 }
 
-void function_call_node::accept(abstract_node_visitor *visitor) {
-    return visitor->visit(this);
-}
 
 void if_node::accept(abstract_node_visitor *visitor) {
     return visitor->visit(this);
