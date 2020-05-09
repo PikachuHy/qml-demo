@@ -20,18 +20,13 @@ using namespace std;
 #include "parser.h"
 #include "ast_visualizer.h"
 #include <variant>
-auto get_val = [](const auto & val) {
-    std::cout << val << std::endl;
-    return val;
-};
+int f(int n) {
+    if (n == 0) return 1;
+    return n * f(n-1);
+}
 int main() {
-    variant<int, float> a = 5.5f;
-    variant<int, float> b = 3;
-//    auto c = visit(get_val, a) ;//- visit(get_val, b);
-//    auto c = get(a);
-    auto c = get<float>(a);
-    std::cout << c << std::endl;
-    auto d = std::visit(get_val, a);
-    std::cout << d << std::endl;
+    for(int i=0;i<17;i++) {
+        std::cout << i << "! =" << f(i) << std::endl;
+    }
     return 0;
 }

@@ -20,7 +20,8 @@ error(msg, type);
 enum class ast_node_type {
     binary_operator, number,
     identifier, assignment, variable_node,
-    block_node,
+    block_node, function_node, procedure_or_function_call_node,
+    string_node, bool_expr_node,
     unknown
 };
 class abstract_node_visitor;
@@ -69,7 +70,9 @@ struct function_node: public ast {
     ast* child;
 
     function_node(string name, vector<variable_declaration_node*> params, type_node* ret_type, ast *child)
-    : name(name), params(std::move(params)), ret_type(ret_type), child(child) {}
+    : name(name), params(std::move(params)), ret_type(ret_type), child(child) {
+        type = ast_node_type::function_node;
+    }
 
     void accept(abstract_node_visitor *visitor) override;
 };
@@ -77,7 +80,10 @@ struct procedure_or_function_call_node: public ast {
     string name;
     vector<ast*> params;
 
-    procedure_or_function_call_node(string name, vector<ast*> params) : name(std::move(name)), params(std::move(params)) {}
+    procedure_or_function_call_node(string name, vector<ast*> params)
+    : name(std::move(name)), params(std::move(params)) {
+        type = ast_node_type::procedure_or_function_call_node;
+    }
 
     void accept(abstract_node_visitor *visitor) override;
 };
@@ -175,7 +181,9 @@ struct bool_expr_node: public ast {
     token op;
     ast* right;
 
-    bool_expr_node(ast *left, token op, ast *right) : left(left), op(std::move(op)), right(right) {}
+    bool_expr_node(ast *left, token op, ast *right) : left(left), op(std::move(op)), right(right) {
+        type = ast_node_type::bool_expr_node;
+    }
     void accept(abstract_node_visitor *visitor) override;
 };
 struct variable_node: public ast {
@@ -207,7 +215,9 @@ struct number: public ast {
 };
 struct string_node: public ast {
     token value;
-    string_node(token value) : value(std::move(value)) {}
+    string_node(token value) : value(std::move(value)) {
+        type = ast_node_type::string_node;
+    }
     void accept(abstract_node_visitor *visitor) override;
 };
 struct variable_declaration_node: public ast {

@@ -16,7 +16,9 @@
 struct ast;
 using namespace std;
 enum class symbol_type_enum {
-    procedure_symbol, function_symbol, unknown
+    procedure_symbol, function_symbol,
+    builtin_procedure_symbol,
+    unknown
 };
 struct symbol {
     std::string name;
@@ -37,7 +39,9 @@ struct builtin_type_symbol: public symbol {
     string to_string() const override;
 };
 struct builtin_procedure_symbol: public symbol {
-    builtin_procedure_symbol(const std::string& name) : symbol(name) {}
+    builtin_procedure_symbol(const std::string& name) : symbol(name) {
+        symbol_type = symbol_type_enum::builtin_procedure_symbol;
+    }
 
 
     string to_string() const override;
@@ -58,8 +62,9 @@ struct procedure_symbol: public symbol {
 };
 struct function_symbol: public symbol {
     vector<variable_symbol*> params;
+    ast* body;
     symbol* ret_value;
-    explicit function_symbol(const string &name) : symbol(name) {
+    explicit function_symbol(const string &name, ast* body = nullptr) : symbol(name), body(body) {
         symbol_type = symbol_type_enum::function_symbol;
     }
 

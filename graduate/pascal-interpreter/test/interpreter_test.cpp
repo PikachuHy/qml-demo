@@ -248,3 +248,49 @@ CALL STACK
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ(expect, output);
 }
+TEST(interpreter, factorial) {
+    spdlog::set_pattern("%v");
+    string code = R"(
+program factorial;
+
+function factorial(n: integer): longint;
+begin
+    if n = 0 then
+        factorial := 1
+    else
+        factorial := n * factorial(n - 1);
+end;
+
+var
+    n: integer;
+
+begin
+    for n := 0 to 16 do
+        writeln(n, '! = ', factorial(n));
+end.
+)";
+    string expect = R"(
+0! = 1
+1! = 1
+2! = 2
+3! = 6
+4! = 24
+5! = 120
+6! = 720
+7! = 5040
+8! = 40320
+9! = 362880
+10! = 3628800
+11! = 39916800
+12! = 479001600
+13! = 1932053504
+14! = 1278945280
+15! = 2004310016
+16! = 2004189184
+)";
+    testing::internal::CaptureStdout();
+    std::cout << std::endl;
+    interpreter(code, false, false).interpret();
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
+}

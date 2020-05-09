@@ -7,6 +7,9 @@
 #include <Neargye/magic_enum.hpp>
 #include <utility>
 #include <functional>
+#define ERROR_LOG(msg) std::cerr << __FILE__ << ":" << __LINE__ << " " << msg << std::endl; \
+exit(1);
+
 
 int interpreter::interpret() {
     auto ast = _parser.parse();
@@ -38,6 +41,21 @@ void interpreter::visit(procedure_or_function_call_node *node) {
         procedure_call(node, (procedure_symbol*)node_symbol);
     } else if (node_symbol->symbol_type == symbol_type_enum::function_symbol) {
 
+    } else if (node_symbol->symbol_type == symbol_type_enum::builtin_procedure_symbol) {
+        if (node_symbol->name == "writeln") {
+            auto print_val = [](const auto & val) {
+                std::cout << val;
+            };
+            for(auto it: node->params) {
+                auto val = eval_node(it);
+                std::visit(print_val, val);
+            }
+            std::cout << std::endl;
+        } else {
+            ERROR_LOG(fmt::format("unimplement builtin procedure: {} ", node_symbol->name));
+        }
+    } else {
+        ERROR_LOG(fmt::format("unknown symbol type: {}", magic_enum::enum_name(node_symbol->symbol_type)));
     }
 }
 
@@ -83,6 +101,9 @@ eval_ret cal(T a, T b, token_type op) {
             auto a_f = (float)a;
             auto b_f = (float)b;
             return a_f / b_f;
+        }
+        case token_type::equality: {
+            return a == b;
         }
         default:
             auto msg = "unknown op"s;
@@ -138,15 +159,20 @@ interpreter::interpreter(const string &text, bool trace_symbol, bool trace_memor
 :_parser(lexer(text)), _trace_symbol(trace_symbol), _trace_memory(trace_memory),
 _call_stack(trace_memory){
     eval_table[ast_node_type::number] = [this](ast* node){ return this->eval_number(node);};
+    eval_table[ast_node_type::string_node] = [this](ast* node){ return this->eval_string_node(node);};
+    eval_table[ast_node_type::bool_expr_node] = [this](ast* node){ return this->eval_bool(node);};
     eval_table[ast_node_type::binary_operator] = [this](ast* node){ return this->eval_binary_operator(node);};
     eval_table[ast_node_type::variable_node] = [this](ast* node){ return this->eval_variable_node(node); };
+    eval_table[ast_node_type::procedure_or_function_call_node] = [this](ast* node){ return this->eval_function_call(node); };
     cur_table = new builtin_symbol_table();
     tables.push_back(cur_table);
 }
 
 eval_ret interpreter::eval_node(ast *node) {
     if (eval_table.find(node->type) == eval_table.end()) {
-        std::cerr << "unknown ast node type: " << magic_enum::enum_name(node->type) << std::endl;
+        string msg = fmt::format("unknown ast node type: {}", magic_enum::enum_name(node->type));
+        SPDLOG_ERROR(msg);
+        std::cerr << __FILE__ << ":" << __LINE__ << " " << msg << std::endl;
         exit(1);
     }
     return eval_table[node->type](node);
@@ -174,27 +200,17 @@ void interpreter::visit(procedure_node *node) {
 }
 
 void interpreter::visit(function_node *node) {
-
     auto func = new function_symbol(node->name);
     cur_table->insert(func);
-    auto table = new scoped_symbol_table(node->name, cur_table);
     for(auto param : node->params) {
-        auto type = table->lookup(param->get_type());
+        auto type = cur_table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
-        table->insert(var_symbol);
         func->params.push_back(var_symbol);
     }
-    auto ret_symbol_type = table->lookup(node->ret_type->value);
+    auto ret_symbol_type = cur_table->lookup(node->ret_type->value);
     auto ret_symbol = new variable_symbol(node->name, ret_symbol_type);
-    table->insert(ret_symbol);
     func->ret_value = ret_symbol;
-
-    tables.push_back(table);
-    cur_table = table;
-    node->child->accept(this);
-    tables.pop_back();
-    delete cur_table;
-    cur_table = tables.back();
+    func->body = node->child;
 }
 
 void interpreter::procedure_call(procedure_or_function_call_node *node, procedure_symbol *symbol) {
@@ -223,6 +239,77 @@ void interpreter::procedure_call(procedure_or_function_call_node *node, procedur
     _call_stack.pop();
     tables.pop_back();
     cur_table = tables.back();
+}
+
+eval_ret interpreter::eval_function_call(ast *node) {
+    assert(node->type == ast_node_type::procedure_or_function_call_node);
+    auto func_node = (procedure_or_function_call_node*)node;
+    auto symbol = cur_table->lookup(func_node->name);
+    assert(symbol->symbol_type == symbol_type_enum::function_symbol);
+    auto func_symbol = (function_symbol*)symbol;
+    return function_call(func_node, func_symbol);
+}
+
+eval_ret interpreter::function_call(procedure_or_function_call_node *node, function_symbol *symbol) {
+
+    auto ar = new activation_record(node->name, activation_record_type::procedure, _call_stack.top()->nesting_level()+1, _trace_memory);
+    if (node->params.size() != symbol->params.size()) {
+        auto msg = fmt::format("procedure params error, expect {} params, actual {} params",
+                               symbol->params.size(), node->params.size());
+        SPDLOG_ERROR(msg);
+        std::cerr << msg << std::endl;
+        exit(1);
+    }
+    auto table = new scoped_symbol_table(node->name, cur_table);
+    auto params_size = node->params.size();
+    for(int i=0;i<params_size;i++) {
+        table->insert(symbol->params[i]);
+        auto var = symbol->params[i]->name;
+        auto val = eval_node(node->params[i]);
+        ar->set(var, val);
+    }
+    tables.push_back(table);
+    cur_table = table;
+    _call_stack.push(ar);
+    assert(symbol->body != nullptr);
+    symbol->body->accept(this);
+    auto ret = _call_stack.top()->get(node->name);
+    _call_stack.pop();
+    tables.pop_back();
+    cur_table = tables.back();
+    return ret;
+}
+
+void interpreter::visit(for_node *node) {
+    assert(node->init->type == ast_node_type::assignment);
+    auto init = (assignment*)node->init;
+    init->left->accept(this);
+    auto loop = init->left->id.raw;
+    int begin = get<0>(eval_node(init->right));
+    int end = get<0>(eval_node(node->end));
+    for (int i = begin; i <= end; ++i) {
+        node->block->accept(this);
+        _call_stack.top()->set(loop, i+1);
+    }
+}
+
+eval_ret interpreter::eval_string_node(ast *node) {
+    assert(node->type == ast_node_type::string_node);
+    auto str_node = (string_node*)node;
+    return str_node->value.raw;
+}
+
+void interpreter::visit(if_node *node) {
+    if (eval_bool(node->condition)) {
+        node->if_block->accept(this);
+    } else {
+        node->else_block->accept(this);
+    }
+}
+
+bool interpreter::eval_bool(ast *node) {
+    auto ret = eval_binary_operator(node);
+    return get<bool>(ret);
 }
 
 activation_record::activation_record(string name, activation_record_type type,
