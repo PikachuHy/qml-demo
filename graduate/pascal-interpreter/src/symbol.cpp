@@ -39,21 +39,24 @@ string procedure_symbol::to_string() const {
     return fmt::format("<ProcedureSymbol(name={}, parameters={})>", name, param_string);
 }
 
-scoped_symbol_table::scoped_symbol_table(string name, scoped_symbol_table *scope)
-        : scope_name(std::move(name)), enclosing_scope(scope) {
-    spdlog::info("ENTER scope: {}", scope_name);
+scoped_symbol_table::scoped_symbol_table(string name, scoped_symbol_table *scope, bool trace_symbol)
+        : scope_name(std::move(name)), enclosing_scope(scope), _trace_symbol(trace_symbol) {
+    if (_trace_symbol)
+        spdlog::info("ENTER scope: {}", scope_name);
     if (scope) {
         scope_level = scope->scope_level + 1;
     }
 }
 
 void scoped_symbol_table::define(symbol *symbol) {
-    spdlog::info("Define: {}", symbol->to_string());
+    if (_trace_symbol)
+        spdlog::info("Define: {}", symbol->to_string());
     symbols[symbol->name] = symbol;
 }
 
 void scoped_symbol_table::insert(symbol *symbol) {
-    spdlog::info("Insert: {}", symbol->name);
+    if (_trace_symbol)
+        spdlog::info("Insert: {}", symbol->name);
     if (symbols.find(symbol->name) != symbols.end()) {
         auto msg = fmt::format("Error: Duplicate identifier '{}' found", symbol->name);
         SPDLOG_ERROR(msg);
@@ -63,7 +66,8 @@ void scoped_symbol_table::insert(symbol *symbol) {
 }
 
 symbol *scoped_symbol_table::lookup(const string &name) {
-    spdlog::info("Lookup: {}. (Scope name: {})", name, scope_name);
+    if (_trace_symbol)
+        spdlog::info("Lookup: {}. (Scope name: {})", name, scope_name);
     if (symbols.find(name) == symbols.end()) {
         if (enclosing_scope) return enclosing_scope->lookup(name);
 
@@ -108,7 +112,16 @@ std::string scoped_symbol_table::to_table_string() {
 }
 
 scoped_symbol_table::~scoped_symbol_table() {
-    spdlog::info("LEAVE scope: {}", scope_name);
+    if (_trace_symbol) {
+        print();
+        spdlog::info("LEAVE scope: {}", scope_name);
+    }
+}
+
+void scoped_symbol_table::print() {
+    std::cout << std::endl << std::endl;
+    std::cout << to_table_string();
+    std::cout << std::endl << std::endl;
 }
 
 string builtin_type_symbol::to_string() const {

@@ -20,6 +20,7 @@ error(msg, type);
 enum class ast_node_type {
     binary_operator, number,
     identifier, assignment, variable_node,
+    block_node,
     unknown
 };
 class abstract_node_visitor;
@@ -76,14 +77,17 @@ struct procedure_or_function_call_node: public ast {
     string name;
     vector<ast*> params;
 
-    procedure_or_function_call_node(const string &name, const vector<ast*> & params) : name(name), params(params) {}
+    procedure_or_function_call_node(string name, vector<ast*> params) : name(std::move(name)), params(std::move(params)) {}
 
     void accept(abstract_node_visitor *visitor) override;
 };
 struct block_node: public ast {
     vector<ast*> children;
 
-    block_node(vector<ast*>  children) : children(std::move(children)) {}
+    block_node(vector<ast*>  children)
+    : children(std::move(children)) {
+        type = ast_node_type::block_node;
+    }
 
     void accept(abstract_node_visitor *visitor) override;
 };
