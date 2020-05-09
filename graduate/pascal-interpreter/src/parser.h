@@ -18,7 +18,9 @@ SPDLOG_ERROR(msg); \
 error(msg, type);
 
 enum class ast_node_type {
-    binary_operator, number, unknown
+    binary_operator, number,
+    identifier, assignment, variable_node,
+    unknown
 };
 class abstract_node_visitor;
 struct ast {
@@ -32,7 +34,7 @@ struct ast {
 struct identifier_node: public ast {
     string value;
 
-    identifier_node(token token) : value(token.raw) {}
+    identifier_node(token token) : value(token.raw) { type = ast_node_type::identifier; }
     void accept(abstract_node_visitor *visitor) override;
 };
 struct type_node: public ast {
@@ -133,11 +135,14 @@ struct compound: public ast {
 struct noop: public ast {
     void accept(abstract_node_visitor *visitor) override;
 };
+struct variable_node;
 struct assignment: public ast {
-    ast* left;
+    variable_node* left;
     ast* right;
 
-    assignment(ast *left, ast *right) : left(left), right(right) {}
+    assignment(variable_node *left, ast *right) : left(left), right(right) {
+        type = ast_node_type::assignment;
+    }
 
     void accept(abstract_node_visitor *visitor) override;
 };
@@ -172,7 +177,9 @@ struct bool_expr_node: public ast {
 struct variable_node: public ast {
     token id;
 
-    variable_node(token id) : id(std::move(id)) {}
+    variable_node(token id) : id(std::move(id)) {
+        type = ast_node_type::variable_node;
+    }
 
     void accept(abstract_node_visitor *visitor) override;
 };

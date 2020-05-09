@@ -3,6 +3,7 @@
 //
 #include <gtest/gtest.h>
 #include "interpreter.h"
+#include <spdlog/spdlog.h>
 TEST(interpreter, add_1) {
     interpreter inter("3+5");
     ASSERT_EQ(8, inter.interpret());
@@ -86,6 +87,7 @@ TEST(interpreter, unary_3) {
 }
 
 TEST(interpreter, memory) {
+    spdlog::set_pattern("%v");
     string code = R"(
 program Main;
 var x, y : integer;

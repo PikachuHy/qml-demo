@@ -37,10 +37,10 @@ lexer::lexer(string text) : text(std::move(text)) {
 token lexer::get_next_token() {
     if (pos >= text.size()) return token_constant::eof;
     token ret = create_token(token_type::unknown, text.substr(pos, 1));
-    while (text[pos] == ' ' || text[pos] == '\n') {
+    while (text[pos] == ' ' || text[pos] == '\n') { // 跳过 空格 回车
         advance();
     }
-    if (text[pos] == '{') {
+    if (text[pos] == '{') { // 跳过 注释
         advance();
         while (text[pos] != '}') {
             advance();
@@ -48,7 +48,7 @@ token lexer::get_next_token() {
         advance();
         return get_next_token();
     }
-    if (text[pos] == '\'') {
+    if (text[pos] == '\'') { // 字符串
         auto cur_col = col;
         advance();
         auto start = pos;
@@ -59,7 +59,7 @@ token lexer::get_next_token() {
         advance();
         ret = create_token(token_type::string_const, str);
         ret.col = cur_col;
-    } else if (text[pos] == '_' || isalpha(text[pos])) {
+    } else if (text[pos] == '_' || isalpha(text[pos])) { // 标识符
         auto cur_col = col;
         auto start = pos;
         while (text[pos] == '_' || isalnum(text[pos])) {
@@ -74,11 +74,11 @@ token lexer::get_next_token() {
             ret = create_token(token_type::identifier, str);
         }
         ret.col = cur_col;
-    } else if (text[pos] == ':' && peek() == '=') {
+    } else if (text[pos] == ':' && peek() == '=') { // 赋值
         ret = create_token(token_type::assignment, text.substr(pos, 2));
         advance();
         advance();
-    } else if (isdigit(text[pos])) {
+    } else if (isdigit(text[pos])) { // 数值
         bool is_real = false;
         auto cur_col = col;
         auto start = pos;
@@ -95,9 +95,9 @@ token lexer::get_next_token() {
         auto value = text.substr(start, pos - start);
         if (is_real) {
 
-            ret = create_token(token_type::real_const, value);
+            ret = create_token(token_type::real_const, value);  // 实数
         } else {
-            ret = create_token(token_type::integer_const, value);
+            ret = create_token(token_type::integer_const, value); // 整数
         }
         ret.col = cur_col;
     } else if ((token_constant::arithmetic_operator_token_type_set.count(last_token.type) == 1
