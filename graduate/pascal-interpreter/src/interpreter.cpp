@@ -207,16 +207,22 @@ void interpreter::procedure_call(procedure_or_function_call_node *node, procedur
         std::cerr << msg << std::endl;
         exit(1);
     }
+    auto table = new scoped_symbol_table(node->name, cur_table);
     auto params_size = node->params.size();
     for(int i=0;i<params_size;i++) {
+        table->insert(symbol->params[i]);
         auto var = symbol->params[i]->name;
         auto val = eval_node(node->params[i]);
         ar->set(var, val);
     }
+    tables.push_back(table);
+    cur_table = table;
     _call_stack.push(ar);
     assert(symbol->body != nullptr);
     symbol->body->accept(this);
     _call_stack.pop();
+    tables.pop_back();
+    cur_table = tables.back();
 }
 
 activation_record::activation_record(string name, activation_record_type type,

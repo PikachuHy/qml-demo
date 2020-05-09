@@ -164,3 +164,87 @@ CALL STACK
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ(expect, output);
 }
+TEST(interpreter, nested_procedure_calls) {
+    spdlog::set_pattern("%v");
+    string code = R"(
+program Main;
+
+procedure Alpha(a : integer; b : integer);
+var x : integer;
+
+   procedure Beta(a : integer; b : integer);
+   var x : integer;
+   begin
+      x := a * 10 + b * 2;
+   end;
+
+begin
+   x := (a + b ) * 2;
+
+   Beta(5, 10);      { procedure call }
+end;
+
+begin { Main }
+
+   Alpha(3 + 5, 7);  { procedure call }
+
+end.  { Main }
+)";
+    string expect = R"(
+
+ENTER: PROGRAM Main
+CALL STACK
+1: PROGRAM Main
+
+
+ENTER: PROCEDURE Alpha
+CALL STACK
+2: PROCEDURE Alpha
+   a                   : 8
+   b                   : 7
+1: PROGRAM Main
+
+
+ENTER: PROCEDURE Beta
+CALL STACK
+3: PROCEDURE Beta
+   a                   : 5
+   b                   : 10
+2: PROCEDURE Alpha
+   a                   : 8
+   b                   : 7
+   x                   : 30
+1: PROGRAM Main
+
+
+LEAVE: PROCEDURE Beta
+CALL STACK
+3: PROCEDURE Beta
+   a                   : 5
+   b                   : 10
+   x                   : 70
+2: PROCEDURE Alpha
+   a                   : 8
+   b                   : 7
+   x                   : 30
+1: PROGRAM Main
+
+
+LEAVE: PROCEDURE Alpha
+CALL STACK
+2: PROCEDURE Alpha
+   a                   : 8
+   b                   : 7
+   x                   : 30
+1: PROGRAM Main
+
+
+LEAVE: PROGRAM Main
+CALL STACK
+1: PROGRAM Main
+)";
+    testing::internal::CaptureStdout();
+    interpreter(code, false, true).interpret();
+    std::string output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(expect, output);
+}

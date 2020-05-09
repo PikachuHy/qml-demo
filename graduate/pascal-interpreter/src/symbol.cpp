@@ -60,6 +60,7 @@ void scoped_symbol_table::insert(symbol *symbol) {
     if (symbols.find(symbol->name) != symbols.end()) {
         auto msg = fmt::format("Error: Duplicate identifier '{}' found", symbol->name);
         SPDLOG_ERROR(msg);
+        std::cerr << msg << std::endl;
         throw invalid_semantic_exception(msg);
     }
     symbols[symbol->name] = symbol;
