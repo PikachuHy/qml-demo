@@ -123,7 +123,7 @@ namespace token_constant {
 }
 class calculator {
 public:
-    explicit calculator(string text) : text(std::move(text)) {}
+    explicit calculator(string text) : _text(std::move(text)) {}
 
     int eval() {
         std::stack<int> operands;
@@ -146,14 +146,14 @@ public:
                 {token_type::division,       3},
         };
 
-        cur_token = get_next_token();
-        while (cur_token != token_constant::eof) {
-            operands.push(cur_token.get_value<int>());
+        _cur_token = get_next_token();
+        while (_cur_token != token_constant::eof) {
+            operands.push(_cur_token.get_value<int>());
             eat(token_type::integer_const);
-            if (cur_token == token_constant::eof) break;
-            if (operators_set.find(cur_token.type) != operators_set.end()) {
+            if (_cur_token == token_constant::eof) break;
+            if (operators_set.find(_cur_token.type) != operators_set.end()) {
                 while (!operators.empty()) {
-                    auto row_index = token_type_index[cur_token.type];
+                    auto row_index = token_type_index[_cur_token.type];
                     auto col_index = token_type_index[operators.top()];
                     if (op_priority_table[row_index][col_index] > 0) {
                         auto a = operands.top();
@@ -166,8 +166,8 @@ public:
                         operands.push(c);
                     } else break;
                 }
-                operators.push(cur_token.type);
-                eat(cur_token.type);
+                operators.push(_cur_token.type);
+                eat(_cur_token.type);
             } else {
                 error(valid_token_set);
             }
@@ -189,32 +189,32 @@ public:
     }
 
 private:
-    inline void advance() { pos++; }
+    inline void advance() { _pos++; }
 
     token get_next_token() {
-        if (pos >= text.size()) return token_constant::eof;
-        while (text[pos] == ' ') {
+        if (_pos >= _text.size()) return token_constant::eof;
+        while (_text[_pos] == ' ') {
             advance();
         }
-        if (isdigit(text[pos])) {
-            auto start = pos;
-            while (isdigit(text[pos])) {
+        if (isdigit(_text[_pos])) {
+            auto start = _pos;
+            while (isdigit(_text[_pos])) {
                 advance();
             }
-            return token(token_type::integer_const, text.substr(start, pos - start), start);
+            return token(token_type::integer_const, _text.substr(start, _pos - start), start);
         }
-        auto iter = token_constant::single_char_token_map.find(text[pos]);
+        auto iter = token_constant::single_char_token_map.find(_text[_pos]);
         if (iter != token_constant::single_char_token_map.end()) {
             auto ret = iter->second;
             advance();
             return ret;
         }
-        return token(token_type::unknown, text.substr(pos, 1), pos);
+        return token(token_type::unknown, _text.substr(_pos, 1), _pos);
     }
 
     void eat(token_type type) {
-        if (cur_token.type == type) {
-            cur_token = get_next_token();
+        if (_cur_token.type == type) {
+            _cur_token = get_next_token();
             return;
         }
         error("Invalid syntax", type);
@@ -238,8 +238,8 @@ private:
 
     void error(string msg, token_type type) {
         std::cout << "Error: " << msg << std::endl;
-        std::cout << text << std::endl;
-        for (int i = 0; i < cur_token.pos; i++) {
+        std::cout << _text << std::endl;
+        for (int i = 0; i < _cur_token.pos; i++) {
             std::cout << " ";
         }
         std::cout << "^" << std::endl;
@@ -254,15 +254,15 @@ private:
             std::cout << it << " ";
         }
         std::cout << std::endl;
-        std::cout << "current type: " << cur_token.type << std::endl;
-        std::cout << "current value: " << cur_token.get_value<string>() << std::endl;
+        std::cout << "current type: " << _cur_token.type << std::endl;
+        std::cout << "current value: " << _cur_token.get_value<string>() << std::endl;
         exit(1);
     }
 
 private:
-    token cur_token;
-    string text;
-    int pos = 0;
+    token _cur_token;
+    string _text;
+    int _pos = 0;
 };
 
 #ifndef CATCH_CONFIG_MAIN

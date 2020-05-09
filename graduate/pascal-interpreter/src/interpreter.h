@@ -105,9 +105,9 @@ private:
 private:
     parser _parser;
     call_stack _call_stack;
-    unordered_map<ast_node_type, std::function<eval_ret(ast*)>> eval_table;
-    scoped_symbol_table* cur_table;
-    vector<scoped_symbol_table*> tables;
+    unordered_map<ast_node_type, std::function<eval_ret(ast*)>> _eval_table;
+    scoped_symbol_table* _cur_table;
+    vector<scoped_symbol_table*> _tables;
     bool _trace_symbol;
     bool _trace_memory;
 };

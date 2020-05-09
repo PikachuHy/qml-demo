@@ -13,30 +13,29 @@ public:
     explicit lexer(string text);
 
     token get_next_token();
-    inline const std::string & get_text() const { return text;}
-    void reset() { pos = 0;}
-    void enter_new_expr() { new_expr = true; }
+    inline const std::string & get_text() const { return _text;}
+    void reset() { _pos = 0;}
+    void enter_new_expr() {}
 private:
     inline void advance() {
-        if (text[pos] == '\n') {
-            row++;
-            col = 0;
+        if (_text[_pos] == '\n') {
+            _row++;
+            _col = 0;
         } else {
-            col++;
+            _col++;
         }
-        pos++;
+        _pos++;
     }
-    inline char peek() { return text[pos+1];}
+    inline char peek() { return _text[_pos + 1];}
     token create_token(token t);
     token create_token(token_type type, const string& value);
 private:
-    string text;
-    int pos;
-    int row;
-    int col;
-    bool new_expr = true;
-    std::vector<string_view> source_code;
-    token last_token;
+    string _text;
+    int _pos;
+    int _row;
+    int _col;
+    std::vector<string_view> _source_code;
+    token _last_token;
 };
 
 

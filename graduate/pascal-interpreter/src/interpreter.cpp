@@ -18,25 +18,25 @@ int interpreter::interpret() {
 }
 
 void interpreter::visit(program_node *node) {
-    auto table = new scoped_symbol_table(node->name, cur_table);
-    tables.push_back(table);
-    cur_table = table;
+    auto table = new scoped_symbol_table(node->name, _cur_table);
+    _tables.push_back(table);
+    _cur_table = table;
     auto ar = new activation_record(node->name, activation_record_type::program, 1, _trace_memory);
 
     _call_stack.push(ar);
     node->child->accept(this);
     _call_stack.pop();
 
-    tables.pop_back();
+    _tables.pop_back();
     if (_trace_symbol)
-        cur_table->print();
-    delete cur_table;
-    cur_table = tables.back();
+        _cur_table->print();
+    delete _cur_table;
+    _cur_table = _tables.back();
 
 }
 
 void interpreter::visit(procedure_or_function_call_node *node) {
-    auto node_symbol = cur_table->lookup(node->name);
+    auto node_symbol = _cur_table->lookup(node->name);
     if (node_symbol->symbol_type == symbol_type_enum::procedure_symbol) {
         procedure_call(node, (procedure_symbol*)node_symbol);
     } else if (node_symbol->symbol_type == symbol_type_enum::function_symbol) {
@@ -60,8 +60,8 @@ void interpreter::visit(procedure_or_function_call_node *node) {
 }
 
 void interpreter::visit(variable_declaration_node *node) {
-    auto type = cur_table->lookup(node->get_type());
-    cur_table->insert(new variable_symbol(node->get_name(), type));
+    auto type = _cur_table->lookup(node->get_type());
+    _cur_table->insert(new variable_symbol(node->get_name(), type));
 }
 
 void interpreter::visit(assignment *node) {
@@ -158,24 +158,24 @@ eval_ret interpreter::eval_binary_operator(ast *node) {
 interpreter::interpreter(const string &text, bool trace_symbol, bool trace_memory)
 :_parser(lexer(text)), _trace_symbol(trace_symbol), _trace_memory(trace_memory),
 _call_stack(trace_memory){
-    eval_table[ast_node_type::number] = [this](ast* node){ return this->eval_number(node);};
-    eval_table[ast_node_type::string_node] = [this](ast* node){ return this->eval_string_node(node);};
-    eval_table[ast_node_type::bool_expr_node] = [this](ast* node){ return this->eval_bool(node);};
-    eval_table[ast_node_type::binary_operator] = [this](ast* node){ return this->eval_binary_operator(node);};
-    eval_table[ast_node_type::variable_node] = [this](ast* node){ return this->eval_variable_node(node); };
-    eval_table[ast_node_type::procedure_or_function_call_node] = [this](ast* node){ return this->eval_function_call(node); };
-    cur_table = new builtin_symbol_table();
-    tables.push_back(cur_table);
+    _eval_table[ast_node_type::number] = [this](ast* node){ return this->eval_number(node);};
+    _eval_table[ast_node_type::string_node] = [this](ast* node){ return this->eval_string_node(node);};
+    _eval_table[ast_node_type::bool_expr_node] = [this](ast* node){ return this->eval_bool(node);};
+    _eval_table[ast_node_type::binary_operator] = [this](ast* node){ return this->eval_binary_operator(node);};
+    _eval_table[ast_node_type::variable_node] = [this](ast* node){ return this->eval_variable_node(node); };
+    _eval_table[ast_node_type::procedure_or_function_call_node] = [this](ast* node){ return this->eval_function_call(node); };
+    _cur_table = new builtin_symbol_table();
+    _tables.push_back(_cur_table);
 }
 
 eval_ret interpreter::eval_node(ast *node) {
-    if (eval_table.find(node->type) == eval_table.end()) {
+    if (_eval_table.find(node->type) == _eval_table.end()) {
         string msg = fmt::format("unknown ast node type: {}", magic_enum::enum_name(node->type));
         SPDLOG_ERROR(msg);
         std::cerr << __FILE__ << ":" << __LINE__ << " " << msg << std::endl;
         exit(1);
     }
-    return eval_table[node->type](node);
+    return _eval_table[node->type](node);
 }
 
 eval_ret interpreter::eval_variable_node(ast *node) {
@@ -185,14 +185,14 @@ eval_ret interpreter::eval_variable_node(ast *node) {
 
 void interpreter::visit(variable_node *node) {
     auto name = node->id.get_value<string>();
-    auto type = cur_table->lookup(name);
+    auto type = _cur_table->lookup(name);
 }
 
 void interpreter::visit(procedure_node *node) {
     auto proc = new procedure_symbol(node->name);
-    cur_table->insert(proc);
+    _cur_table->insert(proc);
     for(auto param : node->params) {
-        auto type = cur_table->lookup(param->get_type());
+        auto type = _cur_table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
         proc->params.push_back(var_symbol);
     }
@@ -201,13 +201,13 @@ void interpreter::visit(procedure_node *node) {
 
 void interpreter::visit(function_node *node) {
     auto func = new function_symbol(node->name);
-    cur_table->insert(func);
+    _cur_table->insert(func);
     for(auto param : node->params) {
-        auto type = cur_table->lookup(param->get_type());
+        auto type = _cur_table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
         func->params.push_back(var_symbol);
     }
-    auto ret_symbol_type = cur_table->lookup(node->ret_type->value);
+    auto ret_symbol_type = _cur_table->lookup(node->ret_type->value);
     auto ret_symbol = new variable_symbol(node->name, ret_symbol_type);
     func->ret_value = ret_symbol;
     func->body = node->child;
@@ -223,7 +223,7 @@ void interpreter::procedure_call(procedure_or_function_call_node *node, procedur
         std::cerr << msg << std::endl;
         exit(1);
     }
-    auto table = new scoped_symbol_table(node->name, cur_table);
+    auto table = new scoped_symbol_table(node->name, _cur_table);
     auto params_size = node->params.size();
     for(int i=0;i<params_size;i++) {
         table->insert(symbol->params[i]);
@@ -231,20 +231,20 @@ void interpreter::procedure_call(procedure_or_function_call_node *node, procedur
         auto val = eval_node(node->params[i]);
         ar->set(var, val);
     }
-    tables.push_back(table);
-    cur_table = table;
+    _tables.push_back(table);
+    _cur_table = table;
     _call_stack.push(ar);
     assert(symbol->body != nullptr);
     symbol->body->accept(this);
     _call_stack.pop();
-    tables.pop_back();
-    cur_table = tables.back();
+    _tables.pop_back();
+    _cur_table = _tables.back();
 }
 
 eval_ret interpreter::eval_function_call(ast *node) {
     assert(node->type == ast_node_type::procedure_or_function_call_node);
     auto func_node = (procedure_or_function_call_node*)node;
-    auto symbol = cur_table->lookup(func_node->name);
+    auto symbol = _cur_table->lookup(func_node->name);
     assert(symbol->symbol_type == symbol_type_enum::function_symbol);
     auto func_symbol = (function_symbol*)symbol;
     return function_call(func_node, func_symbol);
@@ -260,7 +260,7 @@ eval_ret interpreter::function_call(procedure_or_function_call_node *node, funct
         std::cerr << msg << std::endl;
         exit(1);
     }
-    auto table = new scoped_symbol_table(node->name, cur_table);
+    auto table = new scoped_symbol_table(node->name, _cur_table);
     auto params_size = node->params.size();
     for(int i=0;i<params_size;i++) {
         table->insert(symbol->params[i]);
@@ -268,15 +268,15 @@ eval_ret interpreter::function_call(procedure_or_function_call_node *node, funct
         auto val = eval_node(node->params[i]);
         ar->set(var, val);
     }
-    tables.push_back(table);
-    cur_table = table;
+    _tables.push_back(table);
+    _cur_table = table;
     _call_stack.push(ar);
     assert(symbol->body != nullptr);
     symbol->body->accept(this);
     auto ret = _call_stack.top()->get(node->name);
     _call_stack.pop();
-    tables.pop_back();
-    cur_table = tables.back();
+    _tables.pop_back();
+    _cur_table = _tables.back();
     return ret;
 }
 

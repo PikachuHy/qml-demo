@@ -54,11 +54,11 @@ private:
     void add_node(ast* node, const string& label);
     void add_edge(ast* from, ast* to);
 private:
-    int count = 1;
-    vector<string> dot_header;
-    vector<string> dot_body;
-    vector<string> dot_footer;
-    unordered_map<ast*, int> ast2count;
+    int _count = 1;
+    vector<string> _dot_header;
+    vector<string> _dot_body;
+    vector<string> _dot_footer;
+    unordered_map<ast*, int> _ast2count;
 };
 
 

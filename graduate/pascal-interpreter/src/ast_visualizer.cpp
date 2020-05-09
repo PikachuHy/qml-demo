@@ -5,25 +5,25 @@
 #include "ast_visualizer.h"
 #include <fmt/format.h>
 ast_visualizer::ast_visualizer() {
-    dot_header.emplace_back(R"(
+    _dot_header.emplace_back(R"(
 digraph astgraph {
   node [shape=circle, fontsize=12, fontname="Courier", height=.1];
   ranksep=.3;
   edge [arrowsize=.5]
 
 )");
-    dot_footer.emplace_back("}");
+    _dot_footer.emplace_back("}");
 }
 
 string ast_visualizer::gen_dot() {
     string ret;
-    for(const auto& it: dot_header) {
+    for(const auto& it: _dot_header) {
         ret += it;
     }
-    for(const auto& it: dot_body) {
+    for(const auto& it: _dot_body) {
         ret += it;
     }
-    for(const auto& it: dot_footer) {
+    for(const auto& it: _dot_footer) {
         ret += it;
     }
     return ret;
@@ -168,12 +168,12 @@ void ast_visualizer::visit(type_node *node) {
 }
 
 void ast_visualizer::add_node(ast *node, const string &label) {
-    ast2count[node]=count;
-    auto s = fmt::format(R"(    node{} [label="{}"]{})", count++, label, "\n");
-    dot_body.emplace_back(s);
+    _ast2count[node]=_count;
+    auto s = fmt::format(R"(    node{} [label="{}"]{})", _count++, label, "\n");
+    _dot_body.emplace_back(s);
 }
 
 void ast_visualizer::add_edge(ast *from, ast *to) {
-    auto s = fmt::format("    node{}->node{}\n", ast2count[from], ast2count[to]);
-    dot_body.emplace_back(s);
+    auto s = fmt::format("    node{}->node{}\n", _ast2count[from], _ast2count[to]);
+    _dot_body.emplace_back(s);
 }

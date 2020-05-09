@@ -259,8 +259,7 @@ private:
     vector<ast*> variable_declaration();
 private:
     lexer _lexer;
-    token cur_token;
-    bool first = true;
+    token _cur_token;
 };
 struct abstract_node_visitor {
     virtual void visit(program_node* node) = 0;
@@ -391,7 +390,7 @@ struct symbol_node_visitor: public node_visitor_adaptor {
     void visit(program_node *node) override;
 
 private:
-    scoped_symbol_table* cur_table;
-    vector<scoped_symbol_table*> tables;
+    scoped_symbol_table* _cur_table;
+    vector<scoped_symbol_table*> _tables;
 };
 #endif //PASCAL_INTERPRETER_PARSER_H

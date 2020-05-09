@@ -8,24 +8,24 @@
 #include <utility>
 
 parser::parser(lexer lexer) : _lexer(std::move(lexer)) {
-    cur_token = _lexer.get_next_token();
+    _cur_token = _lexer.get_next_token();
 }
 
 void parser::eat(token_type type) {
-    if (cur_token.type == token_type::unknown) {
+    if (_cur_token.type == token_type::unknown) {
         string msg = "Unknown char: ";
-        msg += cur_token.raw;
+        msg += _cur_token.raw;
         ERROR(msg, type);
     }
-    if (cur_token.type == type) {
-        cur_token = _lexer.get_next_token();
+    if (_cur_token.type == type) {
+        _cur_token = _lexer.get_next_token();
         return;
     }
     ERROR("Invalid syntax", type);
 }
 
 ast *parser::factor() {
-    auto token = this->cur_token;
+    auto token = this->_cur_token;
     if (token.type == token_type::integer_const) {
         eat(token_type::integer_const);
         return new number{token};
@@ -50,9 +50,9 @@ ast *parser::factor() {
         eat(token_type::right_parenthesis);
         return ret;
     }
-    auto id = cur_token;
+    auto id = _cur_token;
     eat(token_type::identifier);
-    if (cur_token.type == token_type::left_parenthesis) {
+    if (_cur_token.type == token_type::left_parenthesis) {
         return procedure_or_function_call_statement(id);
     } else {
         return new variable_node(id);
@@ -61,10 +61,10 @@ ast *parser::factor() {
 
 ast *parser::term() {
     auto ret = factor();
-    while (cur_token.type == token_type::multiplication
-           || cur_token.type == token_type::integer_division
-           || cur_token.type == token_type::float_division) {
-        auto token = cur_token;
+    while (_cur_token.type == token_type::multiplication
+           || _cur_token.type == token_type::integer_division
+           || _cur_token.type == token_type::float_division) {
+        auto token = _cur_token;
         eat(token.type);
         ret = new binary_operator(ret, token, factor());
     }
@@ -73,9 +73,9 @@ ast *parser::term() {
 
 ast *parser::expr() {
     auto ret = term();
-    while (cur_token.type == token_type::plus
-           || cur_token.type == token_type::minus) {
-        auto token = cur_token;
+    while (_cur_token.type == token_type::plus
+           || _cur_token.type == token_type::minus) {
+        auto token = _cur_token;
         eat(token.type);
         ret = new binary_operator(ret, token, term());
     }
@@ -84,9 +84,9 @@ ast *parser::expr() {
 
 ast *parser::program() {
     ast* ret;
-    if (cur_token.type == token_type::program) {
+    if (_cur_token.type == token_type::program) {
         eat(token_type::program);
-        auto name = cur_token.get_value<string>();
+        auto name = _cur_token.get_value<string>();
         eat(token_type::identifier);
         eat(token_type::semicolon);
         ret = new program_node(name, block());
@@ -107,12 +107,12 @@ ast *parser::compound_statement() {
 ast *parser::parse() {
 #ifdef TEST
     auto ret = program();
-    if (cur_token.type != token_type::eof) {
+    if (_cur_token.type != token_type::eof) {
         error("code not end", token_type::eof);
     }
     return ret;
 #else
-    switch (cur_token.type) {
+    switch (_cur_token.type) {
 
         case token_type::integer_const:
         case token_type::real_const:
@@ -131,7 +131,7 @@ ast *parser::parse() {
 }
 
 variable_node *parser::variable() {
-    auto ret = new variable_node(cur_token);
+    auto ret = new variable_node(_cur_token);
     eat(token_type::identifier);
     return ret;
 }
@@ -139,12 +139,12 @@ variable_node *parser::variable() {
 vector<ast *> parser::statement_list() {
     vector<ast *> ret;
     ret.emplace_back(statement());
-    while (cur_token.type == token_type::semicolon) {
+    while (_cur_token.type == token_type::semicolon) {
         eat(token_type::semicolon);
         auto nodes = statement_list();
         ret.insert(ret.end(), nodes.begin(), nodes.end());
     }
-    if (cur_token.type == token_type::identifier) {
+    if (_cur_token.type == token_type::identifier) {
         SPDLOG_ERROR("Invalid syntax");
         throw invalid_syntax_exception();
     }
@@ -152,20 +152,20 @@ vector<ast *> parser::statement_list() {
 }
 
 ast *parser::statement() {
-    if (cur_token.type == token_type::begin) {
+    if (_cur_token.type == token_type::begin) {
         return compound_statement();
     }
-    if (cur_token.type == token_type::identifier) {
-        auto id = cur_token;
+    if (_cur_token.type == token_type::identifier) {
+        auto id = _cur_token;
         eat(token_type::identifier);
-        if (cur_token.type == token_type::left_parenthesis) {
+        if (_cur_token.type == token_type::left_parenthesis) {
             return procedure_or_function_call_statement(id);
         } else {
             return assignment_statement(id);
         }
-    } else if (cur_token.type == token_type::if_token) {
+    } else if (_cur_token.type == token_type::if_token) {
         return if_statement();
-    } else if (cur_token.type == token_type::for_token) {
+    } else if (_cur_token.type == token_type::for_token) {
         return for_statement();
     }
     return empty();
@@ -193,24 +193,24 @@ vector<ast *> parser::declarations() {
     vector<ast*> ret;
     bool noop = true;
     // TODO: 这里的语法有问题
-    while (cur_token.type == token_type::variable
-        || cur_token.type == token_type::procedure
-        || cur_token.type == token_type::function
+    while (_cur_token.type == token_type::variable
+           || _cur_token.type == token_type::procedure
+           || _cur_token.type == token_type::function
     ) {
 
-        if (cur_token.type == token_type::variable) {
+        if (_cur_token.type == token_type::variable) {
             eat(token_type::variable);
-            while (cur_token.type == token_type::identifier) {
+            while (_cur_token.type == token_type::identifier) {
                 auto var_dec = variable_declaration();
                 ret.insert(ret.end(), var_dec.begin(), var_dec.end());
                 eat(token_type::semicolon);
             }
             noop = false;
-        } else if (cur_token.type == token_type::procedure) {
+        } else if (_cur_token.type == token_type::procedure) {
             auto p = procedure();
             ret.insert(ret.end(), p.begin(), p.end());
             noop = false;
-        } else if (cur_token.type == token_type::function) {
+        } else if (_cur_token.type == token_type::function) {
             auto p = function();
             ret.insert(ret.end(), p.begin(), p.end());
             noop = false;
@@ -222,17 +222,17 @@ vector<ast *> parser::declarations() {
 
 vector<ast *> parser::variable_declaration() {
     vector<identifier_node*> variables;
-    auto name = new identifier_node(cur_token);
+    auto name = new identifier_node(_cur_token);
     variables.emplace_back(name);
     eat(token_type::identifier);
-    while (cur_token.type == token_type::comma) {
+    while (_cur_token.type == token_type::comma) {
         eat(token_type::comma);
-        name = new identifier_node(cur_token);
+        name = new identifier_node(_cur_token);
         variables.emplace_back(name);
         eat(token_type::identifier);
     }
     eat(token_type::colon);
-    auto type = new type_node(cur_token);
+    auto type = new type_node(_cur_token);
     eat(token_type::type_specification);
     vector<ast*> ret;
     for(const auto& it: variables) {
@@ -243,29 +243,29 @@ vector<ast *> parser::variable_declaration() {
 
 vector<ast *> parser::procedure() {
     vector<ast *> ret;
-    while (cur_token.type == token_type::procedure) {
+    while (_cur_token.type == token_type::procedure) {
         eat(token_type::procedure);
-        auto name = cur_token.get_value<string>();
+        auto name = _cur_token.get_value<string>();
         eat(token_type::identifier);
         vector<variable_declaration_node*> param_nodes;
-        if (cur_token.type == token_type::left_parenthesis) {
+        if (_cur_token.type == token_type::left_parenthesis) {
             eat(token_type::left_parenthesis);
             while (true) {
                 vector<token> params;
-                params.push_back(cur_token);
+                params.push_back(_cur_token);
                 eat(token_type::identifier);
-                while (cur_token.type == token_type::comma) {
+                while (_cur_token.type == token_type::comma) {
                     eat(token_type::comma);
-                    params.push_back(cur_token);
+                    params.push_back(_cur_token);
                     eat(token_type::identifier);
                 }
                 eat(token_type::colon);
                 for (const auto& param : params) {
                     param_nodes.emplace_back(new variable_declaration_node{
-                        new identifier_node(param), new type_node(cur_token)});
+                        new identifier_node(param), new type_node(_cur_token)});
                 }
                 eat(token_type::type_specification);
-                if (cur_token.type != token_type::semicolon) break;
+                if (_cur_token.type != token_type::semicolon) break;
                 eat(token_type::semicolon);
             }
             eat(token_type::right_parenthesis);
@@ -281,35 +281,35 @@ vector<ast *> parser::procedure() {
 
 vector<ast *> parser::function() {
     vector<ast *> ret;
-    while (cur_token.type == token_type::function) {
+    while (_cur_token.type == token_type::function) {
         eat(token_type::function);
-        auto name = cur_token.get_value<string>();
+        auto name = _cur_token.get_value<string>();
         eat(token_type::identifier);
         vector<variable_declaration_node*> param_nodes;
-        if (cur_token.type == token_type::left_parenthesis) {
+        if (_cur_token.type == token_type::left_parenthesis) {
             eat(token_type::left_parenthesis);
             while (true) {
                 vector<token> params;
-                params.push_back(cur_token);
+                params.push_back(_cur_token);
                 eat(token_type::identifier);
-                while (cur_token.type == token_type::comma) {
+                while (_cur_token.type == token_type::comma) {
                     eat(token_type::comma);
-                    params.push_back(cur_token);
+                    params.push_back(_cur_token);
                     eat(token_type::identifier);
                 }
                 eat(token_type::colon);
                 for (const auto& param : params) {
                     param_nodes.emplace_back(new variable_declaration_node{
-                            new identifier_node(param), new type_node(cur_token)});
+                            new identifier_node(param), new type_node(_cur_token)});
                 }
                 eat(token_type::type_specification);
-                if (cur_token.type != token_type::semicolon) break;
+                if (_cur_token.type != token_type::semicolon) break;
                 eat(token_type::semicolon);
             }
             eat(token_type::right_parenthesis);
         }
         eat(token_type::colon);
-        auto ret_type = new type_node(cur_token);
+        auto ret_type = new type_node(_cur_token);
         eat(token_type::type_specification);
         eat(token_type::semicolon);
         auto p = new function_node(name, param_nodes, ret_type, block());
@@ -321,8 +321,8 @@ vector<ast *> parser::function() {
 }
 void parser::error(string msg, token_type expect_type) {
     std::cout << "Error: " << msg << std::endl;
-    std::cout << cur_token.source_code << std::endl;
-    for(int i=0;i<cur_token.col;i++) {
+    std::cout << _cur_token.source_code << std::endl;
+    for(int i=0; i < _cur_token.col; i++) {
         std::cout << " ";
     }
     std::cout << "^" << std::endl;
@@ -334,7 +334,7 @@ ast *parser::procedure_or_function_call_statement(token id) {
     vector<ast*> params;
     eat(token_type::left_parenthesis);
     params.push_back(expr());
-    while (cur_token.type == token_type::comma) {
+    while (_cur_token.type == token_type::comma) {
         eat(token_type::comma);
         params.push_back(expr());
     }
@@ -345,7 +345,7 @@ ast *parser::procedure_or_function_call_statement(token id) {
 ast *parser::if_statement() {
     eat(token_type::if_token);
     auto left = expr();
-    auto op = cur_token;
+    auto op = _cur_token;
     eat(op.type);
     auto cond = new bool_expr_node(left, op, expr());
     eat(token_type::then_token);
@@ -358,11 +358,11 @@ ast *parser::if_statement() {
 
 ast *parser::for_statement() {
     eat(token_type::for_token);
-    auto id = cur_token;
+    auto id = _cur_token;
     eat(token_type::identifier);
     auto init = assignment_statement(id);
     eat(token_type::to_token);
-    auto end = new number(cur_token);
+    auto end = new number(_cur_token);
     eat(token_type::integer_const);
     eat(token_type::do_token);
     auto ret = new for_node(init, end, statement());
@@ -426,35 +426,35 @@ void variable_declaration_node::accept(abstract_node_visitor *visitor) {
 }
 
 symbol_node_visitor::symbol_node_visitor(scoped_symbol_table *table) {
-    tables.push_back(table);
+    _tables.push_back(table);
     table->trace_symbol();
-    cur_table = table;
+    _cur_table = table;
 }
 
 void symbol_node_visitor::visit(variable_declaration_node *node) {
-    auto type = cur_table->lookup(node->get_type());
-    cur_table->insert(new variable_symbol(node->get_name(), type));
+    auto type = _cur_table->lookup(node->get_type());
+    _cur_table->insert(new variable_symbol(node->get_name(), type));
 }
 
 void symbol_node_visitor::visit(variable_node *node) {
     auto name = node->id.get_value<string>();
-    auto type = cur_table->lookup(name);
+    auto type = _cur_table->lookup(name);
 }
 
 void symbol_node_visitor::visit(program_node *node) {
-    auto table = new scoped_symbol_table(node->name, cur_table, true);
-    tables.push_back(table);
-    cur_table = table;
+    auto table = new scoped_symbol_table(node->name, _cur_table, true);
+    _tables.push_back(table);
+    _cur_table = table;
     node->child->accept(this);
-    tables.pop_back();
-    delete cur_table;
-    cur_table = tables.back();
+    _tables.pop_back();
+    delete _cur_table;
+    _cur_table = _tables.back();
 }
 
 void symbol_node_visitor::visit(function_node *node) {
     auto func = new function_symbol(node->name);
-    cur_table->insert(func);
-    auto table = new scoped_symbol_table(node->name, cur_table, true);
+    _cur_table->insert(func);
+    auto table = new scoped_symbol_table(node->name, _cur_table, true);
     for(auto param : node->params) {
         auto type = table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
@@ -466,34 +466,34 @@ void symbol_node_visitor::visit(function_node *node) {
     table->insert(ret_symbol);
     func->ret_value = ret_symbol;
 
-    tables.push_back(table);
-    cur_table = table;
+    _tables.push_back(table);
+    _cur_table = table;
     node->child->accept(this);
-    tables.pop_back();
-    delete cur_table;
-    cur_table = tables.back();
+    _tables.pop_back();
+    delete _cur_table;
+    _cur_table = _tables.back();
 }
 
 void symbol_node_visitor::visit(procedure_node *node) {
     auto proc = new procedure_symbol(node->name);
-    cur_table->insert(proc);
-    auto table = new scoped_symbol_table(node->name, cur_table, true);
+    _cur_table->insert(proc);
+    auto table = new scoped_symbol_table(node->name, _cur_table, true);
     for(auto param : node->params) {
         auto type = table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
         table->insert(var_symbol);
         proc->params.push_back(var_symbol);
     }
-    tables.push_back(table);
-    cur_table = table;
+    _tables.push_back(table);
+    _cur_table = table;
     node->child->accept(this);
-    tables.pop_back();
-    delete cur_table;
-    cur_table = tables.back();
+    _tables.pop_back();
+    delete _cur_table;
+    _cur_table = _tables.back();
 }
 
 void symbol_node_visitor::visit(procedure_or_function_call_node *node) {
-    auto t = cur_table->lookup(node->name);
+    auto t = _cur_table->lookup(node->name);
     for(auto it: node->params) {
         it->accept(this);
     }

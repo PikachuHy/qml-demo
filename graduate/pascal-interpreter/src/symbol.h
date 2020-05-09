@@ -86,10 +86,10 @@ public:
     void trace_symbol(bool flag = true) { _trace_symbol = flag; }
 private:
 //    std::unordered_map<std::string, symbol*> symbols;
-    nlohmann::fifo_map<std::string, symbol*> symbols;
-    std::string scope_name;
-    int scope_level = 0;
-    scoped_symbol_table* enclosing_scope = nullptr;
+    nlohmann::fifo_map<std::string, symbol*> _symbols;
+    std::string _scope_name;
+    int _scope_level = 0;
+    scoped_symbol_table* _enclosing_scope = nullptr;
     bool _trace_symbol;
 };
 class builtin_symbol_table: public scoped_symbol_table {
