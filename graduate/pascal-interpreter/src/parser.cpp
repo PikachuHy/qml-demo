@@ -427,6 +427,7 @@ void variable_declaration_node::accept(abstract_node_visitor *visitor) {
 
 symbol_node_visitor::symbol_node_visitor(scoped_symbol_table *table) {
     tables.push_back(table);
+    table->trace_symbol();
     cur_table = table;
 }
 
@@ -441,14 +442,11 @@ void symbol_node_visitor::visit(variable_node *node) {
 }
 
 void symbol_node_visitor::visit(program_node *node) {
-    auto table = new scoped_symbol_table(node->name, cur_table);
+    auto table = new scoped_symbol_table(node->name, cur_table, true);
     tables.push_back(table);
     cur_table = table;
     node->child->accept(this);
     tables.pop_back();
-    std::cout << std::endl << std::endl;
-    std::cout << cur_table->to_table_string();
-    std::cout << std::endl << std::endl;
     delete cur_table;
     cur_table = tables.back();
 }
@@ -456,7 +454,7 @@ void symbol_node_visitor::visit(program_node *node) {
 void symbol_node_visitor::visit(function_node *node) {
     auto func = new function_symbol(node->name);
     cur_table->insert(func);
-    auto table = new scoped_symbol_table(node->name, cur_table);
+    auto table = new scoped_symbol_table(node->name, cur_table, true);
     for(auto param : node->params) {
         auto type = table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
@@ -472,9 +470,6 @@ void symbol_node_visitor::visit(function_node *node) {
     cur_table = table;
     node->child->accept(this);
     tables.pop_back();
-    std::cout << std::endl << std::endl;
-    std::cout << cur_table->to_table_string();
-    std::cout << std::endl << std::endl;
     delete cur_table;
     cur_table = tables.back();
 }
@@ -482,7 +477,7 @@ void symbol_node_visitor::visit(function_node *node) {
 void symbol_node_visitor::visit(procedure_node *node) {
     auto proc = new procedure_symbol(node->name);
     cur_table->insert(proc);
-    auto table = new scoped_symbol_table(node->name, cur_table);
+    auto table = new scoped_symbol_table(node->name, cur_table, true);
     for(auto param : node->params) {
         auto type = table->lookup(param->get_type());
         auto var_symbol = new variable_symbol(param->get_name(), type);
@@ -493,9 +488,6 @@ void symbol_node_visitor::visit(procedure_node *node) {
     cur_table = table;
     node->child->accept(this);
     tables.pop_back();
-    std::cout << std::endl << std::endl;
-    std::cout << cur_table->to_table_string();
-    std::cout << std::endl << std::endl;
     delete cur_table;
     cur_table = tables.back();
 }

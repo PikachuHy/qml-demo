@@ -42,20 +42,20 @@ Define: <VarSymbol(name='y', type='REAL')>
 Symbols: [<BuiltinTypeSymbol(name='INTEGER')>, <VarSymbol(name='x', type='INTEGER')>, <BuiltinTypeSymbol(name='REAL')>, <VarSymbol(name='y', type='REAL')>, ]
 )";
     std::cout << std::endl;
-    auto table = scoped_symbol_table();
+    auto table = new scoped_symbol_table("global", nullptr, true);
     auto int_type = builtin_type_symbol("INTEGER");
-    table.define(&int_type);
+    table->define(&int_type);
 
     auto var_x_symbol = variable_symbol("x", &int_type);
-    table.define(&var_x_symbol);
+    table->define(&var_x_symbol);
 
     auto real_type = builtin_type_symbol("REAL");
-    table.define(&real_type);
+    table->define(&real_type);
 
     auto var_y_symbol = variable_symbol("y", &real_type);
-    table.define(&var_y_symbol);
+    table->define(&var_y_symbol);
 
-    std::cout << table.to_string() << std::endl;
+    std::cout << table->to_string() << std::endl;
 
     std::string output = testing::internal::GetCapturedStdout();
     ASSERT_EQ(expect, output);

@@ -83,6 +83,7 @@ public:
     std::string to_string();
     std::string to_table_string();
     void print();
+    void trace_symbol(bool flag = true) { _trace_symbol = flag; }
 private:
 //    std::unordered_map<std::string, symbol*> symbols;
     nlohmann::fifo_map<std::string, symbol*> symbols;
