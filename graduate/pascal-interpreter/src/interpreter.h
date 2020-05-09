@@ -17,7 +17,7 @@
 using namespace std;
 
 enum class activation_record_type {
-    program, procedure
+    program, procedure, function
 };
 using eval_ret = std::variant<int, float, string, bool>;
 class activation_record {

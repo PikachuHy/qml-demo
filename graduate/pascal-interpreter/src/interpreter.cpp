@@ -252,7 +252,7 @@ eval_ret interpreter::eval_function_call(ast *node) {
 
 eval_ret interpreter::function_call(procedure_or_function_call_node *node, function_symbol *symbol) {
 
-    auto ar = new activation_record(node->name, activation_record_type::procedure, _call_stack.top()->nesting_level()+1, _trace_memory);
+    auto ar = new activation_record(node->name, activation_record_type::function, _call_stack.top()->nesting_level()+1, _trace_memory);
     if (node->params.size() != symbol->params.size()) {
         auto msg = fmt::format("procedure params error, expect {} params, actual {} params",
                                symbol->params.size(), node->params.size());
