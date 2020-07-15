@@ -72,3 +72,72 @@ np.random.normal(0, 0.05, (200,))
 
 是从高斯分布中采样200个，返回数据是(200,)的ndarray
 
+```python
+plt.scatter(X_test, Y_test)
+plt.plot(X_test, Y_pred)
+```
+
+`scatter`是画散点图，`plot`是画直线
+
+## mnist图片分类
+
+出现warning
+
+```python
+UserWarning: The `nb_epoch` argument in `fit` has been renamed `epochs`.
+  model.fit(X_train, y_train, nb_epoch=2, batch_size=32)
+```
+
+将
+
+```python
+model.fit(X_train, y_train, nb_epoch=2, batch_size=32)
+```
+
+改为
+
+```python
+model.fit(X_train, y_train, epochs=2, batch_size=32)
+```
+
+即可消除warning
+
+```python
+X_train = X_train.reshape(X_train.shape[0], -1) / 255
+```
+
+将`(60000, 28, 28)`转成`(60000, 28 * 28)`，然后再把数值控制在0到1
+
+```python
+y_train = np_utils.to_categorical(y_train, num_classes=10)
+```
+
+就是将索引变成one-hot编码
+
+`Dense`其实就是全连接层FC,  
+$$
+y=a*x+b
+$$
+Relu
+
+![img](https://bkimg.cdn.bcebos.com/pic/d788d43f8794a4c25b5e4dd902f41bd5ac6e39c6?x-bce-process=image/resize,m_lfit,w_268,limit_1/format,f_jpg)
+$$
+f(x)=max(0, x)
+$$
+categorical_crossentropy是多分类的交叉熵损失，具体细节后面再学
+
+我决定比较神奇的是
+
+```python
+metrics=['accuracy']
+```
+
+传入这个指标就可以直接算出来，比较方便
+
+## TODO
+
+- mse
+- sgd
+- categorical_crossentropy
+- RMSprop
+- softmax
