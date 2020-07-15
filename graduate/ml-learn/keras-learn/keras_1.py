@@ -4,10 +4,11 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 import matplotlib.pyplot as plt
-
+import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.ERROR)
 np.random.seed(1337)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 X = np.linspace(-1, 1, 200)
 np.random.shuffle(X)
 Y = 0.5 * X + 2 + np.random.normal(0, 0.05, (200,))
