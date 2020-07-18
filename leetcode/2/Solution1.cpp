@@ -9,6 +9,9 @@
  *     ListNode(int x, ListNode *next) : val(x), next(next) {}
  * };
  */
+// Assume that m and n represents the length of l1 and l2 respectively
+// Time complexity: O(max(m, n))
+// Space complexity: O(max(m, n))
 class Solution {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
