@@ -81,10 +81,34 @@ struct Logical : public Expr {
 
     string toString() override;
 
-private:
-    Type *check(Type *p1, Type *p2);
+protected:
+    virtual Type *check(Type *p1, Type *p2);
 };
+struct Or : public Logical {
+    Or(Token *token, Expr *expr1, Expr *expr2);
 
+    void jumping(int t, int f) override;
+};
+struct And : public Logical {
+    And(Token *token, Expr *expr1, Expr *expr2);
+
+    void jumping(int t, int f) override;
+};
+struct Not : public Logical {
+    Not(Token *token, Expr *expr);
+
+    void jumping(int t, int f) override;
+
+    string toString() override;
+};
+struct Rel : public Logical {
+public:
+    Rel(Token *token, Expr *expr1, Expr *expr2);
+
+    void jumping(int t, int f) override;
+protected:
+    Type *check(Type *p1, Type *p2) override;
+};
 struct Op : public Expr {
     Op(Token *token, Type *type) : Expr(token, type) {}
 

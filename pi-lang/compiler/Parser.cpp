@@ -145,3 +145,55 @@ Expr *Logical::gen() {
 string Logical::toString() {
     return expr1->toString() + " " + op->toString() + " " + expr2->toString();
 }
+
+Or::Or(Token *token, Expr *expr1, Expr *expr2) : Logical(token, expr1, expr2) {
+
+}
+
+void Or::jumping(int t, int f) {
+    int label = t != 0 ? t : newlabel();
+    expr1->jumping(label, 0);
+    expr2->jumping(t,f);
+    if (t == 0) emitlabel(label);
+}
+
+And::And(Token *token, Expr *expr1, Expr *expr2) : Logical(token, expr1, expr2) {
+
+}
+
+void And::jumping(int t, int f) {
+    int label = f != 0 ? f : newlabel();
+    expr1->jumping(0, label);
+    expr2->jumping(t,f);
+    if (f == 0) emitlabel(label);
+}
+
+Not::Not(Token *token, Expr *expr) : Logical(token, expr, expr) {
+
+}
+
+void Not::jumping(int t, int f) {
+    expr2->jumping(f, t);
+}
+
+string Not::toString() {
+    return op->toString() + " " + expr2->toString();
+}
+
+Rel::Rel(Token *token, Expr *expr1, Expr *expr2) : Logical(token, expr1, expr2) {
+
+}
+
+void Rel::jumping(int t, int f) {
+    auto a = expr1->reduce();
+    auto b = expr2->reduce();
+    auto test = a->toString() + " " + op->toString() + " " + b->toString();
+    emitjumps(test, t, f);
+}
+
+Type *Rel::check(Type *p1, Type *p2) {
+    // TODO: must use typeid ???
+    if (typeid(p1) == typeid(Array) || typeid(p2) == typeid(Array)) return nullptr;
+    if (*p1 == *p2) return Type::Bool;
+    return nullptr;
+}
