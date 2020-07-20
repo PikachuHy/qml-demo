@@ -18,6 +18,7 @@ struct Token {
     Token(Tag tag);
     Token(char ch);
     const Tag tag;
+    virtual string toString() const;
 };
 struct Num : public Token{
     Num(int value);
@@ -35,8 +36,8 @@ struct Word: public Token {
 };
 struct Type: public Word {
     Type(string s, Tag tag, int width);
-    static bool numeric(Type* p);
-    static const Type* max(Type* p1, Type* p2);
+    static bool numeric(const Type* p);
+    static const Type* max(const Type* p1, const Type* p2);
     const int width;
     const static Type Int, Float, Char, Bool;
 };

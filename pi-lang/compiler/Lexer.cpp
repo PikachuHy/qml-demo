@@ -14,6 +14,10 @@ Token::Token(char ch) : tag(static_cast<const Tag>(ch)){
     // TODO: find a better way to receive char
 }
 
+string Token::toString() const{
+    return ""s+(char)tag;
+}
+
 Num::Num(int value) : Token(Tag::NUM), value(value) {
 
 }
@@ -152,11 +156,11 @@ const Type Type::Float = Type("float", Tag::BASIC, 8);
 const Type Type::Char = Type("char", Tag::BASIC, 1);
 const Type Type::Bool = Type("bool", Tag::BASIC, 1);
 
-bool Type::numeric(Type *p) {
+bool Type::numeric(const Type *p) {
     return *p == Type::Char || *p == Type::Int || *p == Type::Float;
 }
 
-const Type *Type::max(Type *p1, Type *p2) {
+const Type *Type::max(const Type *p1, const Type *p2) {
     if (!numeric(p1) || !numeric(p2)) return nullptr;
     if (*p1 == Type::Float || *p2 == Type::Float) return &Type::Float;
     if (*p1 == Type::Int || *p2 == Type::Int) return &Type::Int;
