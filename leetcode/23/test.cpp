@@ -17,3 +17,15 @@ TEST(LeetCode2MergeKLists, __LINE__) {
     auto ret = mergeKLists({{1,2,2}, {1, 4}, {2, 5}});
     EXPECT_EQ(ret, expect);
 }
+
+TEST(LeetCode23MergeKLists, __LINE__) {
+    vector<int> expect = {};
+    auto ret = mergeKLists({{}});
+    EXPECT_EQ(ret, expect);
+}
+
+TEST(LeetCode23MergeKLists, __LINE__) {
+    vector<int> expect = {};
+    auto ret = mergeKLists({{}, {}});
+    EXPECT_EQ(ret, expect);
+}
