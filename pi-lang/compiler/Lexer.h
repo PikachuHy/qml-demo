@@ -17,29 +17,28 @@ enum class Tag {
 struct Token {
     Token(Tag tag);
     Token(char ch);
-    const Tag tag;
+    Tag tag;
     virtual string toString() const;
 };
 struct Num : public Token{
     Num(int value);
-    const int value;
+    int value;
 };
 struct Word: public Token {
     Word(string lexeme, Tag tag);
 
-    const string lexeme;
-    const static Word AND, OR, EQ, NE, LE, GE, MINUS, TRUE, FALSE, TEMP;
+    string lexeme;
+    static Word *AND, *OR, *EQ, *NE, *LE, *GE, *MINUS, *TRUE, *FALSE, *TEMP;
 
-    bool operator==(const Word &rhs) const;
+    bool operator==(Word &rhs) const;
 
-    bool operator!=(const Word &rhs) const;
 };
 struct Type: public Word {
     Type(string s, Tag tag, int width);
-    static bool numeric(const Type* p);
-    static const Type* max(const Type* p1, const Type* p2);
-    const int width;
-    const static Type Int, Float, Char, Bool;
+    static bool numeric(Type* p);
+    static Type* max(Type* p1, Type* p2);
+    int width;
+    static Type *Int, *Float, *Char, *Bool;
 };
 struct Array : public Type {
     Array(int size, Type* type);
@@ -48,13 +47,13 @@ struct Array : public Type {
 };
 struct Real: public Token {
     Real(float value);
-    const float value;
+    float value;
 };
 
 class Word_hash
 {
 public:
-    size_t operator()(const Word& word) const {
+    size_t operator()(Word& word) {
         return hash<string>()(word.lexeme) ^ hash<Tag>()(word.tag);
     }
 
@@ -63,11 +62,11 @@ public:
 class Lexer {
 public:
     Lexer();
-    void reserve(const Word* w);
-    const Token* scan();
+    void reserve(Word* w);
+    Token* scan();
     static int line;
     char peek;
-    unordered_map<string, const Word*> words;
+    unordered_map<string, Word*> words;
 private:
     void readch();
     bool readch(char ch);

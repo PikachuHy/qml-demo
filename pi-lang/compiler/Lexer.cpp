@@ -10,7 +10,7 @@ Token::Token(Tag tag) : tag(tag) {
 
 }
 
-Token::Token(char ch) : tag(static_cast<const Tag>(ch)){
+Token::Token(char ch) : tag(static_cast<Tag>(ch)){
     // TODO: find a better way to receive char
 }
 
@@ -25,32 +25,29 @@ Num::Num(int value) : Token(Tag::NUM), value(value) {
 Word::Word(string lexeme, Tag tag) : Token(tag), lexeme(std::move(lexeme)) {
 
 }
-const Word Word::AND = Word("&&"s, Tag::AND);
-const Word Word::OR = Word("||"s, Tag::OR);
-const Word Word::EQ = Word("=="s, Tag::EQ);
-const Word Word::NE = Word("!="s, Tag::NE);
-const Word Word::LE = Word("<="s, Tag::LE);
-const Word Word::GE = Word(">="s, Tag::GE);
-const Word Word::MINUS = Word("-"s, Tag::MINUS);
-const Word Word::TRUE = Word("true"s, Tag::TRUE);
-const Word Word::FALSE = Word("false"s, Tag::FALSE);
-const Word Word::TEMP = Word("t"s, Tag::TEMP);
+Word* Word::AND = new Word("&&"s, Tag::AND);
+Word* Word::OR = new Word("||"s, Tag::OR);
+Word* Word::EQ = new Word("=="s, Tag::EQ);
+Word* Word::NE = new Word("!="s, Tag::NE);
+Word* Word::LE = new Word("<="s, Tag::LE);
+Word* Word::GE = new Word(">="s, Tag::GE);
+Word* Word::MINUS = new Word("-"s, Tag::MINUS);
+Word* Word::TRUE = new Word("true"s, Tag::TRUE);
+Word* Word::FALSE = new Word("false"s, Tag::FALSE);
+Word* Word::TEMP = new Word("t"s, Tag::TEMP);
 
-bool Word::operator==(const Word &rhs) const {
+bool Word::operator==(Word &rhs) const{
     return tag == rhs.tag &&
            lexeme == rhs.lexeme;
 }
 
-bool Word::operator!=(const Word &rhs) const {
-    return !(rhs == *this);
-}
 
 Real::Real(float value): Token(Tag::REAL), value(value) {
 
 }
 int Lexer::line = 1;
 
-void Lexer::reserve(const Word* w) {
+void Lexer::reserve(Word* w) {
     words[w->lexeme] = w;
 }
 
@@ -60,8 +57,8 @@ Lexer::Lexer() {
     reserve(new Word("while", Tag::WHILE));
     reserve(new Word("do", Tag::DO));
     reserve(new Word("break", Tag::BREAK));
-    reserve(&Word::TRUE);
-    reserve(&Word::FALSE);
+    reserve(Word::TRUE);
+    reserve(Word::FALSE);
     // TODO: type int char bool float
     offset = 0;
     peek = ' ';
@@ -78,7 +75,7 @@ bool Lexer::readch(char ch) {
     return false;
 }
 
-const Token* Lexer::scan() {
+Token* Lexer::scan() {
     for(;;readch()) {
         if (peek == ' ' || peek == '\t') continue;
         else if (peek == '\n') line++;
@@ -87,27 +84,27 @@ const Token* Lexer::scan() {
     // parse && || == != <= >=
     switch (peek) {
         case '&': {
-            if (readch('&')) return &Word::AND;
+            if (readch('&')) return Word::AND;
             else return new Token('&');
         }
         case '|': {
-            if (readch('|')) return &Word::OR;
+            if (readch('|')) return Word::OR;
             else return new Token('|');
         }
         case '=': {
-            if (readch('=')) return &Word::EQ;
+            if (readch('=')) return Word::EQ;
             else return new Token('=');
         }
         case '!': {
-            if (readch('=')) return &Word::NE;
+            if (readch('=')) return Word::NE;
             else return new Token('!');
         }
         case '<': {
-            if (readch('=')) return &Word::LE;
+            if (readch('=')) return Word::LE;
             else return new Token('<');
         }
         case '>': {
-            if (readch('=')) return &Word::GE;
+            if (readch('=')) return Word::GE;
             else return new Token('>');
         }
     }
@@ -151,20 +148,20 @@ const Token* Lexer::scan() {
 Type::Type(string s, Tag tag, int width): Word(std::move(s), tag), width(width) {
 
 }
-const Type Type::Int = Type("int", Tag::BASIC, 4);
-const Type Type::Float = Type("float", Tag::BASIC, 8);
-const Type Type::Char = Type("char", Tag::BASIC, 1);
-const Type Type::Bool = Type("bool", Tag::BASIC, 1);
+Type* Type::Int = new Type("int", Tag::BASIC, 4);
+Type* Type::Float = new Type("float", Tag::BASIC, 8);
+Type* Type::Char = new Type("char", Tag::BASIC, 1);
+Type* Type::Bool = new Type("bool", Tag::BASIC, 1);
 
-bool Type::numeric(const Type *p) {
-    return *p == Type::Char || *p == Type::Int || *p == Type::Float;
+bool Type::numeric(Type *p) {
+    return *p == *Type::Char || *p == *Type::Int || *p == *Type::Float;
 }
 
-const Type *Type::max(const Type *p1, const Type *p2) {
+Type *Type::max(Type *p1, Type *p2) {
     if (!numeric(p1) || !numeric(p2)) return nullptr;
-    if (*p1 == Type::Float || *p2 == Type::Float) return &Type::Float;
-    if (*p1 == Type::Int || *p2 == Type::Int) return &Type::Int;
-    return &Type::Char;
+    if (*p1 == *Type::Float || *p2 == *Type::Float) return Type::Float;
+    if (*p1 == *Type::Int || *p2 == *Type::Int) return Type::Int;
+    return Type::Char;
 }
 
 Array::Array(int size, Type *type)
