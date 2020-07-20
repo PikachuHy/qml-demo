@@ -143,3 +143,22 @@ const Token* Lexer::scan() {
     peek = ' ';
     return token;
 }
+
+Type::Type(string s, Tag tag, int width): Word(std::move(s), tag), width(width) {
+
+}
+const Type Type::Int = Type("int", Tag::BASIC, 4);
+const Type Type::Float = Type("float", Tag::BASIC, 8);
+const Type Type::Char = Type("char", Tag::BASIC, 1);
+const Type Type::Bool = Type("bool", Tag::BASIC, 1);
+
+bool Type::numeric(Type *p) {
+    return *p == Type::Char || *p == Type::Int || *p == Type::Float;
+}
+
+const Type *Type::max(Type *p1, Type *p2) {
+    if (!numeric(p1) || !numeric(p2)) return nullptr;
+    if (*p1 == Type::Float || *p2 == Type::Float) return &Type::Float;
+    if (*p1 == Type::Int || *p2 == Type::Int) return &Type::Int;
+    return &Type::Char;
+}

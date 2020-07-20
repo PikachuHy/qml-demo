@@ -33,6 +33,13 @@ struct Word: public Token {
 
     bool operator!=(const Word &rhs) const;
 };
+struct Type: public Word {
+    Type(string s, Tag tag, int width);
+    static bool numeric(Type* p);
+    static const Type* max(Type* p1, Type* p2);
+    const int width;
+    const static Type Int, Float, Char, Bool;
+};
 struct Real: public Token {
     Real(float value);
     const float value;
