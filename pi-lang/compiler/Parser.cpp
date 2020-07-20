@@ -56,6 +56,15 @@ string Expr::toString() const {
     return op->toString();
 }
 
+bool Expr::operator==(const Expr &rhs) const {
+    return op == rhs.op &&
+           type == rhs.type;
+}
+
+bool Expr::operator!=(const Expr &rhs) const {
+    return !(rhs == *this);
+}
+
 const Expr *Op::reduce() const {
     auto x = gen();
     auto t = new Temp(type);
@@ -95,4 +104,14 @@ const Expr *Unary::gen() const {
 
 string Unary::toString() const {
     return op->toString() + " " + expr->toString();
+}
+
+Constant::Constant(const Token *token, const Type *type) : Expr(token, type) {
+
+}
+const Constant Constant::True = Constant(&Word::TRUE, &Type::Bool);
+const Constant Constant::False = Constant(&Word::FALSE, &Type::Bool);
+void Constant::jumping(int t, int f) const {
+    if (*this == True && t != 0) emit("goto L" + to_string(t));
+    else if (*this == False && f != 0) emit("goto L" + to_string(f));
 }

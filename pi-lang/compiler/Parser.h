@@ -23,8 +23,12 @@ struct Expr: public Node {
     const Type* type;
     virtual const Expr* gen() const {return this;}
     virtual const Expr* reduce() const {return this;}
-    void jumping(int t, int f) const;
+    virtual void jumping(int t, int f) const;
     void emitjumps(string test, int t, int f) const;
+
+    bool operator==(const Expr &rhs) const;
+
+    bool operator!=(const Expr &rhs) const;
 
     string toString() const override;
 };
@@ -39,6 +43,13 @@ struct Temp: public Expr {
 
     static int count;
     int number;
+};
+struct Constant: public Expr {
+    Constant(const Token *token, const Type *type);
+    Constant(int i): Expr(new Num(i), &Type::Int) {}
+
+    void jumping(int t, int f) const override;
+    static const Constant True, False;
 };
 struct Op : public Expr {
     Op(const Token *token, const Type* type): Expr(token, type) {}
