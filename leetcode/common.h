@@ -24,6 +24,13 @@ ListNode* toListNode(const vector<int> & v) {
     }
     return dummy.next;
 }
+vector<ListNode*> toListNodes(const vector<vector<int>> & vs) {
+    vector<ListNode*> ret;
+    for(const auto & it: vs) {
+        ret.push_back(toListNode(it));
+    }
+    return ret;
+}
 
 vector<int> toVector(ListNode *l) {
     if (l == nullptr) return {};
