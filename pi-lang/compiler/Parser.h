@@ -21,8 +21,8 @@ struct Expr: public Node {
     Expr(const Token *token, const Type *type);
     const Token * op;
     const Type* type;
-    virtual const Expr* gen() const {return this;}
-    virtual const Expr* reduce() const {return this;}
+    virtual const Expr* gen() {return this;}
+    virtual const Expr* reduce() {return this;}
     virtual void jumping(int t, int f) const;
     void emitjumps(string test, int t, int f) const;
 
@@ -51,17 +51,30 @@ struct Constant: public Expr {
     void jumping(int t, int f) const override;
     static const Constant True, False;
 };
+struct Logical : public Expr {
+    const Expr* expr1;
+    const Expr* expr2;
+
+    Logical(const Token *token, const Expr *expr1, const Expr *expr2);
+
+    const Expr *gen() override;
+
+    string toString() const override;
+
+private:
+    const Type* check(const Type* p1, const Type* p2);
+};
 struct Op : public Expr {
     Op(const Token *token, const Type* type): Expr(token, type) {}
 
-    const Expr *reduce() const override;
+    const Expr *reduce() override;
 };
 struct Arith : public Op {
     const Expr* expr1;
     const Expr* expr2;
     Arith(const Token *token, const Expr* expr1, const Expr* expr2);
 
-    const Expr *gen() const override;
+    const Expr *gen() override;
 
     string toString() const override;
 };
@@ -70,7 +83,7 @@ struct Unary : public Op {
     const Expr* expr;
     Unary(const Token* token, const Expr* expr);
 
-    const Expr *gen() const override;
+    const Expr *gen() override;
 
     string toString() const override;
 };

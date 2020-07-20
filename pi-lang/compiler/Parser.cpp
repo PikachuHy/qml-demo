@@ -65,7 +65,7 @@ bool Expr::operator!=(const Expr &rhs) const {
     return !(rhs == *this);
 }
 
-const Expr *Op::reduce() const {
+const Expr *Op::reduce() {
     auto x = gen();
     auto t = new Temp(type);
     emit(t->toString() + " = " + x->toString());
@@ -85,7 +85,7 @@ Arith::Arith(const Token *token, const Expr *expr1, const Expr *expr2)
     if (type == nullptr) error("type error");
 }
 
-const Expr *Arith::gen() const {
+const Expr *Arith::gen() {
     return new Arith(op, expr1->reduce(), expr2->reduce());
 }
 
@@ -98,7 +98,7 @@ Unary::Unary(const Token *token, const Expr *expr)
     if (type == nullptr) error("type error");
 }
 
-const Expr *Unary::gen() const {
+const Expr *Unary::gen() {
     return new Unary(op, expr->reduce());
 }
 
@@ -114,4 +114,32 @@ const Constant Constant::False = Constant(&Word::FALSE, &Type::Bool);
 void Constant::jumping(int t, int f) const {
     if (*this == True && t != 0) emit("goto L" + to_string(t));
     else if (*this == False && f != 0) emit("goto L" + to_string(f));
+}
+
+Logical::Logical(const Token *token, const Expr *expr1, const Expr *expr2)
+: Expr(token, check(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
+    if (type == nullptr) error("type error");
+}
+
+const Type *Logical::check(const Type* p1, const Type* p2) {
+    if (*p1 == Type::Bool && *p2 == Type::Bool) return &Type::Bool;
+    return nullptr;
+}
+
+const Expr *Logical::gen() {
+    int f = newlabel();
+    int a = newlabel();
+    auto temp = new Temp(type);
+    jumping(0,f);
+    emit(temp->toString() + " = true");
+    emit("goto L" + to_string(a));
+    emitlabel(f);
+    emit(temp->toString() + " = false");
+    emitlabel(a);
+
+    return temp;
+}
+
+string Logical::toString() const {
+    return expr1->toString() + " " + op->toString() + " " + expr2->toString();
 }
