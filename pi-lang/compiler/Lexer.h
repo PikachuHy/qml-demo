@@ -5,7 +5,7 @@
 #ifndef PI_LANG_LEXER_H
 #define PI_LANG_LEXER_H
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 using namespace std;
 enum class Tag {
     AND = 256, BASIC, BREAK, DO, ELSE,
@@ -16,6 +16,7 @@ enum class Tag {
 
 struct Token {
     Token(Tag tag);
+    Token(char ch);
     const Tag tag;
 };
 struct Num : public Token{
@@ -49,11 +50,16 @@ public:
 class Lexer {
 public:
     Lexer();
-    void reserve(Word w);
+    void reserve(const Word* w);
+    const Token* scan();
     static int line;
     char peak;
-    unordered_set<Word, Word_hash> words;
-
+    unordered_map<string, const Word*> words;
+private:
+    void readch();
+    bool readch(char ch);
+    int offset;
+    string sourceCode;
 };
 
 
