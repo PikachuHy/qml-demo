@@ -28,6 +28,31 @@ const Word Word::TRUE = Word("true"s, Tag::TRUE);
 const Word Word::FALSE = Word("false"s, Tag::FALSE);
 const Word Word::TEMP = Word("t"s, Tag::TEMP);
 
+bool Word::operator==(const Word &rhs) const {
+    return tag == rhs.tag &&
+           lexeme == rhs.lexeme;
+}
+
+bool Word::operator!=(const Word &rhs) const {
+    return !(rhs == *this);
+}
+
 Real::Real(float value): Token(Tag::REAL), value(value) {
 
+}
+int Lexer::line = 1;
+
+void Lexer::reserve(Word w) {
+    words.insert(w);
+}
+
+Lexer::Lexer() {
+    reserve(Word("if", Tag::IF));
+    reserve(Word("else", Tag::ELSE));
+    reserve(Word("while", Tag::WHILE));
+    reserve(Word("do", Tag::DO));
+    reserve(Word("break", Tag::BREAK));
+    reserve(Word::TRUE);
+    reserve(Word::FALSE);
+    // TODO: type int char bool float
 }
