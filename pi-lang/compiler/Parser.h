@@ -136,6 +136,19 @@ struct Unary : public Op {
     string toString() override;
 };
 
+struct Access : public Op {
+    Id* array;
+    Expr* index;
+
+    Access(Id *array, Expr *index, Type *type);
+
+    Expr *gen() override;
+
+    void jumping(int t, int f) override;
+
+    string toString() override;
+};
+
 class Parser {
 public:
     Parser(Lexer &lexer);

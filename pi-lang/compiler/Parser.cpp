@@ -197,3 +197,20 @@ Type *Rel::check(Type *p1, Type *p2) {
     if (*p1 == *p2) return Type::Bool;
     return nullptr;
 }
+
+Access::Access(Id *array, Expr *index, Type *type)
+: Op(new Word("[]", Tag::INDEX), type), array(array), index(index) {
+
+}
+
+Expr *Access::gen() {
+    return new Access(array, index->reduce(), type);
+}
+
+void Access::jumping(int t, int f) {
+    emitjumps(reduce()->toString(), t, f);
+}
+
+string Access::toString() {
+    return array->toString() + "[ " + index->toString() + " ]";
+}
