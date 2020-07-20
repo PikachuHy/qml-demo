@@ -10,12 +10,12 @@ Token::Token(Tag tag) : tag(tag) {
 
 }
 
-Token::Token(char ch) : tag(static_cast<Tag>(ch)){
+Token::Token(char ch) : tag(static_cast<Tag>(ch)) {
     // TODO: find a better way to receive char
 }
 
-string Token::toString() const{
-    return ""s+(char)tag;
+string Token::toString() const {
+    return ""s + (char) tag;
 }
 
 Num::Num(int value) : Token(Tag::NUM), value(value) {
@@ -25,29 +25,31 @@ Num::Num(int value) : Token(Tag::NUM), value(value) {
 Word::Word(string lexeme, Tag tag) : Token(tag), lexeme(std::move(lexeme)) {
 
 }
-Word* Word::AND = new Word("&&"s, Tag::AND);
-Word* Word::OR = new Word("||"s, Tag::OR);
-Word* Word::EQ = new Word("=="s, Tag::EQ);
-Word* Word::NE = new Word("!="s, Tag::NE);
-Word* Word::LE = new Word("<="s, Tag::LE);
-Word* Word::GE = new Word(">="s, Tag::GE);
-Word* Word::MINUS = new Word("-"s, Tag::MINUS);
-Word* Word::TRUE = new Word("true"s, Tag::TRUE);
-Word* Word::FALSE = new Word("false"s, Tag::FALSE);
-Word* Word::TEMP = new Word("t"s, Tag::TEMP);
 
-bool Word::operator==(Word &rhs) const{
+Word *Word::AND = new Word("&&"s, Tag::AND);
+Word *Word::OR = new Word("||"s, Tag::OR);
+Word *Word::EQ = new Word("=="s, Tag::EQ);
+Word *Word::NE = new Word("!="s, Tag::NE);
+Word *Word::LE = new Word("<="s, Tag::LE);
+Word *Word::GE = new Word(">="s, Tag::GE);
+Word *Word::MINUS = new Word("-"s, Tag::MINUS);
+Word *Word::TRUE = new Word("true"s, Tag::TRUE);
+Word *Word::FALSE = new Word("false"s, Tag::FALSE);
+Word *Word::TEMP = new Word("t"s, Tag::TEMP);
+
+bool Word::operator==(Word &rhs) const {
     return tag == rhs.tag &&
            lexeme == rhs.lexeme;
 }
 
 
-Real::Real(float value): Token(Tag::REAL), value(value) {
+Real::Real(float value) : Token(Tag::REAL), value(value) {
 
 }
+
 int Lexer::line = 1;
 
-void Lexer::reserve(Word* w) {
+void Lexer::reserve(Word *w) {
     words[w->lexeme] = w;
 }
 
@@ -75,8 +77,8 @@ bool Lexer::readch(char ch) {
     return false;
 }
 
-Token* Lexer::scan() {
-    for(;;readch()) {
+Token *Lexer::scan() {
+    for (;; readch()) {
         if (peek == ' ' || peek == '\t') continue;
         else if (peek == '\n') line++;
         else break;
@@ -118,10 +120,10 @@ Token* Lexer::scan() {
         if (peek != '.') return new Num(v);
         float x = v;
         float d = 10;
-        for(;;) {
+        for (;;) {
             readch();
             if (!isdigit(peek)) break;
-            x+= (peek - '0') / d;
+            x += (peek - '0') / d;
             d *= 10;
         }
         return new Real(x);
@@ -145,13 +147,14 @@ Token* Lexer::scan() {
     return token;
 }
 
-Type::Type(string s, Tag tag, int width): Word(std::move(s), tag), width(width) {
+Type::Type(string s, Tag tag, int width) : Word(std::move(s), tag), width(width) {
 
 }
-Type* Type::Int = new Type("int", Tag::BASIC, 4);
-Type* Type::Float = new Type("float", Tag::BASIC, 8);
-Type* Type::Char = new Type("char", Tag::BASIC, 1);
-Type* Type::Bool = new Type("bool", Tag::BASIC, 1);
+
+Type *Type::Int = new Type("int", Tag::BASIC, 4);
+Type *Type::Float = new Type("float", Tag::BASIC, 8);
+Type *Type::Char = new Type("char", Tag::BASIC, 1);
+Type *Type::Bool = new Type("bool", Tag::BASIC, 1);
 
 bool Type::numeric(Type *p) {
     return *p == *Type::Char || *p == *Type::Int || *p == *Type::Float;
@@ -165,7 +168,7 @@ Type *Type::max(Type *p1, Type *p2) {
 }
 
 Array::Array(int size, Type *type)
-: Type("[]"s, Tag::INDEX, size * type->width),
-size(size), of(type) {
+        : Type("[]"s, Tag::INDEX, size * type->width),
+          size(size), of(type) {
 
 }

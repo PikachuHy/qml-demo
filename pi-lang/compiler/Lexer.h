@@ -4,8 +4,10 @@
 
 #ifndef PI_LANG_LEXER_H
 #define PI_LANG_LEXER_H
+
 #include <string>
 #include <unordered_map>
+
 using namespace std;
 enum class Tag {
     AND = 256, BASIC, BREAK, DO, ELSE,
@@ -16,15 +18,21 @@ enum class Tag {
 
 struct Token {
     Token(Tag tag);
+
     Token(char ch);
+
     Tag tag;
+
     virtual string toString() const;
 };
-struct Num : public Token{
+
+struct Num : public Token {
     Num(int value);
+
     int value;
 };
-struct Word: public Token {
+
+struct Word : public Token {
     Word(string lexeme, Tag tag);
 
     string lexeme;
@@ -33,27 +41,34 @@ struct Word: public Token {
     bool operator==(Word &rhs) const;
 
 };
-struct Type: public Word {
+
+struct Type : public Word {
     Type(string s, Tag tag, int width);
-    static bool numeric(Type* p);
-    static Type* max(Type* p1, Type* p2);
+
+    static bool numeric(Type *p);
+
+    static Type *max(Type *p1, Type *p2);
+
     int width;
     static Type *Int, *Float, *Char, *Bool;
 };
+
 struct Array : public Type {
-    Array(int size, Type* type);
-    Type* of;
+    Array(int size, Type *type);
+
+    Type *of;
     int size;
 };
-struct Real: public Token {
+
+struct Real : public Token {
     Real(float value);
+
     float value;
 };
 
-class Word_hash
-{
+class Word_hash {
 public:
-    size_t operator()(Word& word) {
+    size_t operator()(Word &word) {
         return hash<string>()(word.lexeme) ^ hash<Tag>()(word.tag);
     }
 
@@ -62,14 +77,19 @@ public:
 class Lexer {
 public:
     Lexer();
-    void reserve(Word* w);
-    Token* scan();
+
+    void reserve(Word *w);
+
+    Token *scan();
+
     static int line;
     char peek;
-    unordered_map<string, Word*> words;
+    unordered_map<string, Word *> words;
 private:
     void readch();
+
     bool readch(char ch);
+
     int offset;
     string sourceCode;
 };

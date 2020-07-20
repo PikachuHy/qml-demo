@@ -4,8 +4,9 @@
 
 #include "Parser.h"
 #include <iostream>
+
 Parser::Parser(Lexer &lexer)
-: lexer(lexer) {
+        : lexer(lexer) {
 
 }
 
@@ -17,7 +18,9 @@ void Parser::program() {
 Node::Node() {
     lexline = Lexer::line;
 }
+
 int Node::labels = 0;
+
 void Node::error(string s) {
     std::cout << "ERROR: near line " << lexline << ": " << s << std::endl;
     exit(-1);
@@ -35,17 +38,17 @@ void Node::emit(string s) {
     std::cout << "\t" << s << std::endl;
 }
 
-Expr::Expr(Token *token, Type *type): op(token), type(type) {
+Expr::Expr(Token *token, Type *type) : op(token), type(type) {
 
 }
 
-void Expr::emitjumps(string test, int t, int f){
-    if (t!=0 && f!=0) {
+void Expr::emitjumps(string test, int t, int f) {
+    if (t != 0 && f != 0) {
         emit("if " + test + " goto L" + to_string(t));
         emit("goto L" + to_string(f));
-    } else if (t!=0) emit("if " + test + " goto L" + to_string(t));
-    else if (f!=0) emit("iffalse " + test + " goto L" + to_string(t));
-    else ; // nothing since both t and f fall through
+    } else if (t != 0) emit("if " + test + " goto L" + to_string(t));
+    else if (f != 0) emit("iffalse " + test + " goto L" + to_string(t));
+    else; // nothing since both t and f fall through
 }
 
 void Expr::jumping(int t, int f) {
@@ -56,7 +59,7 @@ string Expr::toString() {
     return op->toString();
 }
 
-bool Expr::operator==(Expr &rhs) const{
+bool Expr::operator==(Expr &rhs) const {
     return op == rhs.op &&
            type == rhs.type;
 }
@@ -69,16 +72,16 @@ Expr *Op::reduce() {
     return t;
 }
 
-Temp::Temp(Type *type): Expr(Word::TEMP, type) {
+Temp::Temp(Type *type) : Expr(Word::TEMP, type) {
     number = ++count;
 }
 
 string Temp::toString() {
-    return "t"+to_string(number);
+    return "t" + to_string(number);
 }
 
 Arith::Arith(Token *token, Expr *expr1, Expr *expr2)
-: Op(token, Type::max(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
+        : Op(token, Type::max(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
     if (type == nullptr) error("type error");
 }
 
@@ -91,7 +94,7 @@ string Arith::toString() {
 }
 
 Unary::Unary(Token *token, Expr *expr)
-: Op(token, Type::max(Type::Int, expr->type)), expr(expr) {
+        : Op(token, Type::max(Type::Int, expr->type)), expr(expr) {
     if (type == nullptr) error("type error");
 }
 
@@ -106,19 +109,21 @@ string Unary::toString() {
 Constant::Constant(Token *token, Type *type) : Expr(token, type) {
 
 }
-Constant* Constant::True = new Constant(Word::TRUE, Type::Bool);
-Constant* Constant::False = new Constant(Word::FALSE, Type::Bool);
+
+Constant *Constant::True = new Constant(Word::TRUE, Type::Bool);
+Constant *Constant::False = new Constant(Word::FALSE, Type::Bool);
+
 void Constant::jumping(int t, int f) {
     if (*this == *True && t != 0) emit("goto L" + to_string(t));
     else if (*this == *False && f != 0) emit("goto L" + to_string(f));
 }
 
 Logical::Logical(Token *token, Expr *expr1, Expr *expr2)
-: Expr(token, check(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
+        : Expr(token, check(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
     if (type == nullptr) error("type error");
 }
 
-Type *Logical::check(Type* p1, Type* p2) {
+Type *Logical::check(Type *p1, Type *p2) {
     if (*p1 == *Type::Bool && *p2 == *Type::Bool) return Type::Bool;
     return nullptr;
 }
@@ -127,7 +132,7 @@ Expr *Logical::gen() {
     int f = newlabel();
     int a = newlabel();
     auto temp = new Temp(type);
-    jumping(0,f);
+    jumping(0, f);
     emit(temp->toString() + " = true");
     emit("goto L" + to_string(a));
     emitlabel(f);
