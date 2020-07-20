@@ -37,6 +37,12 @@ void Node::emitlabel(int i) {
 void Node::emit(string s) {
     std::cout << "\t" << s << std::endl;
 }
+Stmt* Stmt::Null = new Stmt();
+Stmt* Stmt::Enclosing = Stmt::Null;
+
+string Stmt::toString() {
+    return "stmt";
+}
 
 Expr::Expr(Token *token, Type *type) : op(token), type(type) {
 
@@ -213,4 +219,114 @@ void Access::jumping(int t, int f) {
 
 string Access::toString() {
     return array->toString() + "[ " + index->toString() + " ]";
+}
+
+If::If(Expr *expr, Stmt *stmt) : expr(expr), stmt(stmt) {
+    if (expr->type != Type::Bool) expr->error("boolean required in if");
+}
+
+void If::gen(int b, int a) {
+    int label = newlabel();
+    expr->jumping(0, a);
+    emitlabel(label);
+    stmt->gen(label, a);
+}
+
+Else::Else(Expr *expr, Stmt *stmt1, Stmt *stmt2) : expr(expr), stmt1(stmt1), stmt2(stmt2) {
+    if (expr->type != Type::Bool) expr->error("boolean required in if");
+}
+
+void Else::gen(int b, int a) {
+    int label1 = newlabel();
+    int label2 = newlabel();
+    expr->jumping(0, label2);
+    emitlabel(label1);
+    stmt1->gen(label1, a);
+    emit("goto L" + to_string(a));
+    emitlabel(label2);
+    stmt2->gen(label2, a);
+}
+
+void While::gen(int b, int a) {
+    after = a;
+    expr->jumping(0, a);
+    int label = newlabel();
+    emitlabel(label);
+    stmt->gen(label, b);
+    emit("goto L" + to_string(b));
+}
+
+void While::init(Expr *expr, Stmt *stmt) {
+    this->expr = expr;
+    this->stmt = stmt;
+    if (expr->type != Type::Bool) expr->error("boolean required in if");
+}
+
+void Do::init(Expr *expr, Stmt *stmt) {
+    this->expr = expr;
+    this->stmt = stmt;
+    if (expr->type != Type::Bool) expr->error("boolean required in if");
+}
+
+void Do::gen(int b, int a) {
+    after = a;
+    int label = newlabel();
+    stmt->gen(b, label);
+    emitlabel(label);
+    expr->jumping(b, 0);
+}
+
+Set::Set(Id *id, Expr *expr) : id(id), expr(expr) {
+    if (check(id->type, expr->type) == nullptr) error("type error");
+}
+
+Type *Set::check(Type* p1, Type* p2) {
+    if (Type::numeric(p1) && Type::numeric(p2)) return p2;
+    if (p1 == Type::Bool && p2 == Type::Bool) return p2;
+    return nullptr;
+}
+
+void Set::gen(int b, int a) {
+    emit(id->toString() + " = " + expr->gen()->toString());
+}
+
+SetElem::SetElem(Access *x, Expr* y) : array(x->array), index(x->index), expr(y) {
+
+}
+
+Type *SetElem::check(Type* p1, Type* p2) {
+    if (typeid(p1) == typeid(Array) || typeid(p2) == typeid(Array)) return nullptr;
+    if (p1 == p2) return p2;
+    if (Type::numeric(p1) && Type::numeric(p2)) return p2;
+    return nullptr;
+}
+
+void SetElem::gen(int b, int a) {
+    auto s1 = index->reduce()->toString();
+    auto s2 = expr->reduce()->toString();
+    emit(array->toString() + " [ " + s1 + " ] = " + s2);
+}
+
+Seq::Seq(Stmt *stmt1, Stmt *stmt2) : stmt1(stmt1), stmt2(stmt2) {
+
+}
+
+void Seq::gen(int b, int a) {
+    if (stmt1 == Stmt::Null) stmt2->gen(b, a);
+    else if (stmt2 == Stmt::Null) stmt1->gen(b, a);
+    else {
+        int label = newlabel();
+        stmt1->gen(b, label);
+        emitlabel(label);
+        stmt2->gen(label, a);
+    }
+}
+
+Break::Break() {
+    if (Stmt::Enclosing == Stmt::Null) error("unenclosed break");
+    stmt = Stmt::Enclosing;
+}
+
+void Break::gen(int b, int a) {
+    emit("goto L" + stmt->after);
 }

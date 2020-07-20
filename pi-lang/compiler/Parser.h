@@ -27,6 +27,81 @@ private:
     int lexline;
 };
 
+struct Stmt : public Node {
+    Stmt() {}
+    static Stmt * Null, *Enclosing; // used for break stmts
+    virtual void gen(int b, int a) {} // called with labels begin and after
+    int after = 0; // saves label after
+
+    string toString() override;
+};
+struct Expr;
+struct If : public Stmt {
+    Expr* expr;
+    Stmt* stmt;
+
+    If(Expr *expr, Stmt *stmt);
+
+    void gen(int b, int a) override;
+};
+struct Else : public Stmt {
+    Expr* expr;
+    Stmt* stmt1;
+    Stmt* stmt2;
+
+    Else(Expr *expr, Stmt *stmt1, Stmt *stmt2);
+
+    void gen(int b, int a) override;
+};
+struct While : public Stmt {
+    Expr* expr;
+    Stmt* stmt;
+    void init(Expr* expr, Stmt* stmt);
+
+    void gen(int b, int a) override;
+};
+struct Do : public Stmt {
+    Expr* expr;
+    Stmt* stmt;
+    void init(Expr* expr, Stmt* stmt);
+
+    void gen(int b, int a) override;
+};
+struct Id;
+struct Set : public Stmt {
+    Id* id;
+    Expr* expr;
+
+    Set(Id *id, Expr *expr);
+    Type* check(Type* p1, Type* p2);
+
+    void gen(int b, int a) override;
+};
+struct Access;
+struct SetElem : public Stmt {
+    Id* array;
+    Expr* index;
+    Expr* expr;
+    SetElem(Access* x, Expr* y);
+    Type* check(Type* p1, Type* p2);
+
+    void gen(int b, int a) override;
+};
+struct Seq : public Stmt {
+    Stmt* stmt1;
+    Stmt* stmt2;
+
+    Seq(Stmt *stmt1, Stmt *stmt2);
+
+    void gen(int b, int a) override;
+};
+struct Break: public Stmt {
+    Stmt* stmt;
+
+    Break();
+
+    void gen(int b, int a) override;
+};
 struct Expr : public Node {
     Expr(Token *token, Type *type);
 
@@ -148,7 +223,6 @@ struct Access : public Op {
 
     string toString() override;
 };
-
 class Parser {
 public:
     Parser(Lexer &lexer);
