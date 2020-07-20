@@ -40,6 +40,11 @@ struct Type: public Word {
     const int width;
     const static Type Int, Float, Char, Bool;
 };
+struct Array : public Type {
+    Array(int size, Type* type);
+    Type* of;
+    int size;
+};
 struct Real: public Token {
     Real(float value);
     const float value;

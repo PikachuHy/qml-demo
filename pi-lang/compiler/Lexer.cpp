@@ -162,3 +162,9 @@ const Type *Type::max(Type *p1, Type *p2) {
     if (*p1 == Type::Int || *p2 == Type::Int) return &Type::Int;
     return &Type::Char;
 }
+
+Array::Array(int size, Type *type)
+: Type("[]"s, Tag::INDEX, size * type->width),
+size(size), of(type) {
+
+}
