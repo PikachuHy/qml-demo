@@ -36,13 +36,23 @@ struct Real: public Token {
     Real(float value);
     const float value;
 };
+
+class Word_hash
+{
+public:
+    size_t operator()(const Word& word) const {
+        return hash<string>()(word.lexeme) ^ hash<Tag>()(word.tag);
+    }
+
+};
+
 class Lexer {
 public:
     Lexer();
     void reserve(Word w);
     static int line;
     char peak;
-    unordered_set<Word> words;
+    unordered_set<Word, Word_hash> words;
 
 };
 
