@@ -53,7 +53,7 @@ public:
     void reserve(const Word* w);
     const Token* scan();
     static int line;
-    char peak;
+    char peek;
     unordered_map<string, const Word*> words;
 private:
     void readch();

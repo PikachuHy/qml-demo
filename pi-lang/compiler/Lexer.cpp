@@ -60,28 +60,28 @@ Lexer::Lexer() {
     reserve(&Word::FALSE);
     // TODO: type int char bool float
     offset = 0;
-    peak = ' ';
+    peek = ' ';
 }
 
 void Lexer::readch() {
-    peak = sourceCode[offset++];
+    peek = sourceCode[offset++];
 }
 
 bool Lexer::readch(char ch) {
     readch();
-    if (peak != ch) return false;
-    peak = ' ';
+    if (peek != ch) return false;
+    peek = ' ';
     return false;
 }
 
 const Token* Lexer::scan() {
     for(;;readch()) {
-        if (peak == ' ' || peak == '\t') continue;
-        else if (peak == '\n') line++;
+        if (peek == ' ' || peek == '\t') continue;
+        else if (peek == '\n') line++;
         else break;
     }
     // parse && || == != <= >=
-    switch (peak) {
+    switch (peek) {
         case '&': {
             if (readch('&')) return &Word::AND;
             else return new Token('&');
@@ -108,29 +108,29 @@ const Token* Lexer::scan() {
         }
     }
     // int or float
-    if (isdigit(peak)) {
+    if (isdigit(peek)) {
         int v = 0;
         do {
-            v = v * 10 + (peak - '0');
+            v = v * 10 + (peek - '0');
             readch();
-        } while (isdigit(peak));
-        if (peak != '.') return new Num(v);
+        } while (isdigit(peek));
+        if (peek != '.') return new Num(v);
         float x = v;
         float d = 10;
         for(;;) {
             readch();
-            if (!isdigit(peak)) break;
-            x+= (peak - '0') / d;
+            if (!isdigit(peek)) break;
+            x+= (peek - '0') / d;
             d *= 10;
         }
         return new Real(x);
     }
-    if (isalpha(peak)) {
+    if (isalpha(peek)) {
         string s;
         do {
-            s += peak;
+            s += peek;
             readch();
-        } while (isalnum(peak));
+        } while (isalnum(peek));
 
         if (words.find(s) != words.end()) {
             return words[s];
@@ -139,7 +139,7 @@ const Token* Lexer::scan() {
         words[w->lexeme] = w;
         return w;
     }
-    auto token = new Token(peak);
-    peak = ' ';
+    auto token = new Token(peek);
+    peek = ' ';
     return token;
 }
