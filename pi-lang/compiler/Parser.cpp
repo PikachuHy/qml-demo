@@ -305,6 +305,8 @@ Access *Parser::offset(Id* a) { // I -> [E] | [E] I
     match('[');
     i = boolean();
     match(']');
+    // important !!!
+    p = ((Array*)p)->of;
     w = new Constant(p->width);
     t1 = new Arith(new Token('*'), i, w);
     loc = t1;
