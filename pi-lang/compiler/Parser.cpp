@@ -382,7 +382,7 @@ Expr *Op::reduce() {
 Temp::Temp(Type *type) : Expr(Word::TEMP, type) {
     number = ++count;
 }
-
+int Temp::count = 0;
 string Temp::toString() {
     return "t" + to_string(number);
 }
