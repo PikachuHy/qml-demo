@@ -75,7 +75,10 @@ Lexer::Lexer(string sourceCode): sourceCode(sourceCode), offset(0), peek(' ') {
     reserve(new Word("break", Tag::BREAK));
     reserve(Word::TRUE);
     reserve(Word::FALSE);
-    // TODO: type int char bool float
+    reserve(Type::Int);
+    reserve(Type::Char);
+    reserve(Type::Bool);
+    reserve(Type::Float);
 }
 void Lexer::readch() {
     peek = sourceCode[offset++];
