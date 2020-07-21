@@ -223,6 +223,17 @@ struct Access : public Op {
 
     string toString() override;
 };
+class Env {
+public:
+    Env(Env* prev):prev(prev) {
+    }
+    void put(Token* token, Id* id);
+    Id* get(Token* v);
+protected:
+    Env* prev;
+private:
+    unordered_map<Token*,Id*> table;
+};
 class Parser {
 public:
     Parser(Lexer &lexer);

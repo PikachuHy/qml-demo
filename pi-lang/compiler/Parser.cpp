@@ -330,3 +330,15 @@ Break::Break() {
 void Break::gen(int b, int a) {
     emit("goto L" + to_string(stmt->after));
 }
+
+void Env::put(Token *token, Id *id) {
+    table[token] = id;
+}
+
+Id *Env::get(Token *v) {
+    for(auto e = this; e != nullptr, e = e->prev) {
+        auto found = e->table.find(v);
+        if (found != e->table.end()) return e->table[v];
+    }
+    return nullptr;
+}
