@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
     Lexer lexer(filedata);
     Parser parser(&lexer);
     parser.program();
+    std::cout << std::endl;
     std::cout << "Done!" << std::endl;
     return 0;
 }
