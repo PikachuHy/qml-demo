@@ -4,7 +4,7 @@
 
 #include "Parser.h"
 #include <iostream>
-
+#define MY_ERROR(msg) {std::cout << __FILE__ << ":" << __LINE__ << " "; error(msg);}
 Parser::Parser(Lexer *lex)
         : lex(lex) {
     move();
@@ -394,8 +394,9 @@ string Temp::toString() {
 }
 
 Arith::Arith(Token *token, Expr *expr1, Expr *expr2)
-        : Op(token, Type::max(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
-    if (type == nullptr) error("type error");
+        : Op(token, nullptr), expr1(expr1), expr2(expr2) {
+    type = Type::max(expr1->type, expr2->type);
+    if (type == nullptr) MY_ERROR("type error");
 }
 
 Expr *Arith::gen() {
@@ -407,8 +408,9 @@ string Arith::toString() {
 }
 
 Unary::Unary(Token *token, Expr *expr)
-        : Op(token, Type::max(Type::Int, expr->type)), expr(expr) {
-    if (type == nullptr) error("type error");
+        : Op(token, nullptr), expr(expr) {
+    type = Type::max(Type::Int, expr->type);
+    if (type == nullptr) MY_ERROR("type error");
 }
 
 Expr *Unary::gen() {
@@ -432,10 +434,15 @@ void Constant::jumping(int t, int f) {
 }
 
 Logical::Logical(Token *token, Expr *expr1, Expr *expr2)
-        : Expr(token, check(expr1->type, expr2->type)), expr1(expr1), expr2(expr2) {
-    if (type == nullptr) error("type error");
+        : Expr(token, nullptr), expr1(expr1), expr2(expr2) {
+    type = check(expr1->type, expr2->type);
+    if (type == nullptr) MY_ERROR("type error");
 }
 
+Logical::Logical(Token *token, Expr *expr1, Expr *expr2, Type *type)
+:Expr(token, type), expr1(expr1), expr2(expr2) {
+
+}
 Type *Logical::check(Type *p1, Type *p2) {
     if (*p1 == *Type::Bool && *p2 == *Type::Bool) return Type::Bool;
     return nullptr;
@@ -458,6 +465,7 @@ Expr *Logical::gen() {
 string Logical::toString() {
     return expr1->toString() + " " + op->toString() + " " + expr2->toString();
 }
+
 
 Or::Or(Token *token, Expr *expr1, Expr *expr2) : Logical(token, expr1, expr2) {
 
@@ -493,8 +501,10 @@ string Not::toString() {
     return op->toString() + " " + expr2->toString();
 }
 
-Rel::Rel(Token *token, Expr *expr1, Expr *expr2) : Logical(token, expr1, expr2) {
-
+Rel::Rel(Token *token, Expr *expr1, Expr *expr2)
+: Logical(token, expr1, expr2, nullptr) {
+    type = check(expr1->type, expr2->type);
+    if (type == nullptr) MY_ERROR("type error");
 }
 
 void Rel::jumping(int t, int f) {
@@ -506,9 +516,19 @@ void Rel::jumping(int t, int f) {
 
 Type *Rel::check(Type *p1, Type *p2) {
     // TODO: must use typeid ???
-    if (typeid(p1) == typeid(Array) || typeid(p2) == typeid(Array)) return nullptr;
+//    if (typeid(p1) == typeid(Array) || typeid(p2) == typeid(Array)) return nullptr;
+    if (typeid(*p1) == typeid(Array)) {
+        p1 = ((Array*)p1)->of;
+    }
+    if (typeid(*p2) == typeid(Array)) {
+        p2 = ((Array*)p2)->of;
+    }
     if (*p1 == *p2) return Type::Bool;
     return nullptr;
+}
+
+void Rel::init() {
+
 }
 
 Access::Access(Id *array, Expr *index, Type *type)
@@ -584,7 +604,7 @@ void Do::gen(int b, int a) {
 }
 
 Set::Set(Id *id, Expr *expr) : id(id), expr(expr) {
-    if (check(id->type, expr->type) == nullptr) error("type error");
+    if (check(id->type, expr->type) == nullptr) MY_ERROR("type error");
 }
 
 Type *Set::check(Type* p1, Type* p2) {
@@ -630,7 +650,7 @@ void Seq::gen(int b, int a) {
 }
 
 Break::Break() {
-    if (Stmt::Enclosing == Stmt::Null) error("unenclosed break");
+    if (Stmt::Enclosing == Stmt::Null) MY_ERROR("unenclosed break");
     stmt = Stmt::Enclosing;
 }
 
