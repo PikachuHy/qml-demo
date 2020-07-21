@@ -25,6 +25,7 @@ public:
 
 private:
     int lexline;
+    int column;
 };
 
 struct Stmt : public Node {

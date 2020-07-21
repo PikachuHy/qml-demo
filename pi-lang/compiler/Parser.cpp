@@ -324,12 +324,13 @@ Access *Parser::offset(Id* a) { // I -> [E] | [E] I
 
 Node::Node() {
     lexline = Lexer::line;
+    column = Lexer::column;
 }
 
 int Node::labels = 0;
 
 void Node::error(string s) {
-    std::cout << "ERROR: near line " << lexline << ": " << s << std::endl;
+    std::cout << "ERROR: near line " << lexline << ":" << column << " " << s << std::endl;
     exit(-1);
 }
 

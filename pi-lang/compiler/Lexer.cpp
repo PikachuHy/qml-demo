@@ -48,6 +48,7 @@ Real::Real(float value) : Token(Tag::REAL), value(value) {
 }
 
 int Lexer::line = 1;
+int Lexer::column = 0;
 
 void Lexer::reserve(Word *w) {
     words[w->lexeme] = w;
@@ -82,6 +83,7 @@ Lexer::Lexer(string sourceCode): sourceCode(sourceCode), offset(0), peek(' ') {
 }
 void Lexer::readch() {
     peek = sourceCode[offset++];
+    column++;
 }
 
 bool Lexer::readch(char ch) {
@@ -94,7 +96,10 @@ bool Lexer::readch(char ch) {
 Token *Lexer::scan() {
     for (;; readch()) {
         if (peek == ' ' || peek == '\t' || peek == '\r') continue;
-        else if (peek == '\n') line++;
+        else if (peek == '\n') {
+            line++;
+            column = 1;
+        }
         else break;
     }
     // parse && || == != <= >=

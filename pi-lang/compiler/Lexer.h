@@ -83,6 +83,7 @@ public:
     Token *scan();
 
     static int line;
+    static int column;
     char peek = ' ';
     unordered_map<string, Word *> words;
 private:
