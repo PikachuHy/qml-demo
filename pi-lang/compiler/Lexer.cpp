@@ -93,7 +93,7 @@ bool Lexer::readch(char ch) {
 
 Token *Lexer::scan() {
     for (;; readch()) {
-        if (peek == ' ' || peek == '\t') continue;
+        if (peek == ' ' || peek == '\t' || peek == '\r') continue;
         else if (peek == '\n') line++;
         else break;
     }
