@@ -46,6 +46,10 @@ bool Word::operator==(Word &rhs) const {
            lexeme == rhs.lexeme;
 }
 
+string Word::toString() const {
+    return lexeme;
+}
+
 
 Real::Real(float value) : Token(Tag::REAL), value(value) {
 

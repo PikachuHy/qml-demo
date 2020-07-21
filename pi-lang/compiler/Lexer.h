@@ -42,6 +42,7 @@ struct Word : public Token {
 
     bool operator==(Word &rhs) const;
 
+    string toString() const override;
 };
 
 struct Type : public Word {
