@@ -77,7 +77,10 @@ public:
 class Lexer {
 public:
     Lexer();
-
+    Lexer(string sourceCode){
+        Lexer();
+        this->sourceCode = sourceCode;
+    }
     void reserve(Word *w);
 
     Token *scan();
