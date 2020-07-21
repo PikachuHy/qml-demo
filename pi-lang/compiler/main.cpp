@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     string filename = argv[1];
-    std::cout << "parse " << filename;
+    std::cout << "parse " << filename << std::endl;
     string filedata;
     read_file(filename, filedata);
     Lexer lexer(filedata);

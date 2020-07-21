@@ -66,6 +66,17 @@ Lexer::Lexer() {
     peek = ' ';
 }
 
+Lexer::Lexer(string sourceCode): sourceCode(sourceCode), offset(0), peek(' ') {
+
+    reserve(new Word("if", Tag::IF));
+    reserve(new Word("else", Tag::ELSE));
+    reserve(new Word("while", Tag::WHILE));
+    reserve(new Word("do", Tag::DO));
+    reserve(new Word("break", Tag::BREAK));
+    reserve(Word::TRUE);
+    reserve(Word::FALSE);
+    // TODO: type int char bool float
+}
 void Lexer::readch() {
     peek = sourceCode[offset++];
 }
@@ -146,6 +157,7 @@ Token *Lexer::scan() {
     peek = ' ';
     return token;
 }
+
 
 Type::Type(string s, Tag tag, int width) : Word(std::move(s), tag), width(width) {
 

@@ -77,16 +77,13 @@ public:
 class Lexer {
 public:
     Lexer();
-    Lexer(string sourceCode){
-        Lexer();
-        this->sourceCode = sourceCode;
-    }
+    Lexer(string sourceCode);
     void reserve(Word *w);
 
     Token *scan();
 
     static int line;
-    char peek;
+    char peek = ' ';
     unordered_map<string, Word *> words;
 private:
     void readch();
