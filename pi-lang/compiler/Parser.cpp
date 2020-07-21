@@ -637,7 +637,7 @@ void Env::put(Token *token, Id *id) {
 }
 
 Id *Env::get(Token *v) {
-    for(auto e = this; e != nullptr, e = e->prev) {
+    for(auto e = this; e != nullptr; e = e->prev) {
         auto found = e->table.find(v);
         if (found != e->table.end()) return e->table[v];
     }
