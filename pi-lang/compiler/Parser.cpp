@@ -328,5 +328,5 @@ Break::Break() {
 }
 
 void Break::gen(int b, int a) {
-    emit("goto L" + stmt->after);
+    emit("goto L" + to_string(stmt->after));
 }
