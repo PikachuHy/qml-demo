@@ -139,6 +139,12 @@ Stmt *Parser::stmt() {
             match(';');
             return new Break();
         }
+        case (Tag)'{':{
+            return block();
+        }
+        default: {
+            return assign();
+        }
     }
     std::cout << "warning: nullptr stmt" << std::endl;
     return nullptr;
