@@ -625,7 +625,7 @@ void Set::gen(int b, int a) {
 }
 
 SetElem::SetElem(Access *x, Expr* y) : array(x->array), index(x->index), expr(y) {
-
+    if (check(x->type, expr->type) == nullptr) MY_ERROR("type error")
 }
 
 Type *SetElem::check(Type* p1, Type* p2) {
