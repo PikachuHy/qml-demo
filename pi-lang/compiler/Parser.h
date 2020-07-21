@@ -181,7 +181,6 @@ struct Not : public Logical {
 struct Rel : public Logical {
 public:
     Rel(Token *token, Expr *expr1, Expr *expr2);
-    void init();
     void jumping(int t, int f) override;
 protected:
     Type *check(Type *p1, Type *p2) override;

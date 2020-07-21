@@ -524,10 +524,6 @@ Type *Rel::check(Type *p1, Type *p2) {
     return nullptr;
 }
 
-void Rel::init() {
-
-}
-
 Access::Access(Id *array, Expr *index, Type *type)
 : Op(new Word("[]", Tag::INDEX), type), array(array), index(index) {
 
