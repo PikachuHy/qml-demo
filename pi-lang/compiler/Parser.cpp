@@ -5,15 +5,316 @@
 #include "Parser.h"
 #include <iostream>
 
-Parser::Parser(Lexer &lexer)
-        : lexer(lexer) {
-
+Parser::Parser(Lexer *lex)
+        : lex(lex) {
+    move();
 }
 
-void Parser::program() {
+void Parser::program() { // program -> block
     // TODO: implement
     std::cout << "pi-lang compiler is under the development" << std::endl;
+    auto s = block();
+    int begin = s->newlabel();
+    int after = s->newlabel();
+    s->emitlabel(begin);
+    s->gen(begin, after);
+    s->emitlabel(after);
 }
+
+void Parser::move() {
+    look = lex->scan();
+}
+
+void Parser::error(string s) {
+    std::cout << "near line " << Lexer::line << ": " << s << std::endl;
+    exit(-1);
+}
+
+void Parser::match(int t) {
+    if (static_cast<int>(look->tag) == t) move();
+    else error("syntax error");
+}
+
+void Parser::match(Tag tag) {
+    if (look->tag == tag) move();
+    else error("syntax error");
+}
+Stmt *Parser::block() { // block -> { decls stmts }
+    match('{');
+    Env* saveEnv = top;
+    top = new Env(top);
+    decls();
+    auto s = stmts();
+    match('}');
+    top = saveEnv;
+    return s;
+}
+
+void Parser::decls() {
+    while (look->tag == Tag::BASIC) { // D->type ID;
+        auto p = type();
+        auto token = look;
+        match(Tag::ID);
+        match(';');
+        auto id = new Id((Word*)token, p, used);
+        top->put(token, id);
+        used = used + p->width;
+    }
+}
+
+Type *Parser::type() {
+    Type *p = (Type*)look; // expect look->tag == Tag::BASIC
+    match(Tag::BASIC);
+    if ((int)look->tag != '[') return p;
+    return dims(p);
+}
+
+Stmt *Parser::stmts() {
+    if ((int)look->tag == '}') return Stmt::Null;
+    return new Seq(stmt(), stmts());
+}
+
+Type *Parser::dims(Type* p) {
+    match('[');
+    auto token = look;
+    match(Tag::NUM);
+    match(']');
+    if ((int)look->tag == '[') {
+        p = dims(p);
+    }
+    auto v = ((Num*)token)->value;
+    return new Array(v, p);
+}
+
+Stmt *Parser::stmt() {
+    Expr* x;
+    Stmt *s, *s1, *s2;
+    Stmt *savedStmt;
+    switch (look->tag) {
+        case (Tag)':': {
+            move();
+            return Stmt::Null;
+        }
+        case Tag::IF: {
+            match(Tag::IF);
+            match('(');
+            x = boolean();
+            match(')');
+            s1 = stmt();
+            if (look->tag != Tag::ELSE) return new If(x, s1);
+            match(Tag::ELSE);
+            s2 = stmt();
+            return new Else(x, s1, s2);
+        }
+        case Tag::WHILE: {
+            auto whilenode = new While();
+            savedStmt = Stmt::Enclosing;
+            Stmt::Enclosing = whilenode;
+            match(Tag::WHILE);
+            match('(');
+            x =  boolean();
+            match(')');
+            s1 = stmt();
+            whilenode->init(x, s1);
+            Stmt::Enclosing = savedStmt;
+            return whilenode;
+        }
+        case Tag::DO: {
+            auto donode = new Do();
+            savedStmt = Stmt::Enclosing;
+            Stmt::Enclosing = donode;
+            match(Tag::DO);
+            s1 = stmt();
+            match(Tag::WHILE);
+            match('(');
+            x =  boolean();
+            match(')');
+            match(';');
+            donode->init(x, s1);
+            Stmt::Enclosing = savedStmt;
+            return donode;
+        }
+        case Tag::BREAK: {
+            match(Tag::BREAK);
+            match(';');
+            return new Break();
+        }
+    }
+    std::cout << "warning: nullptr stmt" << std::endl;
+    return nullptr;
+}
+
+Stmt *Parser::assign() {
+    Stmt* s;
+    auto token = look;
+    match(Tag::ID);
+    auto id = top->get(token);
+    if (id == nullptr) error(token->toString() + " undeclared");
+    if ((int)look->tag == '=') { // S -> id = E;
+        move();
+        s = new Set(id, boolean());
+    } else { // S->L = E;
+        auto x = offset(id);
+        match('=');
+        s = new SetElem(x, boolean());
+    }
+    match(';');
+    return s;
+}
+
+Expr *Parser::boolean() {
+    auto x = join();
+    while (look->tag == Tag::OR) {
+        auto token = look;
+        move();
+        x = new Or(token, x, join());
+    }
+    return x;
+}
+
+Expr *Parser::join() {
+    auto x = equality();
+    while (look->tag == Tag::AND) {
+        auto token = look;
+        move();
+        x = new And(token, x, equality());
+    }
+    return x;
+}
+
+Expr *Parser::equality() {
+    auto x = rel();
+    while (look->tag == Tag::EQ || look->tag == Tag::NE) {
+        auto token = look;
+        move();
+        x = new Rel(token, x, rel());
+    }
+    return x;
+}
+
+Expr *Parser::rel() {
+    auto x = expr();
+    switch (look->tag) {
+        case (Tag)'<':
+        case Tag::LE:
+        case Tag::NE:
+        case (Tag)'>': {
+            auto token = look;
+            move();
+            return new Rel(token, x, expr());
+        }
+        default: {
+
+        }
+    }
+    return x;
+}
+
+Expr *Parser::expr() {
+    auto x = term();
+    while ((int)look->tag == '+' || (int)look->tag == '-') {
+        auto token = look;
+        move();
+        x = new Arith(token, x, term());
+    }
+    return x;
+}
+
+Expr *Parser::term() {
+    auto x = unary();
+    while ((int)look->tag == '*' || (int)look->tag == '/') {
+        auto token = look;
+        move();
+        x = new Arith(token, x, unary());
+    }
+    return x;
+}
+
+Expr *Parser::unary() {
+    if ((int)look->tag == '-') {
+        move();
+        return new Unary(Word::MINUS, unary());
+    }
+    if ((int)look->tag == '!') {
+        auto token = look;
+        move();
+        return new Not(token, unary());
+    }
+    return factor();
+}
+
+Expr *Parser::factor() {
+    Expr* x = nullptr;
+    switch (look->tag) {
+        case (Tag)'(': {
+            move();
+            x = boolean();
+            match(')');
+            return x;
+        }
+        case Tag::NUM: {
+            x = new Constant(look, Type::Int);
+            move();
+            return x;
+        }
+        case Tag::REAL:{
+            x = new Constant(look, Type::Float);
+            move();
+            return x;
+        }
+        case Tag::TRUE: {
+            x = Constant::True;
+            move();
+            return x;
+        }
+        case Tag::FALSE: {
+            x = Constant::False;
+            move();
+            return x;
+        }
+        case Tag::ID: {
+            auto id = top->get(look);
+            if (id == nullptr) {
+                error(look->toString() + " undeclared");
+            }
+            move();
+            if ((int)look->tag != '[') return id;
+            return offset(id);
+        }
+        default: {
+            error("syntax error");
+        }
+    }
+    return x;
+}
+
+Access *Parser::offset(Id* a) { // I -> [E] | [E] I
+    Expr* i;
+    Expr* w;
+    Expr* t1;
+    Expr* t2;
+    Expr* loc;
+    auto p = a->type;
+    // first index, I -> [E]
+    match('[');
+    i = boolean();
+    match(']');
+    w = new Constant(p->width);
+    t1 = new Arith(new Token('*'), i, w);
+    loc = t1;
+    while ((int)look->tag == '[') { // multi-dimensional I -> [E] I
+        match('[');
+        i = boolean();
+        match(']');
+        w = new Constant(p->width);
+        t1 = new Arith(new Token('*'), i, w);
+        t2 = new Arith(new Token('+'), loc, t1);
+        loc = t2;
+    }
+
+    return new Access(a, loc, p);
+}
+
 
 Node::Node() {
     lexline = Lexer::line;

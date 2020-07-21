@@ -236,12 +236,33 @@ private:
 };
 class Parser {
 public:
-    Parser(Lexer &lexer);
-
+    Parser(Lexer* lex);
+    void move();
+    void error(string s);
+    void match(int t);
+    void match(Tag tag);
     void program();
-
+    Stmt * block();
+    void decls();
+    Type* type();
+    Type* dims(Type* p);
+    Stmt* stmts();
+    Stmt* stmt();
+    Stmt* assign();
+    Expr* boolean();
+    Expr* join();
+    Expr* equality();
+    Expr* rel();
+    Expr* expr();
+    Expr* term();
+    Expr* unary();
+    Expr* factor();
+    Access* offset(Id* a);
 private:
-    Lexer lexer;
+    Lexer *lex;
+    Token* look; // lookahead token
+    Env* top;
+    int used;
 };
 
 
