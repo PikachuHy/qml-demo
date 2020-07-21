@@ -22,6 +22,10 @@ Num::Num(int value) : Token(Tag::NUM), value(value) {
 
 }
 
+string Num::toString() const {
+    return to_string(value);
+}
+
 Word::Word(string lexeme, Tag tag) : Token(tag), lexeme(std::move(lexeme)) {
 
 }

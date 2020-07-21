@@ -30,6 +30,8 @@ struct Num : public Token {
     Num(int value);
 
     int value;
+
+    string toString() const override;
 };
 
 struct Word : public Token {
