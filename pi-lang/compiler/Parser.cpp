@@ -609,6 +609,12 @@ Set::Set(Id *id, Expr *expr) : id(id), expr(expr) {
 }
 
 Type *Set::check(Type* p1, Type* p2) {
+    if (typeid(*p1) == typeid(Array)) {
+        p1 = ((Array*)p1)->of;
+    }
+    if (typeid(*p2) == typeid(Array)) {
+        p2 = ((Array*)p2)->of;
+    }
     if (Type::numeric(p1) && Type::numeric(p2)) return p2;
     if (p1 == Type::Bool && p2 == Type::Bool) return p2;
     return nullptr;
@@ -623,7 +629,13 @@ SetElem::SetElem(Access *x, Expr* y) : array(x->array), index(x->index), expr(y)
 }
 
 Type *SetElem::check(Type* p1, Type* p2) {
-    if (typeid(p1) == typeid(Array) || typeid(p2) == typeid(Array)) return nullptr;
+    if (typeid(*p1) == typeid(Array)) {
+        p1 = ((Array*)p1)->of;
+    }
+    if (typeid(*p2) == typeid(Array)) {
+        p2 = ((Array*)p2)->of;
+    }
+//    if (typeid(p1) == typeid(Array) || typeid(p2) == typeid(Array)) return nullptr;
     if (p1 == p2) return p2;
     if (Type::numeric(p1) && Type::numeric(p2)) return p2;
     return nullptr;
