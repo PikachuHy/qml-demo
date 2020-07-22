@@ -5,6 +5,13 @@ vector<int> reverseKGroup(const vector<int> v, int k) {
     auto ret = s.reverseKGroup(toListNode(v), k);
     return toVector(ret);
 }
+
+TEST(LeetCode25ReverseKGroup, __LINE__) {
+    vector<int> expect = {1};
+    auto ret = reverseKGroup({1}, 2);
+    EXPECT_EQ(ret, expect);
+}
+
 TEST(LeetCode25ReverseKGroup, __LINE__) {
     vector<int> expect = {1, 2};
     auto ret = reverseKGroup({2,1}, 2);
