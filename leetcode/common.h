@@ -61,22 +61,38 @@ vector<int> toVector(ListNode *l) {
 }
 
 
-void dfs(TreeNode *node, vector<variant<int, string>> &v) {
-    if (!node) {
-        v.emplace_back("null");
-        return;
+vector<variant<int, string>> toVector(TreeNode *root) {
+    vector<variant<int, string>> ret;
+    queue<TreeNode*> q;
+    q.push(root);
+    while (!q.empty()) {
+        auto front = q.front();
+        q.pop();
+        if (front == nullptr) {
+            if (!q.empty())
+                ret.emplace_back("null");
+        } else {
+            ret.emplace_back(front->val);
+            if (front->left || front->right) {
+                q.push(front->left);
+                q.push(front->right);
+            }
+        }
     }
-    v.emplace_back(node->val);
-    if (node->left || node->right) {
-        dfs(node->left, v);
-        dfs(node->right, v);
-    }
+    return ret;
 }
-vector<variant<int, string>> toVector1(TreeNode *root) {
-    vector<variant<int, string>> vv;
-    dfs(root, vv);
-    while (vv.back().index() == 1) {
-        vv.pop_back();
+
+template<typename... T>
+ostream& operator <<(ostream& out, const vector<variant<T...>>& vec) {
+    for (const auto &it: vec) {
+        auto f = [&out](auto &x) { out << x <<" "; };
+        visit(f, it);
     }
-    return vv;
+    return out;
+}
+template<typename... T>
+ostream& operator <<(ostream& out, const variant<T...>& v) {
+    auto f = [&out](auto &x) { out << x <<" "; };
+    visit(f, v);
+    return out;
 }
