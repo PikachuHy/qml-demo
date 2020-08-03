@@ -1,4 +1,4 @@
-#include "common.h"
+
 /**
  * Definition for singly-linked list.
  * struct ListNode {
@@ -43,4 +43,3 @@ public:
         return dummy.next;
     }    
 };
-#include "test.cpp"

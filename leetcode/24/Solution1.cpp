@@ -1,4 +1,4 @@
-#include "common.h"
+
 
 /**
  * Definition for singly-linked list.
@@ -25,5 +25,3 @@ public:
         return q;
     }
 };
-
-#include "test.cpp"
