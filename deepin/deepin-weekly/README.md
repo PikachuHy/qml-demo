@@ -342,8 +342,6 @@ Linux不似你所想 [简书](https://www.jianshu.com/p/9207801f6209)
 
 ★Deepin★深度Linux安装与使用(下) [b站](https://www.bilibili.com/video/av41129045?from=search&seid=3051966330361241955)
 
-[KiteAB]国产Linux系统长啥样? [b站](https://www.bilibili.com/video/av41054398?from=search&seid=3051966330361241955)
-
 > 简评：deepin现在都和国产划等号了？官方宣传的么？
 
 Linux主题ABCDE [b站](https://www.bilibili.com/video/av40890067?from=search&seid=3051966330361241955)
